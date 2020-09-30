@@ -1,4 +1,4 @@
-pySunSpec
+pySunSpec2
 #########
 
 Overview
