@@ -32,7 +32,10 @@ class FileClientModel(FileClientGroup):
                  group_class=FileClientGroup, point_class=FileClientPoint):
         self.model_id = model_id
         self.model_addr = model_addr
-        self.model_len = model_len
+        if model_len is None:
+            self.model_len = 0
+        else:
+            self.model_len = model_len
         self.model_def = model_def
         self.error_info = ''
         self.mid = None

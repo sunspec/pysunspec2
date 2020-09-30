@@ -1301,9 +1301,10 @@ class TestFileClientGroup:
             }
         m2 = file_client.FileClientModel(705, data=gdata_705)
         assert m2.groups['Crv'][0].get_dict() == {'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 1, 'VRefAuto': 0,
-                                                    'VRefTms': 5, 'RspTms': 6, 'ReadOnly': 1,
-                                                    'Pt': [{'V': 9200, 'Var': 3000}, {'V': 9670, 'Var': 0},
-                                                           {'V': 10300, 'Var': 0}, {'V': 10700, 'Var': -3000}]}
+                                                  'VRefAutoEna': None, 'VRefTms': 5, 'RspTms': 6,
+                                                  'ReadOnly': 1,
+                                                  'Pt': [{'V': 9200, 'Var': 3000}, {'V': 9670, 'Var': 0},
+                                                         {'V': 10300, 'Var': 0}, {'V': 10700, 'Var': -3000}]}
 
         # test computed
         m2.groups['Crv'][0].points['DeptRef'].sf_required = True
@@ -1417,13 +1418,15 @@ class TestFileClientGroup:
         }
         m = file_client.FileClientModel(705, data=gdata_705)
         assert m.groups['Crv'][0].get_dict() == {'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 1, 'VRefAuto': 0,
-                                                    'VRefTms': 5, 'RspTms': 6, 'ReadOnly': 1,
-                                                    'Pt': [{'V': 9200, 'Var': 3000}, {'V': 9670, 'Var': 0},
-                                                           {'V': 10300, 'Var': 0}, {'V': 10700, 'Var': -3000}]}
+                                                 'VRefAutoEna': None, 'VRefTms': 5, 'RspTms': 6, 'ReadOnly': 1,
+                                                 'Pt': [{'V': 9200, 'Var': 3000}, {'V': 9670, 'Var': 0},
+                                                        {'V': 10300, 'Var': 0}, {'V': 10700, 'Var': -3000}]}
 
-        new_dict = {'ActPt': 4, 'DeptRef': 4000, 'Pri': 5000, 'VRef': 3, 'VRefAuto': 2,
-                    'VRefTms': 2, 'RspTms': 2, 'ReadOnly': 2, 'Pt': [{'V': 111, 'Var': 111}, {'V': 123, 'Var': 1112},
-                                                                     {'V': 111, 'Var': 111}, {'V': 123, 'Var': -1112}]}
+        new_dict = {'ActPt': 4, 'DeptRef': 4000, 'Pri': 5000, 'VRef': 3, 'VRefAuto': 2, 'VRefAutoEna': None,
+                    'VRefTms': 2, 'RspTms': 2, 'ReadOnly': 2,
+                    'Pt': [{'V': 111, 'Var': 111}, {'V': 123, 'Var': 1112}, {'V': 111, 'Var': 111},
+                           {'V': 123, 'Var': -1112}]}
+
         m.groups['Crv'][0].set_dict(new_dict, dirty=True)
         assert m.groups['Crv'][0].get_dict() == new_dict
         assert m.groups['Crv'][0].VRef.value == 3
@@ -1541,10 +1544,9 @@ class TestFileClientGroup:
             ]
         }
         m = file_client.FileClientModel(705, data=gdata_705)
-        assert m.groups['Crv'][0].get_json() == '''{"ActPt": 4, "DeptRef": 1, "Pri": 1, "VRef": 1,''' + \
-                                                 ''' "VRefAuto": 0, "VRefTms": 5, "RspTms": 6, "ReadOnly": 1,''' + \
-                                                 ''' "Pt": [{"V": 9200, "Var": 3000}, {"V": 9670, "Var": 0},''' + \
-                                                 ''' {"V": 10300, "Var": 0}, {"V": 10700, "Var": -3000}]}'''
+        assert m.groups['Crv'][0].get_json() == '''{"ActPt": 4, "DeptRef": 1, "Pri": 1, "VRef": 1, "VRefAuto": 0,''' + \
+               ''' "VRefAutoEna": null, "VRefTms": 5, "RspTms": 6, "ReadOnly": 1, "Pt": [{"V": 9200, "Var": 3000},''' + \
+               ''' {"V": 9670, "Var": 0}, {"V": 10300, "Var": 0}, {"V": 10700, "Var": -3000}]}'''
 
         # test computed
         m.groups['Crv'][0].points['DeptRef'].sf_required = True
@@ -1552,11 +1554,11 @@ class TestFileClientGroup:
         m.groups['Crv'][0].points['Pri'].sf_required = True
         m.groups['Crv'][0].points['Pri'].sf_value = 3
         assert m.groups['Crv'][0].get_json(computed=True) == '''{"ActPt": 4, "DeptRef": 1000.0, "Pri": 1000.0,''' + \
-                                                              ''' "VRef": 1, "VRefAuto": 0, "VRefTms": 5,''' + \
-                                                              ''' "RspTms": 6, "ReadOnly": 1, "Pt":''' + \
-                                                              ''' [{"V": 92.0, "Var": 30.0}, {"V": 96.7,''' + \
-                                                              ''' "Var": 0.0}, {"V": 103.0, "Var": 0.0},''' + \
-                                                              ''' {"V": 107.0, "Var": -30.0}]}'''
+                                                             ''' "VRef": 1, "VRefAuto": 0, "VRefAutoEna": null,''' + \
+                                                             ''' "VRefTms": 5, "RspTms": 6, "ReadOnly": 1, "Pt":''' + \
+                                                             ''' [{"V": 92.0, "Var": 30.0}, {"V": 96.7,''' + \
+                                                             ''' "Var": 0.0}, {"V": 103.0, "Var": 0.0},''' + \
+                                                             ''' {"V": 107.0, "Var": -30.0}]}'''
 
     def test_set_json(self):
         gdata_705 = {
@@ -1661,12 +1663,16 @@ class TestFileClientGroup:
         }
         m = file_client.FileClientModel(705, data=gdata_705)
         assert m.groups['Crv'][0].get_json() == '''{"ActPt": 4, "DeptRef": 1, "Pri": 1, "VRef": 1,''' + \
-                                                 ''' "VRefAuto": 0, "VRefTms": 5, "RspTms": 6, "ReadOnly": 1,''' + \
-                                                 ''' "Pt": [{"V": 9200, "Var": 3000}, {"V": 9670, "Var": 0},''' + \
-                                                 ''' {"V": 10300, "Var": 0}, {"V": 10700, "Var": -3000}]}'''
-        json_to_set = '''{"ActPt": 4, "DeptRef": 9999, "Pri": 9999, "VRef": 99, "VRefAuto": 88, "VRefTms": 88,''' + \
-                      ''' "RspTms": 88, "ReadOnly": 77, "Pt": [{"V": 77, "Var": 66}, {"V": 55, "Var": 44},''' + \
-                      ''' {"V": 33, "Var": 22}, {"V": 111, "Var": -2222}]}'''
+                                                ''' "VRefAuto": 0, "VRefAutoEna": null, "VRefTms": 5,''' + \
+                                                ''' "RspTms": 6, "ReadOnly": 1, "Pt": [{"V": 9200, "Var": 3000},''' + \
+                                                ''' {"V": 9670, "Var": 0}, {"V": 10300, "Var": 0},''' + \
+                                                ''' {"V": 10700, "Var": -3000}]}'''
+
+        json_to_set = '''{"ActPt": 4, "DeptRef": 9999, "Pri": 9999, "VRef": 99, "VRefAuto": 88,''' + \
+                      ''' "VRefAutoEna": null, "VRefTms": 88, "RspTms": 88, "ReadOnly": 77, "Pt":''' + \
+                      ''' [{"V": 77, "Var": 66}, {"V": 55, "Var": 44}, {"V": 33, "Var": 22},''' + \
+                      ''' {"V": 111, "Var": -2222}]}'''
+
         m.groups['Crv'][0].set_json(json_to_set)
         assert m.groups['Crv'][0].get_json() == json_to_set
         assert m.groups['Crv'][0].DeptRef.value == 9999
@@ -1784,17 +1790,17 @@ class TestFileClientGroup:
             ]
         }
         m = file_client.FileClientModel(705, data=gdata_705)
-        assert m.groups['Crv'][0].get_mb() == b'\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\x00\x05\x00\x06\x00\x01#' \
-                                               b'\xf0\x0b\xb8%\xc6\x00\x00(<\x00\x00)\xcc\xf4H'
+        assert m.groups['Crv'][0].get_mb() == b'\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\x00\x05\x00' \
+                                              b'\x06\x00\x01#\xf0\x0b\xb8%\xc6\x00\x00(<\x00\x00)\xcc\xf4H'
 
         # test computed
         m.groups['Crv'][0].points['DeptRef'].sf_required = True
         m.groups['Crv'][0].points['DeptRef'].sf_value = 3
         m.groups['Crv'][0].points['Pri'].sf_required = True
         m.groups['Crv'][0].points['Pri'].sf_value = 3
-        assert m.groups['Crv'][0].get_mb(computed=True) == b'\x00\x04\x03\xe8\x03\xe8\x00\x01\x00\x00\x00\x05\x00' \
-                                                            b'\x06\x00\x01\x00\\\x00\x1e\x00`\x00\x00\x00g\x00\x00' \
-                                                            b'\x00k\xff\xe2'
+        assert m.groups['Crv'][0].get_mb(computed=True) == b'\x00\x04\x03\xe8\x03\xe8\x00\x01\x00\x00\xff\xff' \
+                                                           b'\x00\x05\x00\x06\x00\x01\x00\\\x00\x1e\x00`\x00' \
+                                                           b'\x00\x00g\x00\x00\x00k\xff\xe2'
 
     def test_set_mb(self):
         gdata_705 = {
@@ -1898,10 +1904,10 @@ class TestFileClientGroup:
             ]
         }
         m = file_client.FileClientModel(705, data=gdata_705)
-        assert m.groups['Crv'][0].get_mb() == b'\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\x00\x05\x00\x06\x00\x01#' \
-                                               b'\xf0\x0b\xb8%\xc6\x00\x00(<\x00\x00)\xcc\xf4H'
-        bs = b'\x00\x04\x03\xe7\x03x\x03\t\x02\x9a\x02+\x01\xbc\x01M\x00\xde\x00o\x00\xde\x01M\x01\xbc\x02+' \
-             b'\x02\x9a\xfc\xf7'
+        assert m.groups['Crv'][0].get_mb() == b'\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\x00\x05\x00' \
+                                              b'\x06\x00\x01#\xf0\x0b\xb8%\xc6\x00\x00(<\x00\x00)\xcc\xf4H'
+        bs = b'\x00\x04\x03\xe7\x03x\x03\t\x02\x9a\x02+\x01\xbc\x01M' \
+             b'\x00\xde\x00o\x00\xde\x01M\x01\xbc\x02+\x02\x9a\xfc\xf7\xf4H'
 
         m.groups['Crv'][0].set_mb(bs, dirty=True)
         assert m.groups['Crv'][0].get_mb() == bs
@@ -1926,7 +1932,7 @@ class TestFileClientModel:
         m = file_client.FileClientModel(704)
         assert m.model_id == 704
         assert m.model_addr == 0
-        assert m.model_len is None
+        assert m.model_len == 0
         assert m.model_def['id'] == 704
         assert m.error_info == ''
         assert m.gdef['name'] == 'DERCtlAC'
@@ -2041,7 +2047,7 @@ class TestFileClientModel:
         m2 = file_client.FileClientModel(705, data=gdata_705)
         assert m2.model_id == 705
         assert m2.model_addr == 0
-        assert m2.model_len is None
+        assert m2.model_len == 0
         assert m2.model_def['id'] == 705
         assert m2.error_info == ''
         assert m2.gdef['name'] == 'DERVoltVar'
@@ -2189,54 +2195,42 @@ class TestFileClientDevice:
             }
         m = file_client.FileClientModel(705, data=gdata_705)
         d.add_model(m)
-        assert d.get_dict()['models'] == [{'ID': 705, 'L': 63, 'Ena': 1, 'CrvSt': 1,
-                                             'AdptCrvReq': 0, 'AdptCrvRslt': 0, 'NPt': 4,
-                                             'NCrv': 3, 'RvrtTms': 0, 'RvrtRem': 0,
-                                             'RvrtCrv': 0, 'V_SF': -2, 'DeptRef_SF': -2,
-                                             'Crv': [{'ActPt': 4, 'DeptRef': 1, 'Pri': 1,
-                                                      'VRef': 1, 'VRefAuto': 0, 'VRefTms': 5,
-                                                      'RspTms': 6, 'ReadOnly': 1,
-                                                      'Pt': [{'V': 9200, 'Var': 3000},
-                                                             {'V': 9670, 'Var': 0},
-                                                             {'V': 10300, 'Var': 0},
-                                                             {'V': 10700, 'Var': -3000}]},
-                                                     {'ActPt': 4, 'DeptRef': 1, 'Pri': 1,
-                                                      'VRef': 1, 'VRefAuto': 0, 'VRefTms': 5,
-                                                      'RspTms': 6, 'ReadOnly': 0, 'Pt':
-                                                          [{'V': 9300, 'Var': 3000},
-                                                           {'V': 9570, 'Var': 0},
-                                                           {'V': 10200, 'Var': 0},
-                                                           {'V': 10600, 'Var': -4000}]},
-                                                     {'ActPt': 4, 'DeptRef': 1, 'Pri': 1,
-                                                      'VRef': 1, 'VRefAuto': 0, 'VRefTms': 5,
-                                                      'RspTms': 6, 'ReadOnly': 0, 'Pt':
-                                                          [{'V': 9400, 'Var': 2000},
-                                                           {'V': 9570, 'Var': 0},
-                                                           {'V': 10500, 'Var': 0},
-                                                           {'V': 10800, 'Var': -2000}]}]}]
+        assert d.get_dict()['models'] == [
+            {'ID': 705, 'L': 64, 'Ena': 1, 'CrvSt': 1, 'AdptCrvReq': 0, 'AdptCrvRslt': 0, 'NPt': 4, 'NCrv': 3,
+             'RvrtTms': 0, 'RvrtRem': 0, 'RvrtCrv': 0, 'V_SF': -2, 'DeptRef_SF': -2, 'Crv': [
+                {'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 1, 'VRefAuto': 0, 'VRefAutoEna': None, 'VRefTms': 5,
+                 'RspTms': 6, 'ReadOnly': 1,
+                 'Pt': [{'V': 9200, 'Var': 3000}, {'V': 9670, 'Var': 0}, {'V': 10300, 'Var': 0},
+                        {'V': 10700, 'Var': -3000}]},
+                {'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 1, 'VRefAuto': 0, 'VRefAutoEna': None, 'VRefTms': 5,
+                 'RspTms': 6, 'ReadOnly': 0,
+                 'Pt': [{'V': 9300, 'Var': 3000}, {'V': 9570, 'Var': 0}, {'V': 10200, 'Var': 0},
+                        {'V': 10600, 'Var': -4000}]},
+                {'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 1, 'VRefAuto': 0, 'VRefAutoEna': None, 'VRefTms': 5,
+                 'RspTms': 6, 'ReadOnly': 0,
+                 'Pt': [{'V': 9400, 'Var': 2000}, {'V': 9570, 'Var': 0}, {'V': 10500, 'Var': 0},
+                        {'V': 10800, 'Var': -2000}]}]}]
 
         # computed
         m.groups['Crv'][0].points['DeptRef'].sf_required = True
         m.groups['Crv'][0].points['DeptRef'].sf_value = 3
         m.groups['Crv'][0].points['Pri'].sf_required = True
         m.groups['Crv'][0].points['Pri'].sf_value = 3
-        assert d.get_dict(computed=True)['models'] == \
-                [
-                   {'ID': 705, 'L': 63, 'Ena': 1, 'CrvSt': 1, 'AdptCrvReq': 0, 'AdptCrvRslt': 0, 'NPt': 4, 'NCrv': 3,
-                    'RvrtTms': 0, 'RvrtRem': 0, 'RvrtCrv': 0, 'V_SF': -2, 'DeptRef_SF': -2, 'Crv': [
-                       {'ActPt': 4, 'DeptRef': 1000.0, 'Pri': 1000.0, 'VRef': 1, 'VRefAuto': 0, 'VRefTms': 5,
-                        'RspTms': 6, 'ReadOnly': 1,
-                        'Pt': [{'V': 92.0, 'Var': 30.0}, {'V': 96.7, 'Var': 0.0}, {'V': 103.0, 'Var': 0.0},
-                               {'V': 107.0, 'Var': -30.0}]},
-                       {'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 1, 'VRefAuto': 0, 'VRefTms': 5, 'RspTms': 6,
-                        'ReadOnly': 0,
-                        'Pt': [{'V': 93.0, 'Var': 30.0}, {'V': 95.7, 'Var': 0.0}, {'V': 102.0, 'Var': 0.0},
-                               {'V': 106.0, 'Var': -40.0}]},
-                       {'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 1, 'VRefAuto': 0, 'VRefTms': 5, 'RspTms': 6,
-                        'ReadOnly': 0,
-                        'Pt': [{'V': 94.0, 'Var': 20.0}, {'V': 95.7, 'Var': 0.0}, {'V': 105.0, 'Var': 0.0},
-                               {'V': 108.0, 'Var': -20.0}]}]}
-                ]
+        assert d.get_dict(computed=True)['models'] == [
+            {'ID': 705, 'L': 64, 'Ena': 1, 'CrvSt': 1, 'AdptCrvReq': 0, 'AdptCrvRslt': 0, 'NPt': 4, 'NCrv': 3,
+             'RvrtTms': 0, 'RvrtRem': 0, 'RvrtCrv': 0, 'V_SF': -2, 'DeptRef_SF': -2, 'Crv': [
+                {'ActPt': 4, 'DeptRef': 1000.0, 'Pri': 1000.0, 'VRef': 1, 'VRefAuto': 0, 'VRefAutoEna': None,
+                 'VRefTms': 5, 'RspTms': 6, 'ReadOnly': 1,
+                 'Pt': [{'V': 92.0, 'Var': 30.0}, {'V': 96.7, 'Var': 0.0}, {'V': 103.0, 'Var': 0.0},
+                        {'V': 107.0, 'Var': -30.0}]},
+                {'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 1, 'VRefAuto': 0, 'VRefAutoEna': None, 'VRefTms': 5,
+                 'RspTms': 6, 'ReadOnly': 0,
+                 'Pt': [{'V': 93.0, 'Var': 30.0}, {'V': 95.7, 'Var': 0.0}, {'V': 102.0, 'Var': 0.0},
+                        {'V': 106.0, 'Var': -40.0}]},
+                {'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 1, 'VRefAuto': 0, 'VRefAutoEna': None, 'VRefTms': 5,
+                 'RspTms': 6, 'ReadOnly': 0,
+                 'Pt': [{'V': 94.0, 'Var': 20.0}, {'V': 95.7, 'Var': 0.0}, {'V': 105.0, 'Var': 0.0},
+                        {'V': 108.0, 'Var': -20.0}]}]}]
 
     def test_get_json(self):
         d = file_client.FileClientDevice()
@@ -2343,20 +2337,20 @@ class TestFileClientDevice:
         m = file_client.FileClientModel(705, data=gdata_705)
         d.add_model(m)
 
-        get_json_output = '''{"name": null, "did": "''' + str(d.did) + '''", "models": [{"ID": 705, "L": 63,''' + \
-                          ''' "Ena": 1, "CrvSt": 1, "AdptCrvReq": 0, "AdptCrvRslt": 0, "NPt": 4, "NCrv": 3,''' + \
-                          ''' "RvrtTms": 0, "RvrtRem": 0, "RvrtCrv": 0, "V_SF": -2, "DeptRef_SF": -2,''' + \
-                          ''' "Crv": [{"ActPt": 4, "DeptRef": 1, "Pri": 1, "VRef": 1, "VRefAuto": 0,''' + \
-                          ''' "VRefTms": 5, "RspTms": 6, "ReadOnly": 1, "Pt": [{"V": 9200, "Var": 3000},''' + \
-                          ''' {"V": 9670, "Var": 0}, {"V": 10300, "Var": 0}, {"V": 10700, "Var": -3000}]},''' + \
-                          ''' {"ActPt": 4, "DeptRef": 1, "Pri": 1, "VRef": 1, "VRefAuto": 0, "VRefTms": 5,''' + \
-                          ''' "RspTms": 6, "ReadOnly": 0, "Pt": [{"V": 9300, "Var": 3000}, {"V": 9570,''' + \
-                          ''' "Var": 0}, {"V": 10200, "Var": 0}, {"V": 10600, "Var": -4000}]}, {"ActPt": 4,''' + \
-                          ''' "DeptRef": 1, "Pri": 1, "VRef": 1, "VRefAuto": 0, "VRefTms": 5, "RspTms": 6,''' + \
-                          ''' "ReadOnly": 0, "Pt": [{"V": 9400, "Var": 2000}, {"V": 9570, "Var": 0},''' + \
-                          ''' {"V": 10500, "Var": 0}, {"V": 10800, "Var": -2000}]}]}]}'''
-
-        assert d.get_json() == get_json_output
+        assert d.get_json() == '''{"name": null, "did": "''' + str(d.did) + '''", "models": [{"ID": 705,''' + \
+                               ''' "L": 64, "Ena": 1, "CrvSt": 1, "AdptCrvReq": 0, "AdptCrvRslt": 0, "NPt": 4,''' + \
+                               ''' "NCrv": 3, "RvrtTms": 0, "RvrtRem": 0, "RvrtCrv": 0, "V_SF": -2,''' + \
+                               ''' "DeptRef_SF": -2, "Crv": [{"ActPt": 4, "DeptRef": 1, "Pri": 1, "VRef": 1,''' + \
+                               ''' "VRefAuto": 0, "VRefAutoEna": null, "VRefTms": 5, "RspTms": 6, "ReadOnly": 1,''' + \
+                               ''' "Pt": [{"V": 9200, "Var": 3000}, {"V": 9670, "Var": 0}, {"V": 10300,''' + \
+                               ''' "Var": 0}, {"V": 10700, "Var": -3000}]}, {"ActPt": 4, "DeptRef": 1,''' + \
+                               ''' "Pri": 1, "VRef": 1, "VRefAuto": 0, "VRefAutoEna": null, "VRefTms": 5,''' + \
+                               ''' "RspTms": 6, "ReadOnly": 0, "Pt": [{"V": 9300, "Var": 3000},''' + \
+                               ''' {"V": 9570, "Var": 0}, {"V": 10200, "Var": 0}, {"V": 10600, "Var": -4000}]},''' + \
+                               ''' {"ActPt": 4, "DeptRef": 1, "Pri": 1, "VRef": 1, "VRefAuto": 0,''' + \
+                               ''' "VRefAutoEna": null, "VRefTms": 5, "RspTms": 6, "ReadOnly": 0, "Pt":''' + \
+                               ''' [{"V": 9400, "Var": 2000}, {"V": 9570, "Var": 0}, {"V": 10500, "Var": 0},''' + \
+                               ''' {"V": 10800, "Var": -2000}]}]}]}'''
 
         # computed
         m.groups['Crv'][0].points['DeptRef'].sf_required = True
@@ -2376,8 +2370,23 @@ class TestFileClientDevice:
                            ''' "DeptRef": 1, "Pri": 1, "VRef": 1, "VRefAuto": 0, "VRefTms": 5, "RspTms": 6,''' + \
                            ''' "ReadOnly": 0, "Pt": [{"V": 94.0, "Var": 20.0}, {"V": 95.7, "Var": 0.0},''' + \
                            ''' {"V": 105.0, "Var": 0.0}, {"V": 108.0, "Var": -20.0}]}]}]}'''
-
-        assert d.get_json(computed=True) == get_json_output2
+        assert d.get_json(computed=True) == '''{"name": null, "did": "''' + str(d.did) + '''", "models":''' + \
+                                            ''' [{"ID": 705, "L": 64, "Ena": 1, "CrvSt": 1, "AdptCrvReq": 0,''' + \
+                                            ''' "AdptCrvRslt": 0, "NPt": 4, "NCrv": 3, "RvrtTms": 0,''' + \
+                                            ''' "RvrtRem": 0, "RvrtCrv": 0, "V_SF": -2, "DeptRef_SF": -2,''' + \
+                                            ''' "Crv": [{"ActPt": 4, "DeptRef": 1000.0, "Pri": 1000.0,''' + \
+                                            ''' "VRef": 1, "VRefAuto": 0, "VRefAutoEna": null, "VRefTms": 5,''' + \
+                                            ''' "RspTms": 6, "ReadOnly": 1, "Pt": [{"V": 92.0, "Var": 30.0},''' + \
+                                            ''' {"V": 96.7, "Var": 0.0}, {"V": 103.0, "Var": 0.0}, {"V": 107.0,''' + \
+                                            ''' "Var": -30.0}]}, {"ActPt": 4, "DeptRef": 1, "Pri": 1, "VRef": 1,''' + \
+                                            ''' "VRefAuto": 0, "VRefAutoEna": null, "VRefTms": 5, "RspTms": 6,''' + \
+                                            ''' "ReadOnly": 0, "Pt": [{"V": 93.0, "Var": 30.0}, {"V": 95.7,''' + \
+                                            ''' "Var": 0.0}, {"V": 102.0, "Var": 0.0}, {"V": 106.0,''' + \
+                                            ''' "Var": -40.0}]}, {"ActPt": 4, "DeptRef": 1, "Pri": 1, "VRef": 1,''' + \
+                                            ''' "VRefAuto": 0, "VRefAutoEna": null, "VRefTms": 5, "RspTms": 6,''' + \
+                                            ''' "ReadOnly": 0, "Pt": [{"V": 94.0, "Var": 20.0}, {"V": 95.7,''' + \
+                                            ''' "Var": 0.0}, {"V": 105.0, "Var": 0.0}, {"V": 108.0,''' + \
+                                            ''' "Var": -20.0}]}]}]}'''
 
     def test_get_mb(self):
         d = file_client.FileClientDevice()
@@ -2483,25 +2492,26 @@ class TestFileClientDevice:
             }
         m = file_client.FileClientModel(705, data=gdata_705)
         d.add_model(m)
-        assert d.get_mb() == b"\x02\xc1\x00?\x00\x01\x00\x01\x00\x00\x00\x00\x00\x04\x00\x03\x00\x00\x00\x00\x00\x00" \
-                             b"\x00\x00\x00\x00\xff\xfe\xff\xfe\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\x00\x05\x00" \
-                             b"\x06\x00\x01#\xf0\x0b\xb8%\xc6\x00\x00(<\x00\x00)\xcc\xf4H\x00\x04\x00\x01\x00\x01\x00" \
-                             b"\x01\x00\x00\x00\x05\x00\x06\x00\x00$T\x0b\xb8%b\x00\x00'\xd8\x00\x00)h\xf0`\x00\x04" \
-                             b"\x00\x01\x00\x01\x00\x01\x00\x00\x00\x05\x00\x06\x00\x00$\xb8\x07\xd0%b\x00\x00)\x04" \
-                             b"\x00\x00*0\xf80"
+        assert d.get_mb() == b"\x02\xc1\x00@\x00\x01\x00\x01\x00\x00\x00\x00\x00\x04\x00\x03\x00\x00\x00\x00\x00" \
+                             b"\x00\x00\x00\x00\x00\xff\xfe\xff\xfe\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff" \
+                             b"\xff\x00\x05\x00\x06\x00\x01#\xf0\x0b\xb8%\xc6\x00\x00(<\x00\x00)\xcc\xf4H\x00\x04" \
+                             b"\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\x00\x05\x00\x06\x00\x00$T\x0b\xb8%b\x00" \
+                             b"\x00'\xd8\x00\x00)h\xf0`\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\x00\x05\x00" \
+                             b"\x06\x00\x00$\xb8\x07\xd0%b\x00\x00)\x04\x00\x00*0\xf80"
 
         # computed
         m.groups['Crv'][0].points['DeptRef'].sf_required = True
         m.groups['Crv'][0].points['DeptRef'].sf_value = 3
         m.groups['Crv'][0].points['Pri'].sf_required = True
         m.groups['Crv'][0].points['Pri'].sf_value = 3
-        assert d.get_mb(computed=True) == b'\x02\xc1\x00?\x00\x01\x00\x01\x00\x00\x00\x00\x00\x04\x00\x03\x00\x00\x00' \
-                                          b'\x00\x00\x00\x00\x00\x00\x00\xff\xfe\xff\xfe\x00\x04\x03\xe8\x03\xe8\x00' \
-                                          b'\x01\x00\x00\x00\x05\x00\x06\x00\x01\x00\\\x00\x1e\x00`\x00\x00\x00g\x00' \
-                                          b'\x00\x00k\xff\xe2\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\x00\x05\x00\x06' \
-                                          b'\x00\x00\x00]\x00\x1e\x00_\x00\x00\x00f\x00\x00\x00j\xff\xd8\x00\x04\x00' \
-                                          b'\x01\x00\x01\x00\x01\x00\x00\x00\x05\x00\x06\x00\x00\x00^\x00\x14\x00_' \
-                                          b'\x00\x00\x00i\x00\x00\x00l\xff\xec'
+        assert d.get_mb(computed=True) == b'\x02\xc1\x00@\x00\x01\x00\x01\x00\x00\x00\x00\x00\x04\x00\x03\x00' \
+                                          b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xfe\xff\xfe\x00\x04\x03' \
+                                          b'\xe8\x03\xe8\x00\x01\x00\x00\xff\xff\x00\x05\x00\x06\x00\x01\x00' \
+                                          b'\\\x00\x1e\x00`\x00\x00\x00g\x00\x00\x00k\xff\xe2\x00\x04\x00\x01' \
+                                          b'\x00\x01\x00\x01\x00\x00\xff\xff\x00\x05\x00\x06\x00\x00\x00]\x00' \
+                                          b'\x1e\x00_\x00\x00\x00f\x00\x00\x00j\xff\xd8\x00\x04\x00\x01\x00' \
+                                          b'\x01\x00\x01\x00\x00\xff\xff\x00\x05\x00\x06\x00\x00\x00^\x00\x14' \
+                                          b'\x00_\x00\x00\x00i\x00\x00\x00l\xff\xec'
 
     def test_set_mb(self):
         d = file_client.FileClientDevice()
@@ -2607,15 +2617,20 @@ class TestFileClientDevice:
             }
         m = file_client.FileClientModel(705, data=gdata_705)
         d.add_model(m)
-        assert d.get_mb() == b"\x02\xc1\x00?\x00\x01\x00\x01\x00\x00\x00\x00\x00\x04\x00\x03\x00\x00\x00\x00\x00\x00" \
-                             b"\x00\x00\x00\x00\xff\xfe\xff\xfe\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\x00\x05\x00" \
-                             b"\x06\x00\x01#\xf0\x0b\xb8%\xc6\x00\x00(<\x00\x00)\xcc\xf4H\x00\x04\x00\x01\x00\x01\x00" \
-                             b"\x01\x00\x00\x00\x05\x00\x06\x00\x00$T\x0b\xb8%b\x00\x00'\xd8\x00\x00)h\xf0`\x00\x04" \
-                             b"\x00\x01\x00\x01\x00\x01\x00\x00\x00\x05\x00\x06\x00\x00$\xb8\x07\xd0%b\x00\x00)\x04" \
-                             b"\x00\x00*0\xf80"
+        assert d.get_mb() == b"\x02\xc1\x00@\x00\x01\x00\x01\x00\x00\x00\x00\x00\x04\x00\x03\x00\x00\x00\x00\x00\x00" \
+                             b"\x00\x00\x00\x00\xff\xfe\xff\xfe\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\x00" \
+                             b"\x05\x00\x06\x00\x01#\xf0\x0b\xb8%\xc6\x00\x00(<\x00\x00)\xcc\xf4H\x00\x04\x00\x01" \
+                             b"\x00\x01\x00\x01\x00\x00\xff\xff\x00\x05\x00\x06\x00\x00$T\x0b\xb8%b\x00\x00'\xd8" \
+                             b"\x00\x00)h\xf0`\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\x00\x05\x00\x06\x00" \
+                             b"\x00$\xb8\x07\xd0%b\x00\x00)\x04\x00\x00*0\xf80"
 
         # DeptRef and Pri set to 3000 in byte string
-        bs = b"\x02\xc1\x00?\x00\x01\x00\x01\x00\x00\x00\x00\x00\x04\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xfe\xff\xfe\x00\x04\x0b\xb8\x0b\xb8\x00\x01\x00\x00\x00\x05\x00\x06\x00\x01#\xf0\x0b\xb8%\xc6\x00\x00(<\x00\x00)\xcc\xf4H\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\x00\x05\x00\x06\x00\x00$T\x0b\xb8%b\x00\x00'\xd8\x00\x00)h\xf0`\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\x00\x05\x00\x06\x00\x00$\xb8\x07\xd0%b\x00\x00)\x04\x00\x00*0\xf80"
+        bs = b"\x02\xc1\x00?\x00\x01\x00\x01\x00\x00\x00\x00\x00\x04\x00\x03\x00\x00\x00\x00\x00\x00" \
+             b"\x00\x00\x00\x00\xff\xfe\xff\xfe\x00\x04\x0b\xb8\x0b\xb8\x00\x01\x00\x00\x00\x05\x00\x06" \
+             b"\x00\x01#\xf0\x0b\xb8%\xc6\x00\x00(<\x00\x00)\xcc\xf4H\x00\x04\x00\x01\x00\x01\x00\x01" \
+             b"\x00\x00\x00\x05\x00\x06\x00\x00$T\x0b\xb8%b\x00\x00'\xd8\x00\x00)h\xf0`\x00\x04\x00" \
+             b"\x01\x00\x01\x00\x01\x00\x00\x00\x05\x00\x06\x00\x00$\xb8\x07\xd0%b\x00\x00)\x04\x00\x00*0\xf80"
+
         d.set_mb(bs, dirty=True)
         assert m.groups['Crv'][0].DeptRef.value == 3000
         assert m.groups['Crv'][0].DeptRef.dirty
