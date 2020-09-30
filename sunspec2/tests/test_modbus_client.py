@@ -477,7 +477,7 @@ class TestSunSpecModbusClientModel:
         c = client.SunSpecModbusClientModel(704)
         assert c.model_id == 704
         assert c.model_addr == 0
-        assert c.model_len is None
+        assert c.model_len == 0
         assert c.model_def['id'] == 704
         assert c.error_info == ''
         assert c.gdef['name'] == 'DERCtlAC'
