@@ -7,7 +7,7 @@ pySunSpec is a python package that provides objects and applications that suppor
 devices and documents. pySunSpec runs in most environments that support Python and is tested on Windows 7 and
 Windows 10.
 
-This is version 2 of pySunSpec. It supports all SunSpec infomation model definitions and formats including smdx and
+This is the next generation of pySunSpec tools. It supports all SunSpec infomation model definitions and formats including smdx and
 json. The Python objects used for interacting with devices have some differences from version 1 and it is not backward
 compatable with version 1. This version of pySunSpec must be used with devices implementing the 7xx series of
 information models as they use updated modeling concepts.
