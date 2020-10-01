@@ -31,13 +31,13 @@ Requirements
 
 Installation
 =================================
-Installing from the setup.py file: ::
+Installing from the setup.py file:
 
 C:\> python setup.py install
  
- or if the python path isn't configured: ::
+ or if the python path isn't configured:
  
-C:\> c:\Python37\python.exe setup.py install
+C:\> c:\\Python37\\python.exe setup.py install
  
 Interacting with a SunSpec Device
 =================================
