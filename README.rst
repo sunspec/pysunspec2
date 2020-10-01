@@ -29,7 +29,16 @@ Requirements
 - openpyxl (if using Excel spreadsheet)
 - pytest (if running tests)
 
+Installation
+=================================
+Installing from the setup.py file:
 
+ C:\> python setup.py install
+ 
+or if the python path isn't configured:
+ 
+ C:\> c:\\Python37\\python.exe setup.py install
+ 
 Interacting with a SunSpec Device
 =================================
 
