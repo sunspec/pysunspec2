@@ -1,0 +1,8 @@
+Address Offset,Group Offset,Name,Value,Count,Type,Size,Scale Factor,Units,RW Access (RW),Mandatory (M),Static (S),Label,Description,Detailed Description
+,,inclinometer,,,group,,,,,,,Inclinometer Model,Include to support orientation measurements,
+0,,ID,304,,uint16,,,,,M,S,Model ID,Model identifier,
+1,,L,,,uint16,,,,,M,S,Model Length,Model length,
+,,inclinometer.incl,,0,group,,,,,,,,,
+,0,Inclx,,,int32,,-2,Degrees,,M,,X,X-Axis inclination,
+,2,Incly,,,int32,,-2,Degrees,,,,Y,Y-Axis inclination,
+,4,Inclz,,,int32,,-2,Degrees,,,,Z,Z-Axis inclination,
