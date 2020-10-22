@@ -279,34 +279,55 @@ class TestPoint:
 
     def test_cvalue_getter(self):
         p_def = {
-                "name": "TestPoint",
-                "type": "uint16",
-               }
+            "name": "TestPoint",
+            "type": "uint16",
+            "sf": "TestSF"
+        }
         p = device.Point(p_def)
         p.sf_required = True
         p.sf_value = 3
         p.value = 4
         assert p.cvalue == 4000.0
 
+        p_sf = device.Point()
+        points = {'TestSF': p_sf}
+        m = device.Model()
+        setattr(m, 'points', points)
+        p2 = device.Point(p_def, model=m)
+        p2.sf_value = -2
+        p2.cvalue = 1.16
+        assert p2.cvalue == 1.16
+        assert p2.value == 116
+
     def test_cvalue_setter(self):
         p_def = {
-                "name": "TestPoint",
-                "type": "uint16"
-                }
+            "name": "TestPoint",
+            "type": "uint16"
+        }
         p = device.Point(p_def)
         p.sf_required = True
         p.sf_value = 3
         p.cvalue = 3000
         assert p.value == 3
 
+        p_sf = device.Point()
+        points = {'TestSF': p_sf}
+        m = device.Model()
+        setattr(m, 'points', points)
+        p2 = device.Point(p_def, model=m)
+        p2.sf_value = -2
+        p2.cvalue = 1.16
+        assert p2.cvalue == 1.16
+        assert p2.value == 116
+
     def test_get_value(self):
         p_def = {
-                    "access": "RW",
-                    "desc": "Power factor setpoint when injecting active power.",
-                    "label": "Power Factor (W Inj) ",
-                    "name": "PF",
-                    "type": "uint16"
-                }
+            "access": "RW",
+            "desc": "Power factor setpoint when injecting active power.",
+            "label": "Power Factor (W Inj) ",
+            "name": "PF",
+            "type": "uint16",
+        }
         p = device.Point(p_def)
         p.value = 3
         assert p.get_value() == 3
@@ -342,6 +363,12 @@ class TestPoint:
         p9.group = g
         p9.value = 2020
         assert p9.get_value(computed=True) == 2020000.0
+
+        p9.sf_value = -2
+        p9.cvalue = 1.16
+        assert p9.get_value(computed=True) == 1.16
+        assert p9.get_value() == 116
+
 
         # computed exception
         m3 = device.Model()
@@ -404,10 +431,18 @@ class TestPoint:
             p4.set_value(1000, computed=True)
         assert 'SF field TestSF value not initialized for point TestingComputed' in str(exc.value)
 
+        # test computed float rounding
+        p5 = device.Point(pdef_computed, model=m2)
+        p5.sf_value = -2
+        p5.set_value(1.16, computed=True)
+        assert p5.get_value(computed=True) == 1.16
+        assert p5.get_value() == 116
+
     def test_get_mb(self):
         p_def = {
             "name": "ESVLo",
             "type": "uint16",
+            "sf": "TestSF"
         }
         p = device.Point(p_def)
         p.value = 3
@@ -1506,11 +1541,12 @@ class TestGroup:
 
         # test computed
         m2.groups['Crv'][0].points['DeptRef'].sf_required = True
-        m2.groups['Crv'][0].points['DeptRef'].sf_value = 3
+        m2.groups['Crv'][0].points['DeptRef'].sf_value = -2
+        m2.groups['Crv'][0].DeptRef.cvalue = 1.16
         m2.groups['Crv'][0].points['Pri'].sf_required = True
         m2.groups['Crv'][0].points['Pri'].sf_value = 3
         computed_dict = m2.groups['Crv'][0].get_dict(computed=True)
-        assert computed_dict['DeptRef'] == 1000.0
+        assert computed_dict['DeptRef'] == 1.16
         assert computed_dict['Pri'] == 1000.0
 
     def test_set_dict(self):
@@ -1639,6 +1675,12 @@ class TestGroup:
         computed_dict = m.groups['Crv'][0].get_dict()
         assert computed_dict['DeptRef'] == 4.0
         assert computed_dict['Pri'] == 5.0
+
+        m.groups['Crv'][0].DeptRef.sf_value = -2
+        float_dict = {'DeptRef': 1.16}
+        m.groups['Crv'][0].set_dict(float_dict, computed=True)
+        assert m.groups['Crv'][0].DeptRef.value == 116
+        assert m.groups['Crv'][0].DeptRef.cvalue == 1.16
 
     def test_get_json(self):
         gdata_705 = {
@@ -1881,9 +1923,9 @@ class TestGroup:
         m.groups['Crv'][0].points['Pri'].sf_required = True
         m.groups['Crv'][0].points['Pri'].sf_value = 3
         m.groups['Crv'][0].set_json(json_to_set, computed=True, dirty=True)
-        assert m.groups['Crv'][0].points['DeptRef'].value == 9
+        assert m.groups['Crv'][0].points['DeptRef'].value == 10
         assert m.groups['Crv'][0].points['DeptRef'].dirty
-        assert m.groups['Crv'][0].points['Pri'].value == 9
+        assert m.groups['Crv'][0].points['Pri'].value == 10
         assert m.groups['Crv'][0].points['Pri'].dirty
 
     def test_get_mb(self):

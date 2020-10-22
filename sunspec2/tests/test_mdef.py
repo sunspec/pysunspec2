@@ -1,6 +1,7 @@
 import sunspec2.mdef as mdef
 import json
 import copy
+import pytest
 
 
 def test_to_int():
@@ -305,3 +306,8 @@ def test_to_json_file(tmp_path):
         assert isinstance(model_json, dict)
 
 
+def test_model_filename_to_id():
+    assert mdef.model_filename_to_id('model_00077.json') == 77
+    with pytest.raises(Exception) as exc:
+        mdef.model_filename_to_id('model_abc.json')
+    assert 'Error extracting model id from filename' in str(exc.value)

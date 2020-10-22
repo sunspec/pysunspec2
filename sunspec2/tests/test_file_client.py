@@ -1683,9 +1683,9 @@ class TestFileClientGroup:
         m.groups['Crv'][0].points['Pri'].sf_required = True
         m.groups['Crv'][0].points['Pri'].sf_value = 3
         m.groups['Crv'][0].set_json(json_to_set, computed=True, dirty=True)
-        assert m.groups['Crv'][0].points['DeptRef'].value == 9
+        assert m.groups['Crv'][0].points['DeptRef'].value == 10
         assert m.groups['Crv'][0].points['DeptRef'].dirty
-        assert m.groups['Crv'][0].points['Pri'].value == 9
+        assert m.groups['Crv'][0].points['Pri'].value == 10
         assert m.groups['Crv'][0].points['Pri'].dirty
 
     def test_get_mb(self):

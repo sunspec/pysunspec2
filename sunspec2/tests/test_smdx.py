@@ -11,7 +11,9 @@ def test_to_smdx_filename():
 
 def test_model_filename_to_id():
     assert smdx.model_filename_to_id('smdx_00077.xml') == 77
-    assert smdx.model_filename_to_id('smdx_abc.xml') is None
+    with pytest.raises(Exception) as exc:
+        smdx.model_filename_to_id('smdx_abc.xml')
+    assert 'Error extracting model id from filename' in str(exc.value)
 
 
 def test_from_smdx_file():
