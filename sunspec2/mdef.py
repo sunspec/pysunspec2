@@ -386,6 +386,18 @@ def to_json_filename(model_id):
     return 'model_%s%s' % (model_id, MODEL_DEF_EXT)
 
 
+def model_filename_to_id(filename):
+    f = filename
+    if '.' in f:
+        f = os.path.splitext(f)[0]
+    try:
+        mid = int(f.rsplit('_', 1)[1])
+    except ValueError:
+        raise ModelDefinitionError('Error extracting model id from filename')
+
+    return mid
+
+
 def to_json_file(model_def, filename=None, filedir=None, indent=4):
     if filename is None:
         filename = to_json_filename(model_def[ID])
