@@ -116,21 +116,19 @@ SMDX_EXT = '.xml'
 
 
 def to_smdx_filename(model_id):
-
     return '%s%05d%s' % (SMDX_PREFIX, int(model_id), SMDX_EXT)
 
 
 def model_filename_to_id(filename):
+    f = filename
+    if '.' in f:
+        f = os.path.splitext(f)[0]
+    try:
+        mid = int(f.rsplit('_', 1)[1])
+    except ValueError:
+        raise mdef.ModelDefinitionError('Error extracting model id from filename')
 
-    model_id = None
-
-    if filename[0:5] == SMDX_PREFIX and filename[-4:] == SMDX_EXT:
-        try:
-            model_id = int(filename[5:-4])
-        except Exception as e:
-            pass
-
-    return model_id
+    return mid
 
 '''
     smdx to json mapping:

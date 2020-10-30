@@ -228,7 +228,7 @@ class Point(object):
                         else:
                             raise ModelError('Scale factor %s for point %s not found' % (self.sf, self.pdef['name']))
             if self.sf_value:
-                self._value = int(round(float(v), abs(self.sf_value)) / math.pow(10, self.sf_value))
+                self._value = round(round(float(v), abs(self.sf_value)) / math.pow(10, self.sf_value))
             else:
                 self._value = v
         else:
