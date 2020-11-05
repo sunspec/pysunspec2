@@ -1726,7 +1726,7 @@ class TestFileClientGroup:
                         },
                         {
                             "V": 10700,
-                            "Var": 3000
+                            "Var": -3000
                         }
                     ]
                 },
@@ -1754,7 +1754,7 @@ class TestFileClientGroup:
                         },
                         {
                             "V": 10600,
-                            "Var": 4000
+                            "Var": -4000
                         }
                     ]
                 },
@@ -1782,25 +1782,24 @@ class TestFileClientGroup:
                         },
                         {
                             "V": 10800,
-                            "Var": 2000
+                            "Var": -2000
                         }
                     ]
                 }
             ]
         }
         m = file_client.FileClientModel(705, data=gdata_705)
-        assert m.groups['Crv'][0].get_mb() == b'\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\xff\xff' \
-                                              b'\x00\x00\x00\x06\x00\x01#\xf0\x0b\xb8%\xc6\x00\x00(<\x00' \
-                                              b'\x00)\xcc\x0b\xb8'
+        assert m.groups['Crv'][0].get_mb() == b'\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\xff\xff\x00' \
+                                              b'\x00\x00\x06\x00\x01#\xf0\x0b\xb8%\xc6\x00\x00(<\x00\x00)\xcc\xf4H'
 
         # test computed
         m.groups['Crv'][0].points['DeptRef'].sf_required = True
         m.groups['Crv'][0].points['DeptRef'].sf_value = 3
         m.groups['Crv'][0].points['Pri'].sf_required = True
         m.groups['Crv'][0].points['Pri'].sf_value = 3
-        assert m.groups['Crv'][0].get_mb(computed=True) == b'\x00\x04\x03\xe8\x03\xe8\x00\x01\x00\x00' \
-                                                           b'\xff\xff\xff\xff\x00\x00\x00\x06\x00\x01' \
-                                                           b'\x00\\\x00\x1e\x00`\x00\x00\x00g\x00\x00\x00k\x00\x1e'
+        assert m.groups['Crv'][0].get_mb(computed=True) == b'\x00\x04\x03\xe8\x03\xe8\x00\x01\x00\x00\xff\xff' \
+                                                           b'\xff\xff\x00\x00\x00\x06\x00\x01\x00\\\x00\x1e\x00`' \
+                                                           b'\x00\x00\x00g\x00\x00\x00k\xff\xe2'
 
     def test_set_mb(self):
         gdata_705 = {
@@ -1841,7 +1840,7 @@ class TestFileClientGroup:
                         },
                         {
                             "V": 10700,
-                            "Var": 3000
+                            "Var": -3000
                         }
                     ]
                 },
@@ -1869,7 +1868,7 @@ class TestFileClientGroup:
                         },
                         {
                             "V": 10600,
-                            "Var": 4000
+                            "Var": -4000
                         }
                     ]
                 },
@@ -1904,9 +1903,8 @@ class TestFileClientGroup:
             ]
         }
         m = file_client.FileClientModel(705, data=gdata_705)
-        assert m.groups['Crv'][0].get_mb() == b'\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\xff' \
-                                              b'\xff\x00\x00\x00\x06\x00\x01#\xf0\x0b\xb8%\xc6\x00' \
-                                              b'\x00(<\x00\x00)\xcc\x0b\xb8'
+        assert m.groups['Crv'][0].get_mb() == b'\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\xff\xff\x00\x00' \
+                                              b'\x00\x06\x00\x01#\xf0\x0b\xb8%\xc6\x00\x00(<\x00\x00)\xcc\xf4H'
 
         bs = b'\x00\x04\x03\xe7\x03x\x03\t\x02\x9a\x02+\x01\xbc\x01M\x00\xde' \
              b'\x00o\x00\xde\x01M\x01\xbc\x02+\x02\x9a\xfc\xf7\xf4H\x0b\xb8'
@@ -2133,7 +2131,7 @@ class TestFileClientDevice:
                     },
                     {
                       "V": 10700,
-                      "Var": 3000
+                      "Var": -3000
                     }
                   ]
                 },
@@ -2161,7 +2159,7 @@ class TestFileClientDevice:
                     },
                     {
                       "V": 10600,
-                      "Var": 4000
+                      "Var": -4000
                     }
                   ]
                 },
@@ -2189,7 +2187,7 @@ class TestFileClientDevice:
                     },
                     {
                       "V": 10800,
-                      "Var": 2000
+                      "Var": -2000
                     }
                   ]
                 }
@@ -2203,15 +2201,15 @@ class TestFileClientDevice:
                 {'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 1, 'VRefAuto': 0, 'VRefAutoEna': None, 'VRefAutoTms': None,
                  'RspTms': 6, 'ReadOnly': 1,
                  'Pt': [{'V': 9200, 'Var': 3000}, {'V': 9670, 'Var': 0}, {'V': 10300, 'Var': 0},
-                        {'V': 10700, 'Var': 3000}]},
+                        {'V': 10700, 'Var': -3000}]},
                 {'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 1, 'VRefAuto': 0, 'VRefAutoEna': None, 'VRefAutoTms': None,
                  'RspTms': 6, 'ReadOnly': 0,
                  'Pt': [{'V': 9300, 'Var': 3000}, {'V': 9570, 'Var': 0}, {'V': 10200, 'Var': 0},
-                        {'V': 10600, 'Var': 4000}]},
+                        {'V': 10600, 'Var': -4000}]},
                 {'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 1, 'VRefAuto': 0, 'VRefAutoEna': None, 'VRefAutoTms': None,
                  'RspTms': 6, 'ReadOnly': 0,
                  'Pt': [{'V': 9400, 'Var': 2000}, {'V': 9570, 'Var': 0}, {'V': 10500, 'Var': 0},
-                        {'V': 10800, 'Var': 2000}]}]}]
+                        {'V': 10800, 'Var': -2000}]}]}]
 
         # computed
         m.groups['Crv'][0].points['DeptRef'].sf_required = True
@@ -2224,15 +2222,15 @@ class TestFileClientDevice:
                 {'ActPt': 4, 'DeptRef': 1000.0, 'Pri': 1000.0, 'VRef': 1, 'VRefAuto': 0, 'VRefAutoEna': None,
                  'VRefAutoTms': None, 'RspTms': 6, 'ReadOnly': 1,
                  'Pt': [{'V': 92.0, 'Var': 30.0}, {'V': 96.7, 'Var': 0.0}, {'V': 103.0, 'Var': 0.0},
-                        {'V': 107.0, 'Var': 30.0}]},
+                        {'V': 107.0, 'Var': -30.0}]},
                 {'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 1, 'VRefAuto': 0, 'VRefAutoEna': None, 'VRefAutoTms': None,
                  'RspTms': 6, 'ReadOnly': 0,
                  'Pt': [{'V': 93.0, 'Var': 30.0}, {'V': 95.7, 'Var': 0.0}, {'V': 102.0, 'Var': 0.0},
-                        {'V': 106.0, 'Var': 40.0}]},
+                        {'V': 106.0, 'Var': -40.0}]},
                 {'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 1, 'VRefAuto': 0, 'VRefAutoEna': None, 'VRefAutoTms': None,
                  'RspTms': 6, 'ReadOnly': 0,
                  'Pt': [{'V': 94.0, 'Var': 20.0}, {'V': 95.7, 'Var': 0.0}, {'V': 105.0, 'Var': 0.0},
-                        {'V': 108.0, 'Var': 20.0}]}]}]
+                        {'V': 108.0, 'Var': -20.0}]}]}]
 
     def test_get_json(self):
         d = file_client.FileClientDevice()
@@ -2274,7 +2272,7 @@ class TestFileClientDevice:
                     },
                     {
                       "V": 10700,
-                      "Var": 3000
+                      "Var": -3000
                     }
                   ]
                 },
@@ -2302,7 +2300,7 @@ class TestFileClientDevice:
                     },
                     {
                       "V": 10600,
-                      "Var": 4000
+                      "Var": -4000
                     }
                   ]
                 },
@@ -2330,7 +2328,7 @@ class TestFileClientDevice:
                     },
                     {
                       "V": 10800,
-                      "Var": 2000
+                      "Var": -2000
                     }
                   ]
                 }
@@ -2343,13 +2341,13 @@ class TestFileClientDevice:
                ''' "RvrtRem": 0, "RvrtCrv": 0, "V_SF": -2, "DeptRef_SF": -2, "RspTms_SF": null,''' + \
                ''' "Crv": [{"ActPt": 4, "DeptRef": 1, "Pri": 1, "VRef": 1, "VRefAuto": 0, "VRefAutoEna": null,''' + \
                ''' "VRefAutoTms": null, "RspTms": 6, "ReadOnly": 1, "Pt": [{"V": 9200, "Var": 3000},''' + \
-               ''' {"V": 9670, "Var": 0}, {"V": 10300, "Var": 0}, {"V": 10700, "Var": 3000}]}, {"ActPt": 4,''' + \
+               ''' {"V": 9670, "Var": 0}, {"V": 10300, "Var": 0}, {"V": 10700, "Var": -3000}]}, {"ActPt": 4,''' + \
                ''' "DeptRef": 1, "Pri": 1, "VRef": 1, "VRefAuto": 0, "VRefAutoEna": null, "VRefAutoTms": null,''' + \
                ''' "RspTms": 6, "ReadOnly": 0, "Pt": [{"V": 9300, "Var": 3000}, {"V": 9570, "Var": 0},''' + \
-               ''' {"V": 10200, "Var": 0}, {"V": 10600, "Var": 4000}]}, {"ActPt": 4, "DeptRef": 1, "Pri": 1,''' + \
+               ''' {"V": 10200, "Var": 0}, {"V": 10600, "Var": -4000}]}, {"ActPt": 4, "DeptRef": 1, "Pri": 1,''' + \
                ''' "VRef": 1, "VRefAuto": 0, "VRefAutoEna": null, "VRefAutoTms": null, "RspTms": 6,''' + \
                ''' "ReadOnly": 0, "Pt": [{"V": 9400, "Var": 2000}, {"V": 9570, "Var": 0}, {"V": 10500,''' + \
-               ''' "Var": 0}, {"V": 10800, "Var": 2000}]}]}]}'''
+               ''' "Var": 0}, {"V": 10800, "Var": -2000}]}]}]}'''
 
         # computed
         m.groups['Crv'][0].points['DeptRef'].sf_required = True
@@ -2363,14 +2361,14 @@ class TestFileClientDevice:
                            ''' "RspTms_SF": null, "Crv": [{"ActPt": 4, "DeptRef": 1000.0, "Pri": 1000.0,''' + \
                            ''' "VRef": 1, "VRefAuto": 0, "VRefAutoEna": null, "VRefAutoTms": null, "RspTms": 6,''' + \
                            ''' "ReadOnly": 1, "Pt": [{"V": 92.0, "Var": 30.0}, {"V": 96.7, "Var": 0.0},''' + \
-                           ''' {"V": 103.0, "Var": 0.0}, {"V": 107.0, "Var": 30.0}]}, {"ActPt": 4, "DeptRef": 1,''' + \
+                           ''' {"V": 103.0, "Var": 0.0}, {"V": 107.0, "Var": -30.0}]}, {"ActPt": 4, "DeptRef": 1,''' + \
                            ''' "Pri": 1, "VRef": 1, "VRefAuto": 0, "VRefAutoEna": null, "VRefAutoTms": null,''' + \
                            ''' "RspTms": 6, "ReadOnly": 0, "Pt": [{"V": 93.0, "Var": 30.0}, {"V": 95.7,''' + \
-                           ''' "Var": 0.0}, {"V": 102.0, "Var": 0.0}, {"V": 106.0, "Var": 40.0}]},''' + \
+                           ''' "Var": 0.0}, {"V": 102.0, "Var": 0.0}, {"V": 106.0, "Var": -40.0}]},''' + \
                            ''' {"ActPt": 4, "DeptRef": 1, "Pri": 1, "VRef": 1, "VRefAuto": 0,''' + \
                            ''' "VRefAutoEna": null, "VRefAutoTms": null, "RspTms": 6, "ReadOnly": 0,''' + \
                            ''' "Pt": [{"V": 94.0, "Var": 20.0}, {"V": 95.7, "Var": 0.0}, {"V": 105.0,''' + \
-                           ''' "Var": 0.0}, {"V": 108.0, "Var": 20.0}]}]}]}'''
+                           ''' "Var": 0.0}, {"V": 108.0, "Var": -20.0}]}]}]}'''
 
         assert d.get_json(computed=True) == get_json_output2
 
@@ -2414,7 +2412,7 @@ class TestFileClientDevice:
                     },
                     {
                       "V": 10700,
-                      "Var": 3000
+                      "Var": -3000
                     }
                   ]
                 },
@@ -2442,7 +2440,7 @@ class TestFileClientDevice:
                     },
                     {
                       "V": 10600,
-                      "Var": 4000
+                      "Var": -4000
                     }
                   ]
                 },
@@ -2470,7 +2468,7 @@ class TestFileClientDevice:
                     },
                     {
                       "V": 10800,
-                      "Var": 2000
+                      "Var": -2000
                     }
                   ]
                 }
@@ -2478,13 +2476,13 @@ class TestFileClientDevice:
             }
         m = file_client.FileClientModel(705, data=gdata_705)
         d.add_model(m)
-        assert d.get_mb() == b"\x02\xc1\x00C\x00\x01\x00\x00\x00\x00\x00\x04\x00\x03\x00\x00\x00\x00" \
-                             b"\x00\x00\x00\x00\x00\x00\xff\xfe\xff\xfe\x80\x00\x00\x04\x00\x01\x00" \
-                             b"\x01\x00\x01\x00\x00\xff\xff\xff\xff\x00\x00\x00\x06\x00\x01#\xf0\x0b" \
-                             b"\xb8%\xc6\x00\x00(<\x00\x00)\xcc\x0b\xb8\x00\x04\x00\x01\x00\x01\x00" \
-                             b"\x01\x00\x00\xff\xff\xff\xff\x00\x00\x00\x06\x00\x00$T\x0b\xb8%b\x00" \
-                             b"\x00'\xd8\x00\x00)h\x0f\xa0\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00" \
-                             b"\xff\xff\xff\xff\x00\x00\x00\x06\x00\x00$\xb8\x07\xd0%b\x00\x00)\x04\x00\x00*0\x07\xd0"
+        assert d.get_mb() == b"\x02\xc1\x00C\x00\x01\x00\x00\x00\x00\x00\x04\x00\x03\x00\x00\x00\x00\x00\x00" \
+                             b"\x00\x00\x00\x00\xff\xfe\xff\xfe\x80\x00\x00\x04\x00\x01\x00\x01\x00\x01\x00" \
+                             b"\x00\xff\xff\xff\xff\x00\x00\x00\x06\x00\x01#\xf0\x0b\xb8%\xc6\x00\x00(<\x00" \
+                             b"\x00)\xcc\xf4H\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\xff\xff\x00" \
+                             b"\x00\x00\x06\x00\x00$T\x0b\xb8%b\x00\x00'\xd8\x00\x00)h\xf0`\x00\x04\x00\x01" \
+                             b"\x00\x01\x00\x01\x00\x00\xff\xff\xff\xff\x00\x00\x00\x06\x00\x00$\xb8\x07\xd0%b" \
+                             b"\x00\x00)\x04\x00\x00*0\xf80"
 
         # computed
         m.groups['Crv'][0].points['DeptRef'].sf_required = True
@@ -2494,11 +2492,11 @@ class TestFileClientDevice:
         assert d.get_mb(computed=True) == b'\x02\xc1\x00C\x00\x01\x00\x00\x00\x00\x00\x04\x00\x03\x00\x00\x00' \
                                           b'\x00\x00\x00\x00\x00\x00\x00\xff\xfe\xff\xfe\x80\x00\x00\x04\x03' \
                                           b'\xe8\x03\xe8\x00\x01\x00\x00\xff\xff\xff\xff\x00\x00\x00\x06\x00' \
-                                          b'\x01\x00\\\x00\x1e\x00`\x00\x00\x00g\x00\x00\x00k\x00\x1e\x00\x04' \
+                                          b'\x01\x00\\\x00\x1e\x00`\x00\x00\x00g\x00\x00\x00k\xff\xe2\x00\x04' \
                                           b'\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\xff\xff\x00\x00\x00\x06' \
-                                          b'\x00\x00\x00]\x00\x1e\x00_\x00\x00\x00f\x00\x00\x00j\x00(\x00\x04' \
-                                          b'\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\xff\xff\x00\x00\x00\x06' \
-                                          b'\x00\x00\x00^\x00\x14\x00_\x00\x00\x00i\x00\x00\x00l\x00\x14'
+                                          b'\x00\x00\x00]\x00\x1e\x00_\x00\x00\x00f\x00\x00\x00j\xff\xd8\x00' \
+                                          b'\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\xff\xff\x00\x00\x00\x06' \
+                                          b'\x00\x00\x00^\x00\x14\x00_\x00\x00\x00i\x00\x00\x00l\xff\xec'
 
     def test_set_mb(self):
         d = file_client.FileClientDevice()
@@ -2540,7 +2538,7 @@ class TestFileClientDevice:
                     },
                     {
                       "V": 10700,
-                      "Var": 3000
+                      "Var": -3000
                     }
                   ]
                 },
@@ -2568,7 +2566,7 @@ class TestFileClientDevice:
                     },
                     {
                       "V": 10600,
-                      "Var": 4000
+                      "Var": -4000
                     }
                   ]
                 },
@@ -2596,7 +2594,7 @@ class TestFileClientDevice:
                     },
                     {
                       "V": 10800,
-                      "Var": 2000
+                      "Var": -2000
                     }
                   ]
                 }
@@ -2604,12 +2602,12 @@ class TestFileClientDevice:
             }
         m = file_client.FileClientModel(705, data=gdata_705)
         d.add_model(m)
-        assert d.get_mb() == b"\x02\xc1\x00C\x00\x01\x00\x00\x00\x00\x00\x04\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00" \
-                             b"\x00\x00\xff\xfe\xff\xfe\x80\x00\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\xff" \
-                             b"\xff\x00\x00\x00\x06\x00\x01#\xf0\x0b\xb8%\xc6\x00\x00(<\x00\x00)\xcc\x0b\xb8\x00" \
-                             b"\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\xff\xff\x00\x00\x00\x06\x00\x00$T\x0b" \
-                             b"\xb8%b\x00\x00'\xd8\x00\x00)h\x0f\xa0\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff" \
-                             b"\xff\xff\xff\x00\x00\x00\x06\x00\x00$\xb8\x07\xd0%b\x00\x00)\x04\x00\x00*0\x07\xd0"
+        assert d.get_mb() == b"\x02\xc1\x00C\x00\x01\x00\x00\x00\x00\x00\x04\x00\x03\x00\x00\x00\x00\x00\x00\x00" \
+                             b"\x00\x00\x00\xff\xfe\xff\xfe\x80\x00\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff" \
+                             b"\xff\xff\xff\x00\x00\x00\x06\x00\x01#\xf0\x0b\xb8%\xc6\x00\x00(<\x00\x00)\xcc\xf4H" \
+                             b"\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\xff\xff\x00\x00\x00\x06\x00\x00$T" \
+                             b"\x0b\xb8%b\x00\x00'\xd8\x00\x00)h\xf0`\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff" \
+                             b"\xff\xff\xff\x00\x00\x00\x06\x00\x00$\xb8\x07\xd0%b\x00\x00)\x04\x00\x00*0\xf80"
 
         # DeptRef and Pri set to 3000 in byte string
         bs = b"\x02\xc1\x00?\x00\x01\x00\x01\x00\x00\x00\x00\x00\x04\x00\x03\x00\x00\x00\x00\x00\x00" \

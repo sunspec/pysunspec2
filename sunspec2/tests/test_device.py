@@ -1971,7 +1971,7 @@ class TestGroup:
                         },
                         {
                             "V": 10700,
-                            "Var": 3000
+                            "Var": -3000
                         }
                     ]
                 },
@@ -1999,7 +1999,7 @@ class TestGroup:
                         },
                         {
                             "V": 10600,
-                            "Var": 4000
+                            "Var": -4000
                         }
                     ]
                 },
@@ -2027,24 +2027,24 @@ class TestGroup:
                         },
                         {
                             "V": 10800,
-                            "Var": 2000
+                            "Var": -2000
                         }
                     ]
                 }
             ]
         }
         m = device.Model(705, data=gdata_705)
-        assert m.groups['Crv'][0].get_mb() == b'\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\xff\xff\x00\x00\x00' \
-                                              b'\x06\x00\x01#\xf0\x0b\xb8%\xc6\x00\x00(<\x00\x00)\xcc\x0b\xb8'
+        assert m.groups['Crv'][0].get_mb() == b'\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\xff\xff\x00\x00' \
+                                              b'\x00\x06\x00\x01#\xf0\x0b\xb8%\xc6\x00\x00(<\x00\x00)\xcc\xf4H'
 
         # test computed
         m.groups['Crv'][0].points['DeptRef'].sf_required = True
         m.groups['Crv'][0].points['DeptRef'].sf_value = 3
         m.groups['Crv'][0].points['Pri'].sf_required = True
         m.groups['Crv'][0].points['Pri'].sf_value = 3
-        assert m.groups['Crv'][0].get_mb(computed=True) == b'\x00\x04\x03\xe8\x03\xe8\x00\x01\x00\x00\xff\xff' \
-                                                           b'\xff\xff\x00\x00\x00\x06\x00\x01\x00\\\x00\x1e\x00`' \
-                                                           b'\x00\x00\x00g\x00\x00\x00k\x00\x1e'
+        assert m.groups['Crv'][0].get_mb(computed=True) == b'\x00\x04\x03\xe8\x03\xe8\x00\x01\x00\x00\xff\xff\xff' \
+                                                           b'\xff\x00\x00\x00\x06\x00\x01\x00\\\x00\x1e\x00`\x00\x00' \
+                                                           b'\x00g\x00\x00\x00k\xff\xe2'
 
     def test_set_mb(self):
         gdata_705 = {
@@ -2085,7 +2085,7 @@ class TestGroup:
                         },
                         {
                             "V": 10700,
-                            "Var": 3000
+                            "Var": -3000
                         }
                     ]
                 },
@@ -2113,7 +2113,7 @@ class TestGroup:
                         },
                         {
                             "V": 10600,
-                            "Var": 4000
+                            "Var": -4000
                         }
                     ]
                 },
@@ -2141,15 +2141,15 @@ class TestGroup:
                         },
                         {
                             "V": 10800,
-                            "Var": 2000
+                            "Var": -2000
                         }
                     ]
                 }
             ]
         }
         m = device.Model(705, data=gdata_705)
-        assert m.groups['Crv'][0].get_mb() == b'\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\xff\xff\x00' \
-                                              b'\x00\x00\x06\x00\x01#\xf0\x0b\xb8%\xc6\x00\x00(<\x00\x00)\xcc\x0b\xb8'
+        assert m.groups['Crv'][0].get_mb() == b'\x00\x04\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\xff\xff\x00\x00' \
+                                              b'\x00\x06\x00\x01#\xf0\x0b\xb8%\xc6\x00\x00(<\x00\x00)\xcc\xf4H'
 
         bs = b'\x00\x04\x03\xe7\x03x\x03\t\x02\x9a\x02+\x01\xbc\x01M\x00\xde\x00o' \
              b'\x00\xde\x01M\x01\xbc\x02+\x02\x9a\xfc\xf7\xf4H\x0b\xb8'
