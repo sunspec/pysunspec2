@@ -349,8 +349,11 @@ def to_spreadsheet_point(ss, point, has_notes, addr_offset=None, group_offset=No
         row[NOTES_IDX] = point.get(mdef.NOTES, '')
     ss.append(row)
     # process symbols
-    for s in point.get(mdef.SYMBOLS, []):
-        to_spreadsheet_symbol(ss, s, has_notes=has_notes)
+    symbols = point.get(mdef.SYMBOLS, [])
+    if symbols:
+        symbols = sorted(symbols, key=lambda sy: sy['value'])
+        for s in symbols:
+            to_spreadsheet_symbol(ss, s, has_notes=has_notes)
     # return point length
     try:
         plen = mdef.point_type_info[ptype]['len']
