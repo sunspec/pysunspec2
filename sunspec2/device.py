@@ -264,7 +264,7 @@ class Point(object):
         try:
             mb_len = self.len
             # if not enough data, do not set but consume the data
-            if len(data) < mb_len:
+            if len(data) < mb_len * 2:
                 return len(data)
             self.set_value(self.info.data_to(data[:mb_len * 2]), computed=computed, dirty=dirty)
             if not self.info.is_impl(self.value):
@@ -273,6 +273,13 @@ class Point(object):
         except Exception as e:
             self.model.add_error('Error setting value for %s: %s' % (self.pdef[mdef.NAME], str(e)))
         return mb_len
+
+    def is_impl(self):
+        impl = False
+        v = self.value
+        if v is not None:
+            impl = self.info.is_impl(self.value)
+        return impl
 
 
 class Group(object):
@@ -446,7 +453,7 @@ class Group(object):
                     if remaining != 0:
                         raise ModelError('Repeating group count not consistent with model length for model %s,'
                                          'model repeating len = %s, model repeating group len = %s' %
-                                         (self.model._id, repeating_len, group_points_len))
+                                         (self.model.model_id, repeating_len, group_points_len))
 
                     count = int(repeating_len / group_points_len)
                     if count > 0:
