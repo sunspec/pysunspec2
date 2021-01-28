@@ -378,7 +378,6 @@ try:
             self.spreadsheet_to_xlsx(mid, spreadsheet)
 
         def create_error_sheet(self, mid, err_msg):
-            print('creating error sheet')
             ws = self.wb.create_sheet(title=str(mid))
             ws.column_dimensions['A'].width = 40
             ws['A1'] = 'Model Definition Errors'
