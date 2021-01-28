@@ -377,6 +377,16 @@ try:
             spreadsheet = ss.to_spreadsheet(model_def)
             self.spreadsheet_to_xlsx(mid, spreadsheet)
 
+        def create_error_sheet(self, mid, err_msg):
+            print('creating error sheet')
+            ws = self.wb.create_sheet(title=str(mid))
+            ws.column_dimensions['A'].width = 40
+            ws['A1'] = 'Model Definition Errors'
+            ws['A1'].font = styles.Font(bold=True)
+            ws['A1'].alignment = styles.Alignment(horizontal='center')
+            ws['A2'].alignment = styles.Alignment(horizontal='center', wrap_text=True)
+            ws['A2'] = err_msg
+
 except:
     # provide indication the openpyxl library not available
     class ModelWorkbook(object):
