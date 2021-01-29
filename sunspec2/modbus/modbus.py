@@ -290,6 +290,7 @@ class ModbusClientRTU(object):
         return resp[3:-2]
 
     def read(self, slave_id, addr, count, op=FUNC_READ_HOLDING, trace_func=None, max_count=REQ_COUNT_MAX):
+
         """
         Parameters:
             slave_id :
@@ -309,7 +310,6 @@ class ModbusClientRTU(object):
         Returns:
             Byte string containing register contents.
         """
-
         resp = bytearray()
         read_count = 0
         read_offset = 0
@@ -489,9 +489,10 @@ class ModbusClientTCP(object):
         req = struct.pack('>HHHBBHH', 0, 0, TCP_READ_REQ_LEN, int(self.slave_id), op, int(addr), int(count))
 
         if self.trace_func:
-            s = '%s:%s:%s[addr=%s] ->' % (self.ipaddr, str(self.ipport), str(self.slave_id), addr)
+            # s = '%s:%s:%s[addr=%s] ->' % (self.ipaddr, str(self.ipport), str(self.slave_id), addr)
+            s = '> '
             for c in req:
-                s += '%02X' % (ord(c))
+                s += '%02X' % c
             self.trace_func(s)
 
         try:
@@ -518,9 +519,10 @@ class ModbusClientTCP(object):
             except_code = resp[TCP_HDR_LEN + 2]
 
         if self.trace_func:
-            s = '%s:%s:%s[addr=%s] <--' % (self.ipaddr, str(self.ipport), str(self.slave_id), addr)
+            # s = '%s:%s:%s[addr=%s] <--' % (self.ipaddr, str(self.ipport), str(self.slave_id), addr)
+            s ='< '
             for c in resp:
-                s += '%02X' % (ord(c))
+                s += '%02X' % c
             self.trace_func(s)
 
         if except_code:
@@ -592,9 +594,10 @@ class ModbusClientTCP(object):
         req += data
 
         if self.trace_func:
-            s = '%s:%s:%s[addr=%s] ->' % (self.ipaddr, str(self.ipport), str(self.slave_id), addr)
+            # s = '%s:%s:%s[addr=%s] ->' % (self.ipaddr, str(self.ipport), str(self.slave_id), addr)
+            s = '> '
             for c in req:
-                s += '%02X' % (ord(c))
+                s += '%02X' % c
             self.trace_func(s)
 
         try:
@@ -621,9 +624,10 @@ class ModbusClientTCP(object):
             except_code = resp[TCP_HDR_LEN + 2]
 
         if self.trace_func:
-            s = '%s:%s:%s[addr=%s] <--' % (self.ipaddr, str(self.ipport), str(self.slave_id), addr)
+            # s = '%s:%s:%s[addr=%s] <--' % (self.ipaddr, str(self.ipport), str(self.slave_id), addr)
+            s = '< '
             for c in resp:
-                s += '%02X' % (ord(c))
+                s += '%02X' % c
             self.trace_func(s)
 
         if except_code:
