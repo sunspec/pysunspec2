@@ -480,6 +480,9 @@ class ModbusClientTCP(object):
         except Exception:
             pass
 
+    def is_connected(self):
+        return self.socket
+
     def _read(self, addr, count, op=FUNC_READ_HOLDING):
         resp = bytearray()
         len_remaining = TCP_HDR_LEN + TCP_RESP_MIN_LEN

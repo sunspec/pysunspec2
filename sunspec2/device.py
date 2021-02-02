@@ -10,6 +10,7 @@ import sunspec2.mb as mb
 class ModelError(Exception):
     pass
 
+ACCESS_REGION_REGS = 123
 
 this_dir, this_filename = os.path.split(__file__)
 models_dir = os.path.join(this_dir, 'models')
@@ -295,6 +296,7 @@ class Group(object):
         self.points_len = 0
         self.group_class = group_class
         self.index = index
+        self.access_regions = []
 
         if group_class is None:
             self.group_class = self.__class__
@@ -339,6 +341,35 @@ class Group(object):
                     self.model.add_error('Model length %s not equal to calculated model length %s for model %s' %
                                         (self.len + 2, mlen, self.model.model_id ))
             self.len = mlen
+
+        # check if group fits in access region
+        if self.len > ACCESS_REGION_REGS:
+            if self.points_len > ACCESS_REGION_REGS:
+                index = 0
+                count = 0
+                for p, point in self.points.items():
+                    if count + point.len > ACCESS_REGION_REGS:
+                        self.access_regions.append((index, count))
+                        index = count
+                        count = 0
+                    count += point.len
+                if count > 0:
+                    self.access_regions.append((index, count))
+            else:
+                self.access_regions.append((0, self.points_len))
+                groups_len = self.len - self.points_len
+                if groups_len > ACCESS_REGION_REGS:
+                    for g, group in self.groups.items():
+                        if isinstance(group, list) and len(group) > 0:
+                            glen = group[0].len
+                            if glen > ACCESS_REGION_REGS:
+                                raise ModelError('Nested groups too big')
+                            index = self.points_len
+                            for i in range(len(group)):
+                                self.access_regions.append((index, glen))
+                                index += glen
+                        elif group.len > ACCESS_REGION_REGS:
+                            raise ModelError('Nested single group too big')
 
         len_point = self.points.get('L')
         if len_point:

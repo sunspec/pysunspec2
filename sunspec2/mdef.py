@@ -407,5 +407,49 @@ def to_json_file(model_def, filename=None, filedir=None, indent=4):
     json.dump(model_def, f, indent=indent, sort_keys=True)
 
 
+def get_group_len_points(group_def, points=None):
+    if points is None:
+        points = []
+    groups = group_def.get(GROUPS)
+    if groups:
+        for g in groups:
+            count = g.get(COUNT)
+            if count:
+                try:
+                    count = int(count)
+                except:
+                    if count not in points:
+                        points.append(count)
+            points = get_group_len_points(g, points)
+    return points
+
+
+def get_group_len_points_index(group_def):
+    index = pindex = 0
+    len_points = get_group_len_points(group_def)
+
+    if len_points:
+        points = group_def.get(POINTS, list())
+        for p in points:
+            name = p.get(NAME)
+            plen = point_type_info.get(p.get(TYPE)).get('len')
+            if plen is None:
+                plen = point_type_info.get(p.get(SIZE))
+            if not plen:
+                ModelDefinitionError('Unable to get size of point %s' % name)
+            pindex += plen
+            if name in len_points:
+                index = pindex
+                len_points.remove(name)
+            if not len_points:
+                break
+        if len_points:
+            raise ModelDefinitionError('Expected points not found in group definition: %s' % len_points)
+    return index
+
+
+
 if __name__ == "__main__":
-    pass
+
+    model_def = from_json_file('./models/json/model_711.json')
+    print(get_group_len_points_index(model_def.get(GROUP)))
