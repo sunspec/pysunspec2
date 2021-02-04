@@ -285,7 +285,7 @@ class Point(object):
 
 class Group(object):
     def __init__(self, gdef=None, model=None, model_offset=0, group_len=0, data=None, data_offset=0, group_class=None,
-                 point_class=Point, index=None):
+                 point_class=None, index=None):
         self.gdef = gdef
         self.model = model
         self.gname = None
@@ -300,6 +300,8 @@ class Group(object):
 
         if group_class is None:
             self.group_class = self.__class__
+        if point_class is None:
+            point_class = Point
 
         if gdef is not None:
             self.gname = gdef[mdef.NAME]
