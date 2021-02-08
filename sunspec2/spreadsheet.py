@@ -145,8 +145,10 @@ def from_spreadsheet(spreadsheet):
                     raise Exception('Duplicate point definition in group %s: %s' % (group[mdef.NAME], name))
             else:
                 raise Exception('Point %s defined outside of group' % name)
-
-            size = mdef.to_number_type(row[size_idx])
+            if etype == mdef.TYPE_STRING:
+                size = mdef.to_number_type(row[size_idx])
+            else:
+                size = mdef.point_type_info[etype]['len']
             sf = mdef.to_number_type(row[scale_factor_idx])
             units = row[units_idx]
             access = row[access_idx]
@@ -341,7 +343,12 @@ def to_spreadsheet_point(ss, point, has_notes, addr_offset=None, group_offset=No
     row[STATIC_IDX] = static
     row[UNITS_IDX] = point.get(mdef.UNITS, '')
     row[SCALE_FACTOR_IDX] = mdef.to_number_type(point.get(mdef.SF, ''))
-    row[SIZE_IDX] = mdef.to_number_type(point.get(mdef.SIZE, ''))
+
+    if ptype == mdef.TYPE_STRING:
+        row[SIZE_IDX] = mdef.to_number_type(point.get(mdef.SIZE, ''))
+    else:
+        row[SIZE_IDX] = mdef.point_type_info[ptype]['len']
+
     row[VALUE_IDX] = mdef.to_number_type(point.get(mdef.VALUE, ''))
     row[LABEL_IDX] = point.get(mdef.LABEL, '')
     row[DESCRIPTION_IDX] = point.get(mdef.DESCRIPTION, '')
