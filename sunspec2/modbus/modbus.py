@@ -20,6 +20,7 @@
 import socket
 import struct
 import serial
+import time
 
 PARITY_NONE = 'N'
 PARITY_EVEN = 'E'
@@ -177,6 +178,12 @@ class ModbusClientRTU(object):
         self.timeout = .5
         self.write_timeout = .5
         self.devices = {}
+        self.trace_func = None
+        self.inter_frame_gap = .00175
+
+        baudrate = int(baudrate)
+        if baudrate <= 19200:
+            self.inter_frame_gap = (1/(baudrate/10)) * 3.5
 
         self.open()
 
@@ -246,14 +253,16 @@ class ModbusClientRTU(object):
         req = struct.pack('>BBHH', int(slave_id), op, int(addr), int(count))
         req += struct.pack('>H', computeCRC(req))
 
-        if trace_func:
-            s = '{}:{}[addr={}] ->'.format(self.name, str(slave_id), addr)
+        if self.trace_func:
+            # s = '{}:{}[addr={}] ->'.format(self.name, str(slave_id), addr)
+            s = '> '
             for c in req:
-                s += '%02X' % (ord(c))
-            trace_func(s)
+                s += '%02X' % c
+            self.trace_func(s)
 
         self.serial.flushInput()
         try:
+            time.sleep(self.inter_frame_gap)
             self.serial.write(req)
         except Exception as e:
             raise ModbusClientError('Serial write error: %s' % str(e))
@@ -274,11 +283,12 @@ class ModbusClientRTU(object):
             else:
                 raise ModbusClientTimeout('Response timeout')
 
-        if trace_func:
-            s = '{}:{}[addr={}] <--'.format(self.name, str(slave_id), addr)
+        if self.trace_func:
+            # s = '{}:{}[addr={}] <--'.format(self.name, str(slave_id), addr)
+            s = '< '
             for c in resp:
-                s += '%02X' % (ord(c))
-            trace_func(s)
+                s += '%02X' % c
+            self.trace_func(s)
 
         crc = (resp[-2] << 8) | resp[-1]
         if not checkCRC(resp[:-2], crc):
@@ -346,15 +356,17 @@ class ModbusClientRTU(object):
         req += data
         req += struct.pack('>H', computeCRC(req))
 
-        if trace_func:
-            s = '{}:{}[addr={}] ->'.format(self.name, str(slave_id), addr)
+        if self.trace_func:
+            # s = '{}:{}[addr={}] ->'.format(self.name, str(slave_id), addr)
+            s = '> '
             for c in req:
-                s += '%02X' % (ord(c))
-            trace_func(s)
+                s += '%02X' % c
+            self.trace_func(s)
 
         self.serial.flushInput()
 
         try:
+            time.sleep(self.inter_frame_gap)
             self.serial.write(bytes(req))
         except Exception as e:
             raise ModbusClientError('Serial write error: %s' % str(e))
@@ -375,11 +387,12 @@ class ModbusClientRTU(object):
             else:
                 raise ModbusClientTimeout('Response timeout')
 
-        if trace_func:
-            s = '{}:{}[addr={}] <--'.format(self.name, str(slave_id), addr)
+        if self.trace_func:
+            # s = '{}:{}[addr={}] <--'.format(self.name, str(slave_id), addr)
+            s = '< '
             for c in resp:
-                s += '%02X' % (ord(c))
-            trace_func(s)
+                s += '%02X' % c
+            self.trace_func(s)
 
         crc = (resp[-2] << 8) | resp[-1]
         if not checkCRC(resp[:-2], crc):
