@@ -16,5 +16,6 @@ setup(
     url='https://sunspec.org/',
     packages=['sunspec2', 'sunspec2.modbus', 'sunspec2.file', 'sunspec2.tests'],
     package_data={'sunspec2.tests': ['test_data/*'], 'sunspec2': ['models/json/*']},
+    python_requires='>=3.5',
     install_requires=['pyserial', 'openpyxl', 'pytest']
 )
