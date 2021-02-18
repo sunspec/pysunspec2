@@ -399,3 +399,7 @@ The function is disabled, set the value to 1, and write to device, in order to e
 
 It is considered a best practice with Modbus to verify values written to the device by reading them back to ensure they
 were set properly. That step has been omitted to here to focus on the update sequence.
+
+Contribution
+============
+If you wish to contribute to the project, please contact support@sunspec.org to sign a CLA.
