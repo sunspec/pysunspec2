@@ -97,8 +97,7 @@ def get_model_def(model_id, mapping=True):
                 if mapping:
                     add_mappings(model_def[mdef.GROUP])
                 return model_def
-    raise mdef.ModelDefinitionError('Model definition not found for model %s\nLooking in: %s' %
-                                    (model_id, os.path.join(path, path_option, model_def_file_json)))
+    raise mdef.ModelDefinitionError('Model definition not found for model %s' % model_id)
 
 
 # add id mapping for points and groups for more efficient lookup by id
