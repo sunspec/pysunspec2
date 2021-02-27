@@ -702,6 +702,12 @@ class Device(object):
             else:
                 model_id = m['ID']
             if model_id != mdef.END_MODEL_ID:
-                model_def = get_model_def(model_id)
-                model = Model(model_def=model_def, data=m, model_id=m['ID'])
+                model_def = model_len = None
+                try:
+                    model_def = get_model_def(model_id)
+                except:
+                    model_len = m.get('L')
+                if not model_len:
+                    model_len = 0
+                model = Model(model_def=model_def, data=m, model_id=m['ID'], model_len=model_len)
                 self.add_model(model=model)
