@@ -10,6 +10,7 @@ import sunspec2.mb as mb
 class ModelError(Exception):
     pass
 
+ACCESS_REGION_REGS = 123
 
 this_dir, this_filename = os.path.split(__file__)
 models_dir = os.path.join(this_dir, 'models')
@@ -96,8 +97,7 @@ def get_model_def(model_id, mapping=True):
                 if mapping:
                     add_mappings(model_def[mdef.GROUP])
                 return model_def
-    raise mdef.ModelDefinitionError('Model definition not found for model %s\nLooking in: %s' %
-                                    (model_id, os.path.join(path, path_option, model_def_file_json)))
+    raise mdef.ModelDefinitionError('Model definition not found for model %s' % model_id)
 
 
 # add id mapping for points and groups for more efficient lookup by id
@@ -264,7 +264,7 @@ class Point(object):
         try:
             mb_len = self.len
             # if not enough data, do not set but consume the data
-            if len(data) < mb_len:
+            if len(data) < mb_len * 2:
                 return len(data)
             self.set_value(self.info.data_to(data[:mb_len * 2]), computed=computed, dirty=dirty)
             if not self.info.is_impl(self.value):
@@ -274,10 +274,17 @@ class Point(object):
             self.model.add_error('Error setting value for %s: %s' % (self.pdef[mdef.NAME], str(e)))
         return mb_len
 
+    def is_impl(self):
+        impl = False
+        v = self.value
+        if v is not None:
+            impl = self.info.is_impl(self.value)
+        return impl
+
 
 class Group(object):
     def __init__(self, gdef=None, model=None, model_offset=0, group_len=0, data=None, data_offset=0, group_class=None,
-                 point_class=Point, index=None):
+                 point_class=None, index=None):
         self.gdef = gdef
         self.model = model
         self.gname = None
@@ -288,9 +295,12 @@ class Group(object):
         self.points_len = 0
         self.group_class = group_class
         self.index = index
+        self.access_regions = []
 
         if group_class is None:
             self.group_class = self.__class__
+        if point_class is None:
+            point_class = Point
 
         if gdef is not None:
             self.gname = gdef[mdef.NAME]
@@ -332,6 +342,35 @@ class Group(object):
                     self.model.add_error('Model length %s not equal to calculated model length %s for model %s' %
                                         (self.len + 2, mlen, self.model.model_id ))
             self.len = mlen
+
+        # check if group fits in access region
+        if self.len > ACCESS_REGION_REGS:
+            if self.points_len > ACCESS_REGION_REGS:
+                index = 0
+                count = 0
+                for p, point in self.points.items():
+                    if count + point.len > ACCESS_REGION_REGS:
+                        self.access_regions.append((index, count))
+                        index = count
+                        count = 0
+                    count += point.len
+                if count > 0:
+                    self.access_regions.append((index, count))
+            else:
+                self.access_regions.append((0, self.points_len))
+                groups_len = self.len - self.points_len
+                if groups_len > ACCESS_REGION_REGS:
+                    for g, group in self.groups.items():
+                        if isinstance(group, list) and len(group) > 0:
+                            glen = group[0].len
+                            if glen > ACCESS_REGION_REGS:
+                                raise ModelError('Nested groups too big')
+                            index = self.points_len
+                            for i in range(len(group)):
+                                self.access_regions.append((index, glen))
+                                index += glen
+                        elif group.len > ACCESS_REGION_REGS:
+                            raise ModelError('Nested single group too big')
 
         len_point = self.points.get('L')
         if len_point:
@@ -446,7 +485,7 @@ class Group(object):
                     if remaining != 0:
                         raise ModelError('Repeating group count not consistent with model length for model %s,'
                                          'model repeating len = %s, model repeating group len = %s' %
-                                         (self.model._id, repeating_len, group_points_len))
+                                         (self.model.model_id, repeating_len, group_points_len))
 
                     count = int(repeating_len / group_points_len)
                     if count > 0:
@@ -663,6 +702,12 @@ class Device(object):
             else:
                 model_id = m['ID']
             if model_id != mdef.END_MODEL_ID:
-                model_def = get_model_def(model_id)
-                model = Model(model_def=model_def, data=m, model_id=m['ID'])
+                model_def = model_len = None
+                try:
+                    model_def = get_model_def(model_id)
+                except:
+                    model_len = m.get('L')
+                if not model_len:
+                    model_len = 0
+                model = Model(model_def=model_def, data=m, model_id=m['ID'], model_len=model_len)
                 self.add_model(model=model)

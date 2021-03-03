@@ -63,13 +63,33 @@ class SunSpecModbusClientPoint(device.Point):
 
 class SunSpecModbusClientGroup(device.Group):
 
-    def read(self):
+    def __init__(self, gdef=None, model=None, model_offset=0, group_len=0, data=None, data_offset=0, group_class=None,
+                 point_class=None, index=None):
 
-        data = self.model.device.read(self.model.model_addr + self.offset, self.len)
+        device.Group.__init__(self, gdef=gdef, model=model, model_offset=model_offset, group_len=group_len,
+                              data=data, data_offset=data_offset, group_class=group_class, point_class=point_class,
+                              index=index)
+
+    def read(self):
+        # check if currently connected
+        connected = self.model.device.is_connected()
+        if not connected:
+            self.model.device.connect()
+
+        if self.access_regions:
+            data = bytearray()
+            for region in self.access_regions:
+                data += self.model.device.read(self.model.model_addr + self.offset + region[0], region[1])
+            data = bytes(data)
+        else:
+            data = self.model.device.read(self.model.model_addr + self.offset, self.len)
         self.set_mb(data=data, dirty=False)
 
-    def write(self):
+        # disconnect if was not connected
+        if not connected:
+            self.model.device.disconnect()
 
+    def write(self):
         start_addr = next_addr = self.model.model_addr + self.offset
         data = b''
         start_addr, next_addr, data = self.write_points(start_addr, next_addr, data)
@@ -128,6 +148,15 @@ class SunSpecModbusClientModel(SunSpecModbusClientGroup):
         except Exception as e:
             self.add_error(str(e))
 
+        # determine largest point index that contains a group len
+        group_len_points_index = mdef.get_group_len_points_index(gdef)
+        # if data len < largest point index that contains a group len, read the rest of the point data
+        data_regs = len(data)/2
+        remaining = group_len_points_index - data_regs
+        if remaining > 0:
+            points_data = self.device.read(self.model_addr + data_regs, remaining)
+            data += points_data
+
         SunSpecModbusClientGroup.__init__(self, gdef=gdef, model=self.model, model_offset=0, group_len=self.model_len,
                                           data=data, data_offset=0, group_class=group_class, point_class=point_class)
 
@@ -148,7 +177,7 @@ class SunSpecModbusClientDevice(device.Device):
         device.Device.__init__(self, model_class=model_class)
         self.did = str(uuid.uuid4())
         self.retry_count = 2
-        self.base_addr_list = [40000, 0, 50000]
+        self.base_addr_list = [0, 40000, 50000]
         self.base_addr = None
 
     def connect(self):
@@ -156,6 +185,9 @@ class SunSpecModbusClientDevice(device.Device):
 
     def disconnect(self):
         pass
+
+    def is_connected(self):
+        return True
 
     def close(self):
         pass
@@ -168,7 +200,7 @@ class SunSpecModbusClientDevice(device.Device):
     def write(self, addr, data):
         return
 
-    def scan(self, progress=None, delay=None, connect=False):
+    def scan(self, progress=None, delay=None, connect=True):
         """Scan all the models of the physical device and create the
         corresponding model objects within the device object based on the
         SunSpec model definitions.
@@ -196,38 +228,43 @@ class SunSpecModbusClientDevice(device.Device):
                 except SunSpecModbusClientError as e:
                     if not error:
                         error = str(e)
+                except modbus_client.ModbusClientException:
+                    pass
 
                 if delay is not None:
                     time.sleep(delay)
 
         if self.base_addr is not None:
-            model_id = mb.data_to_u16(data[4:6])
+            model_id_data = data[4:6]
+            model_id = mb.data_to_u16(model_id_data)
             addr = self.base_addr + 2
 
             mid = 0
             while model_id != mb.SUNS_END_MODEL_ID:
                 # read model and model len separately due to some devices not supplying
                 # count for the end model id
-                data = self.read(addr + 1, 1)
-                if data and len(data) == 2:
+                model_len_data = self.read(addr + 1, 1)
+                if model_len_data and len(model_len_data) == 2:
                     if progress is not None:
                         cont = progress('Scanning model %s' % (model_id))
                         if not cont:
                             raise SunSpecModbusClientError('Device scan terminated')
-                    model_len = mb.data_to_u16(data)
+                    model_len = mb.data_to_u16(model_len_data)
 
                     # read model data
-                    model_data = self.read(addr, model_len + 2)
+                    ### model_data = self.read(addr, model_len + 2)
+                    model_data = model_id_data + model_len_data
                     model = self.model_class(model_id=model_id, model_addr=addr, model_len=model_len, data=model_data,
                                              mb_device=self)
+                    model.read()
                     model.mid = '%s_%s' % (self.did, mid)
                     mid += 1
                     self.add_model(model)
 
                     addr += model_len + 2
-                    data = self.read(addr, 1)
-                    if data and len(data) == 2:
-                        model_id = mb.data_to_u16(data)
+                    model_id_data = self.read(addr, 1)
+                    if model_id_data and len(model_id_data) == 2:
+                        model_id = mb.data_to_u16(model_id_data)
                     else:
                         break
                 else:
@@ -269,6 +306,9 @@ class SunSpecModbusClientDeviceTCP(SunSpecModbusClientDevice):
 
     def disconnect(self):
         self.client.disconnect()
+
+    def is_connected(self):
+        return self.client.is_connected()
 
     def read(self, addr, count, op=modbus_client.FUNC_READ_HOLDING):
         return self.client.read(addr, count, op)
