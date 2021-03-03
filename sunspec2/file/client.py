@@ -92,6 +92,9 @@ class FileClientDevice(device.Device):
     def write(self):
         return
 
+    def close(self):
+        return
+
 
 class FileClient(FileClientDevice):
     pass

@@ -298,7 +298,13 @@ try:
             self.set_cell(ws, row, ss.VALUE_IDX + 1, values[ss.VALUE_IDX], entry_style)
             self.set_cell(ws, row, ss.COUNT_IDX + 1, values[ss.COUNT_IDX], entry_style)
             self.set_cell(ws, row, ss.TYPE_IDX + 1, values[ss.TYPE_IDX], entry_style)
-            self.set_cell(ws, row, ss.SIZE_IDX + 1, values[ss.SIZE_IDX], entry_style)
+
+            # don't put type size in xlsx unless point type is string
+            if values[ss.TYPE_IDX] == 'string':
+                self.set_cell(ws, row, ss.SIZE_IDX + 1, values[ss.SIZE_IDX], entry_style)
+            else:
+                self.set_cell(ws, row, ss.SIZE_IDX + 1, '', entry_style)
+
             self.set_cell(ws, row, ss.SCALE_FACTOR_IDX + 1, values[ss.SCALE_FACTOR_IDX], entry_style)
             self.set_cell(ws, row, ss.UNITS_IDX + 1, values[ss.UNITS_IDX], entry_style)
             self.set_cell(ws, row, ss.ACCESS_IDX + 1, values[ss.ACCESS_IDX], entry_style)
@@ -376,6 +382,15 @@ try:
             mid = model_def[mdef.ID]
             spreadsheet = ss.to_spreadsheet(model_def)
             self.spreadsheet_to_xlsx(mid, spreadsheet)
+
+        def create_error_sheet(self, mid, err_msg):
+            ws = self.wb.create_sheet(title=str(mid))
+            ws.column_dimensions['A'].width = 40
+            ws['A1'] = 'Model Definition Errors'
+            ws['A1'].font = styles.Font(bold=True)
+            ws['A1'].alignment = styles.Alignment(horizontal='center')
+            ws['A2'].alignment = styles.Alignment(horizontal='center', wrap_text=True)
+            ws['A2'] = err_msg
 
 except:
     # provide indication the openpyxl library not available
