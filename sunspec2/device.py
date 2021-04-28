@@ -342,12 +342,14 @@ class Group(object):
             points = self.gdef.get(mdef.POINTS)
             if points:
                 for pdef in points:
-                    p = point_class(pdef, model=self.model, group=self, model_offset=model_offset, data=data,
-                                    data_offset=data_offset)
-                    self.points_len += p.len
-                    model_offset += p.len
-                    data_offset += p.len
-                    self.points[pdef[mdef.NAME]] = p
+                    # allow legacy model 1 to have an alternate length of 65 registers
+                    if self.len != 65 or model.model_id != 1 or pdef[mdef.NAME] != 'Pad':
+                        p = point_class(pdef, model=self.model, group=self, model_offset=model_offset, data=data,
+                                        data_offset=data_offset)
+                        self.points_len += p.len
+                        model_offset += p.len
+                        data_offset += p.len
+                        self.points[pdef[mdef.NAME]] = p
             # initialize groups
             groups = self.gdef.get(mdef.GROUPS)
             if groups:
