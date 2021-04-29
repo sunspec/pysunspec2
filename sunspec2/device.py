@@ -44,7 +44,7 @@ def get_model_info(model_id):
                 for pdef in points:
                     info = mb.point_type_info.get(pdef[mdef.TYPE])
                     plen = pdef.get(mdef.SIZE, None)
-                    if plen is None:
+                    if plen is not None:
                         glen += info.len
     except:
         raise
@@ -678,13 +678,14 @@ class Device(object):
         model_list.append(model)
         # add by group id
         gname = model.gname
-        model_list = self.models.get(gname)
-        if model_list is None:
-            model_list = []
-            self.models[gname] = model_list
-        model_list.append(model)
-        # add to model list
-        self.model_list.append(model)
+        if gname is not None:
+            model_list = self.models.get(gname)
+            if model_list is None:
+                model_list = []
+                self.models[gname] = model_list
+            model_list.append(model)
+            # add to model list
+            self.model_list.append(model)
 
         model.device = self
 
