@@ -114,6 +114,14 @@ END_MODEL_ID = 65535
 MODEL_DEF_EXT = '.json'
 
 
+def get_size(ptype):
+    tinfo = point_type_info.get(ptype)
+    if tinfo is not None:
+        return tinfo.get('len')
+    else:
+        raise ModelDefinitionError('Unknown point type %s.' % ptype)
+
+
 def to_int(x):
     try:
         return int(x, 0)

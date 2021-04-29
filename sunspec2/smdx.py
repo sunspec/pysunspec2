@@ -188,10 +188,10 @@ def from_smdx(element):
                  mdef.TYPE: mdef.TYPE_GROUP,
                  mdef.POINTS: [
                      {mdef.NAME: 'ID', mdef.VALUE: mid,
-                      mdef.DESCRIPTION: 'Model identifier', mdef.LABEL: 'Model ID',
+                      mdef.DESCRIPTION: 'Model identifier', mdef.LABEL: 'Model ID', mdef.SIZE: 1,
                       mdef.MANDATORY: mdef.MANDATORY_TRUE, mdef.STATIC: mdef.STATIC_TRUE, mdef.TYPE: mdef.TYPE_UINT16},
                      {mdef.NAME: 'L',
-                      mdef.DESCRIPTION: 'Model length', mdef.LABEL: 'Model Length',
+                      mdef.DESCRIPTION: 'Model length', mdef.LABEL: 'Model Length', mdef.SIZE: 1,
                       mdef.MANDATORY: mdef.MANDATORY_TRUE, mdef.STATIC: mdef.STATIC_TRUE, mdef.TYPE: mdef.TYPE_UINT16}
                  ]
                  }
@@ -316,6 +316,8 @@ def from_smdx_point(element):
         if plen is None:
             raise mdef.ModelDefinitionError('Missing len attribute for point: %s' % pid)
         point_def[mdef.SIZE] = plen
+    else:
+        point_def[mdef.SIZE] = mdef.get_size(ptype)
     mandatory = element.attrib.get(SMDX_ATTR_MANDATORY, SMDX_MANDATORY_FALSE)
     if mandatory not in smdx_mandatory_types:
         raise mdef.ModelDefinitionError('Unknown mandatory type: %s' % mandatory)
