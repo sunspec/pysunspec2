@@ -11,6 +11,9 @@ class TestSunSpecModbusClientPoint:
         monkeypatch.setattr(socket, 'socket', MockSocket.mock_socket)
         monkeypatch.setattr(serial, 'Serial', MockPort.mock_port)
 
+        monkeypatch.setattr(client.SunSpecModbusClientDeviceTCP, 'connect', MockSocket.mock_tcp_connect)
+        monkeypatch.setattr(client.SunSpecModbusClientDeviceTCP, 'disconnect', MockSocket.mock_tcp_connect)
+
         # tcp
         d_tcp = client.SunSpecModbusClientDeviceTCP(slave_id=1, ipaddr='127.0.0.1', ipport=8502)
         tcp_buffer = [b'\x00\x00\x00\x00\x00\t\x01\x03\x06',
@@ -36,16 +39,16 @@ class TestSunSpecModbusClientPoint:
                       b'\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff',
                       b'\x00\x00\x00\x00\x00\x05\x01\x03\x02',
                       b'\xff\xff']
-        d_tcp.client.connect()
+        d_tcp.connect()
         d_tcp.client.socket._set_buffer(tcp_buffer)
         d_tcp.scan()
+
         assert d_tcp.common[0].SN.value == 'sn-123456789'
         assert not d_tcp.common[0].SN.dirty
 
         d_tcp.common[0].SN.value = 'will be overwritten by read'
         assert d_tcp.common[0].SN.value == 'will be overwritten by read'
         assert d_tcp.common[0].SN.dirty
-
         d_tcp.client.socket.clear_buffer()
         tcp_p_buffer = [b'\x00\x00\x00\x00\x00#\x01\x03 ',
                         b'sn-123456789\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00']
@@ -101,6 +104,9 @@ class TestSunSpecModbusClientPoint:
     def test_write(self, monkeypatch):
         monkeypatch.setattr(socket, 'socket', MockSocket.mock_socket)
         monkeypatch.setattr(serial, 'Serial', MockPort.mock_port)
+
+        monkeypatch.setattr(client.SunSpecModbusClientDeviceTCP, 'connect', MockSocket.mock_tcp_connect)
+        monkeypatch.setattr(client.SunSpecModbusClientDeviceTCP, 'disconnect', MockSocket.mock_tcp_connect)
 
         # tcp
         d_tcp = client.SunSpecModbusClientDeviceTCP(slave_id=1, ipaddr='127.0.0.1', ipport=8502)
@@ -159,7 +165,9 @@ class TestSunSpecModbusClientPoint:
 
         # rtu
         d_rtu = client.SunSpecModbusClientDeviceRTU(slave_id=1, name="COM2")
-        rtu_buffer = [b'\x01\x03\x06Su',
+        rtu_buffer = [
+                        b'\x01\x83\x02\xc0\xf1',
+                        b'\x01\x03\x06Su',
                         b'nS\x00\x01\x8d\xe4',
                         b'\x01\x03\x02\x00B',
                         b'8u',
@@ -216,6 +224,9 @@ class TestSunSpecModbusClientGroup:
     def test_read(self, monkeypatch):
         monkeypatch.setattr(socket, 'socket', MockSocket.mock_socket)
         monkeypatch.setattr(serial, 'Serial', MockPort.mock_port)
+
+        monkeypatch.setattr(client.SunSpecModbusClientDeviceTCP, 'connect', MockSocket.mock_tcp_connect)
+        monkeypatch.setattr(client.SunSpecModbusClientDeviceTCP, 'disconnect', MockSocket.mock_tcp_connect)
 
         # tcp
         d_tcp = client.SunSpecModbusClientDeviceTCP(slave_id=1, ipaddr='127.0.0.1', ipport=8502)
@@ -330,6 +341,9 @@ class TestSunSpecModbusClientGroup:
         monkeypatch.setattr(socket, 'socket', MockSocket.mock_socket)
         monkeypatch.setattr(serial, 'Serial', MockPort.mock_port)
 
+        monkeypatch.setattr(client.SunSpecModbusClientDeviceTCP, 'connect', MockSocket.mock_tcp_connect)
+        monkeypatch.setattr(client.SunSpecModbusClientDeviceTCP, 'disconnect', MockSocket.mock_tcp_connect)
+
         # tcp
         d_tcp = client.SunSpecModbusClientDeviceTCP(slave_id=1, ipaddr='127.0.0.1', ipport=8502)
         tcp_buffer = [b'\x00\x00\x00\x00\x00\t\x01\x03\x06',
@@ -402,7 +416,9 @@ class TestSunSpecModbusClientGroup:
 
         # rtu
         d_rtu = client.SunSpecModbusClientDeviceRTU(slave_id=1, name="COM2")
-        rtu_buffer = [b'\x01\x03\x06Su',
+        rtu_buffer = [
+                      b'\x01\x83\x02\xc0\xf1',
+                      b'\x01\x03\x06Su',
                       b'nS\x00\x01\x8d\xe4',
                       b'\x01\x03\x02\x00B',
                       b'8u',
@@ -473,22 +489,83 @@ class TestSunSpecModbusClientGroup:
 
 
 class TestSunSpecModbusClientModel:
-    def test___init__(self):
-        c = client.SunSpecModbusClientModel(704)
-        assert c.model_id == 704
-        assert c.model_addr == 0
-        assert c.model_len == 0
-        assert c.model_def['id'] == 704
-        assert c.error_info == ''
-        assert c.gdef['name'] == 'DERCtlAC'
-        assert c.mid is None
-        assert c.device is None
-        assert c.model == c
+    def test___init__(self, monkeypatch):
+        d_rtu = client.SunSpecModbusClientDeviceRTU(slave_id=1, name="COM2")
+        monkeypatch.setattr(serial, 'Serial', MockPort.mock_port)
 
-    def test_error(self):
-        c = client.SunSpecModbusClientModel(704)
-        c.add_error('test error')
-        assert c.error_info == 'test error\n'
+        rtu_buffer = [
+            b'\x01\x83\x02\xc0\xf1',
+            b'\x01\x03\x06Su',
+            b'nS\x00\x01\x8d\xe4',
+            b'\x01\x03\x02\x00B',
+            b'8u',
+            b'\x01\x03\x88\x00\x01',
+            b'\x00BSunSpecTest\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+            b'\x00\x00\x00TestDevice-1\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+            b'\x00\x00\x00\x00opt_a_b_c\x00\x00\x00\x00\x00\x00\x001.2.3\x00\x00\x00\x00\x00\x00\x00\x00'
+            b'\x00\x00\x00sn-123456789\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+            b'\x00\x00\x00\x00\x01\x00\x00M\xf9',
+            b'\x01\x03\x02\x00~',
+            b'8d',
+            b'\x01\x03\x02\x00@',
+            b'\xb9\xb4',
+            b'\x01\x03\x84\x00~',
+            b'\x00@\x00\x03\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x80\x00\x80\x00\x80\x00'
+            b'\xff\xff\xff\xff\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff'
+            b'\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00'
+            b'\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff'
+            b'\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\x00\x00\x00\x00'
+            b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff\xffI',
+            b'\x01\x03\x02\xff\xff',
+            b'\xb9\xf4']
+        d_rtu.open()
+        d_rtu.client.serial._set_buffer(rtu_buffer)
+        d_rtu.scan()
+        client_model = d_rtu.models['common'][0]
+        assert client_model.model_id == 1
+        assert client_model.model_addr == 40002
+        assert client_model.model_len == 66
+        assert client_model.model_def['id'] == 1
+        assert client_model.error_info == ''
+        assert client_model.gdef['name'] == 'common'
+        assert client_model.mid is not None
+        assert client_model.__class__.__name__ == 'SunSpecModbusClientModel'
+
+    def test_error(self, monkeypatch):
+        d_rtu = client.SunSpecModbusClientDeviceRTU(slave_id=1, name="COM2")
+        monkeypatch.setattr(serial, 'Serial', MockPort.mock_port)
+
+        rtu_buffer = [
+            b'\x01\x83\x02\xc0\xf1',
+            b'\x01\x03\x06Su',
+            b'nS\x00\x01\x8d\xe4',
+            b'\x01\x03\x02\x00B',
+            b'8u',
+            b'\x01\x03\x88\x00\x01',
+            b'\x00BSunSpecTest\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+            b'\x00\x00\x00TestDevice-1\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+            b'\x00\x00\x00\x00opt_a_b_c\x00\x00\x00\x00\x00\x00\x001.2.3\x00\x00\x00\x00\x00\x00\x00\x00'
+            b'\x00\x00\x00sn-123456789\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+            b'\x00\x00\x00\x00\x01\x00\x00M\xf9',
+            b'\x01\x03\x02\x00~',
+            b'8d',
+            b'\x01\x03\x02\x00@',
+            b'\xb9\xb4',
+            b'\x01\x03\x84\x00~',
+            b'\x00@\x00\x03\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x80\x00\x80\x00\x80\x00'
+            b'\xff\xff\xff\xff\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff'
+            b'\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00'
+            b'\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff'
+            b'\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\x00\x00\x00\x00'
+            b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff\xffI',
+            b'\x01\x03\x02\xff\xff',
+            b'\xb9\xf4']
+        d_rtu.open()
+        d_rtu.client.serial._set_buffer(rtu_buffer)
+        d_rtu.scan()
+        client_model = d_rtu.models['common'][0]
+        client_model.add_error('test error')
+        assert client_model.error_info == 'test error\n'
 
 
 class TestSunSpecModbusClientDevice:
@@ -496,7 +573,7 @@ class TestSunSpecModbusClientDevice:
         d = client.SunSpecModbusClientDevice()
         assert d.did
         assert d.retry_count == 2
-        assert d.base_addr_list == [40000, 0, 50000]
+        assert d.base_addr_list == [0, 40000, 50000]
         assert d.base_addr is None
 
     def test_connect(self):
@@ -517,14 +594,17 @@ class TestSunSpecModbusClientDevice:
     def test_scan(self, monkeypatch):
         # tcp scan
         monkeypatch.setattr(socket, 'socket', MockSocket.mock_socket)
+        monkeypatch.setattr(client.SunSpecModbusClientDeviceTCP, 'connect', MockSocket.mock_tcp_connect)
+        monkeypatch.setattr(client.SunSpecModbusClientDeviceTCP, 'disconnect', MockSocket.mock_tcp_connect)
+
         c_tcp = client.SunSpecModbusClientDeviceTCP()
-        tcp_req_check = [b'\x00\x00\x00\x00\x00\x06\x01\x03\x9c@\x00\x03',
-                         b'\x00\x00\x00\x00\x00\x06\x01\x03\x9cC\x00\x01',
-                         b'\x00\x00\x00\x00\x00\x06\x01\x03\x9cB\x00D',
-                         b'\x00\x00\x00\x00\x00\x06\x01\x03\x9c\x86\x00\x01',
-                         b'\x00\x00\x00\x00\x00\x06\x01\x03\x9c\x87\x00\x01',
-                         b'\x00\x00\x00\x00\x00\x06\x01\x03\x9c\x86\x00B',
-                         b'\x00\x00\x00\x00\x00\x06\x01\x03\x9c\xc8\x00\x01']
+        tcp_req_check = [b'\x00\x00\x00\x00\x00\x06\x01\x03\x00\x00\x00\x03',
+                         b'\x00\x00\x00\x00\x00\x06\x01\x03\x00\x03\x00\x01',
+                         b'\x00\x00\x00\x00\x00\x06\x01\x03\x00\x02\x00B',
+                         b'\x00\x00\x00\x00\x00\x06\x01\x03\x00F\x00\x01',
+                         b'\x00\x00\x00\x00\x00\x06\x01\x03\x00G\x00\x01',
+                         b'\x00\x00\x00\x00\x00\x06\x01\x03\x00F\x00@',
+                         b'\x00\x00\x00\x00\x00\x06\x01\x03\x00\x88\x00\x01']
         tcp_buffer = [b'\x00\x00\x00\x00\x00\t\x01\x03\x06',
                       b'SunS\x00\x01',
                       b'\x00\x00\x00\x00\x00\x05\x01\x03\x02',
@@ -560,13 +640,9 @@ class TestSunSpecModbusClientDevice:
         monkeypatch.setattr(serial, 'Serial', MockPort.mock_port)
         c_rtu = client.SunSpecModbusClientDeviceRTU(1, "COMM2")
 
-        rtu_req_check = [b'\x01\x03\x9c@\x00\x03*O',
-                         b'\x01\x03\x9cC\x00\x01[\x8e',
-                         b'\x01\x03\x9cB\x00D\xcb\xbd',
-                         b'\x01\x03\x9c\x86\x00\x01K\xb3',
-                         b'\x01\x03\x9c\x87\x00\x01\x1as',
-                         b'\x01\x03\x9c\x86\x00B\nB',
-                         b'\x01\x03\x9c\xc8\x00\x01+\xa4']
+        rtu_req_check = [b'\x01\x03\x00\x00\x00\x03\x05\xcb', b'\x01\x03\x00\x03\x00\x01t\n',
+                         b'\x01\x03\x00\x02\x00Bd;', b'\x01\x03\x00F\x00\x01e\xdf', b'\x01\x03\x00G\x00\x014\x1f',
+                         b'\x01\x03\x00F\x00@\xa5\xef', b'\x01\x03\x00\x88\x00\x01\x04 ']
         rtu_buffer = [b'\x01\x03\x06Su',
                       b'nS\x00\x01\x8d\xe4',
                       b'\x01\x03\x02\x00B',
