@@ -317,7 +317,7 @@ def from_smdx_point(element):
             raise mdef.ModelDefinitionError('Missing len attribute for point: %s' % pid)
         point_def[mdef.SIZE] = plen
     else:
-        point_def[mdef.SIZE] = mdef.get_size(ptype)
+        point_def[mdef.SIZE] = mdef.point_type_info.get(ptype)['len']
     mandatory = element.attrib.get(SMDX_ATTR_MANDATORY, SMDX_MANDATORY_FALSE)
     if mandatory not in smdx_mandatory_types:
         raise mdef.ModelDefinitionError('Unknown mandatory type: %s' % mandatory)
