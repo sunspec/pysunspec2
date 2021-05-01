@@ -320,11 +320,17 @@ def to_spreadsheet_point(ss, point, has_notes, addr_offset=None, group_offset=No
         row[NAME_IDX] = name
     else:
         raise Exception('Point missing name attribute')
+
     ptype = point.get(mdef.TYPE, '')
-    if ptype != '':
-        row[TYPE_IDX] = ptype
-    else:
+
+    if ptype == '':
         raise Exception('Point %s missing type attribute' % name)
+
+    if mdef.point_type_info.get(ptype) is None:
+        raise Exception('Unknown point type %s for point %s' % (ptype, name))
+
+    row[TYPE_IDX] = ptype
+
     if addr_offset is not None:
         row[ADDRESS_OFFSET_IDX] = addr_offset
     elif group_offset is not None:

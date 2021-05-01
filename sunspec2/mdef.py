@@ -451,5 +451,4 @@ def get_group_len_points_index(group_def):
 
 if __name__ == "__main__":
 
-    model_def = from_json_file('./models/json/model_711.json')
-    print(get_group_len_points_index(model_def.get(GROUP)))
+    pass

@@ -17,68 +17,18 @@ def test_model_filename_to_id():
 
 
 def test_from_smdx_file():
-    smdx_304 = {
-      "id": 304,
-      "group": {
-        "name": "inclinometer",
-        "type": "group",
-        "points": [
-          {
-            "name": "ID",
-            "value": 304,
-            "desc": "Model identifier",
-            "label": "Model ID",
-            "mandatory": "M",
-            "static": "S",
-            "type": "uint16"
-          },
-          {
-            "name": "L",
-            "desc": "Model length",
-            "label": "Model Length",
-            "mandatory": "M",
-            "static": "S",
-            "type": "uint16"
-          }
-        ],
-        "groups": [
-          {
-            "name": "incl",
-            "type": "group",
-            "count": 0,
-            "points": [
-              {
-                "name": "Inclx",
-                "type": "int32",
-                "mandatory": "M",
-                "units": "Degrees",
-                "sf": -2,
-                "label": "X",
-                "desc": "X-Axis inclination"
-              },
-              {
-                "name": "Incly",
-                "type": "int32",
-                "units": "Degrees",
-                "sf": -2,
-                "label": "Y",
-                "desc": "Y-Axis inclination"
-              },
-              {
-                "name": "Inclz",
-                "type": "int32",
-                "units": "Degrees",
-                "sf": -2,
-                "label": "Z",
-                "desc": "Z-Axis inclination"
-              }
-            ]
-          }
-        ],
-        "label": "Inclinometer Model",
-        "desc": "Include to support orientation measurements"
-      }
-    }
+    smdx_304 = {'id': 304, 'group': {'name': 'inclinometer', 'type': 'group', 'points': [
+        {'name': 'ID', 'value': 304, 'desc': 'Model identifier', 'label': 'Model ID', 'size': 1, 'mandatory': 'M',
+         'static': 'S', 'type': 'uint16'},
+        {'name': 'L', 'desc': 'Model length', 'label': 'Model Length', 'size': 1, 'mandatory': 'M', 'static': 'S',
+         'type': 'uint16'}], 'groups': [{'name': 'incl', 'type': 'group', 'count': 0, 'points': [
+        {'name': 'Inclx', 'type': 'int32', 'size': 2, 'mandatory': 'M', 'units': 'Degrees', 'sf': -2, 'label': 'X',
+         'desc': 'X-Axis inclination'},
+        {'name': 'Incly', 'type': 'int32', 'size': 2, 'units': 'Degrees', 'sf': -2, 'label': 'Y',
+         'desc': 'Y-Axis inclination'},
+        {'name': 'Inclz', 'type': 'int32', 'size': 2, 'units': 'Degrees', 'sf': -2, 'label': 'Z',
+         'desc': 'Z-Axis inclination'}]}], 'label': 'Inclinometer Model',
+                                     'desc': 'Include to support orientation measurements'}}
     assert smdx.from_smdx_file('sunspec2/models/smdx/smdx_00304.xml') == smdx_304
 
 

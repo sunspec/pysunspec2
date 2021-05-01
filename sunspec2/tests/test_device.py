@@ -1799,9 +1799,9 @@ class TestGroup:
         m.groups['Crv'][0].points['DeptRef'].sf_value = 3
         m.groups['Crv'][0].points['Pri'].sf_required = True
         m.groups['Crv'][0].points['Pri'].sf_value = 3
-        assert m.groups['Crv'][0].get_json(computed=True) == '''{"ActPt": 4, "DeptRef": 1000.0,''' + \
-               ''' "Pri": 1000.0, "VRef": 1, "VRefAuto": 0, "VRefAutoEna": null, "VRefAutoTms": null,''' + \
-               ''' "RspTms": 6, "ReadOnly": 1, "Pt": [{"V": 92.0, "Var": 30.0}, {"V": 96.7, "Var": 0.0},''' + \
+        assert m.groups['Crv'][0].get_json(computed=True) == '''{"ActPt": 4, "DeptRef": 1000.0, "Pri": 1000.0,''' + \
+               ''' "VRef": 0.01, "VRefAuto": 0.0, "VRefAutoEna": null, "VRefAutoTms": null, "RspTms": 6,''' + \
+               ''' "ReadOnly": 1, "Pt": [{"V": 92.0, "Var": 30.0}, {"V": 96.7, "Var": 0.0},''' + \
                ''' {"V": 103.0, "Var": 0.0}, {"V": 107.0, "Var": -30.0}]}'''
 
     def test_set_json(self):
@@ -2042,9 +2042,9 @@ class TestGroup:
         m.groups['Crv'][0].points['DeptRef'].sf_value = 3
         m.groups['Crv'][0].points['Pri'].sf_required = True
         m.groups['Crv'][0].points['Pri'].sf_value = 3
-        assert m.groups['Crv'][0].get_mb(computed=True) == b'\x00\x04\x03\xe8\x03\xe8\x00\x01\x00\x00\xff\xff\xff' \
-                                                           b'\xff\x00\x00\x00\x06\x00\x01\x00\\\x00\x1e\x00`\x00\x00' \
-                                                           b'\x00g\x00\x00\x00k\xff\xe2'
+        assert m.groups['Crv'][0].get_mb(computed=True) == b'\x00\x04\x03\xe8\x03\xe8\x00\x00\x00\x00\xff\xff\xff' \
+                                                           b'\xff\x00\x00\x00\x06\x00\x01\x00\\\x00\x1e\x00`\x00' \
+                                                           b'\x00\x00g\x00\x00\x00k\xff\xe2'
 
     def test_set_mb(self):
         gdata_705 = {
@@ -2299,6 +2299,21 @@ class TestModel:
         assert m2.mid is None
         assert m2.device is None
 
+    def test_model_1(self):
+
+        mdata = {
+            "ID": 1,
+            "L": 68,
+            "Mn": "Test manuf",
+            "Md": "Test model",
+            "Opt": "Test options",
+            "Vr": "Test version",
+            "SN": "Test serial num",
+            "DA": 12,
+            "Pad": 0
+        }
+        m = device.Model(1, data=mdata)
+
     def test__error(self):
         m = device.Model(704)
         m.add_error('test error')
@@ -2467,16 +2482,16 @@ class TestDevice:
         assert d.get_dict(computed=True) == {'name': None, 'did': None, 'models': [
             {'ID': 705, 'L': 67, 'Ena': 1, 'AdptCrvReq': 0, 'AdptCrvRslt': 0, 'NPt': 4, 'NCrv': 3, 'RvrtTms': 0,
              'RvrtRem': 0, 'RvrtCrv': 0, 'V_SF': -2, 'DeptRef_SF': -2, 'RspTms_SF': None, 'Crv': [
-                {'ActPt': 4, 'DeptRef': 1000.0, 'Pri': 1000.0, 'VRef': 1, 'VRefAuto': 0, 'VRefAutoEna': None,
+                {'ActPt': 4, 'DeptRef': 1000.0, 'Pri': 1000.0, 'VRef': 0.01, 'VRefAuto': 0.0, 'VRefAutoEna': None,
                  'VRefAutoTms': None, 'RspTms': 6, 'ReadOnly': 1,
                  'Pt': [{'V': 92.0, 'Var': 30.0}, {'V': 96.7, 'Var': 0.0}, {'V': 103.0, 'Var': 0.0},
                         {'V': 107.0, 'Var': -30.0}]},
-                {'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 1, 'VRefAuto': 0, 'VRefAutoEna': None, 'VRefAutoTms': None,
-                 'RspTms': 6, 'ReadOnly': 0,
+                {'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 0.01, 'VRefAuto': 0.0, 'VRefAutoEna': None,
+                 'VRefAutoTms': None, 'RspTms': 6, 'ReadOnly': 0,
                  'Pt': [{'V': 93.0, 'Var': 30.0}, {'V': 95.7, 'Var': 0.0}, {'V': 102.0, 'Var': 0.0},
                         {'V': 106.0, 'Var': -40.0}]},
-                {'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 1, 'VRefAuto': 0, 'VRefAutoEna': None, 'VRefAutoTms': None,
-                 'RspTms': 6, 'ReadOnly': 0,
+                {'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 0.01, 'VRefAuto': 0.0, 'VRefAutoEna': None,
+                 'VRefAutoTms': None, 'RspTms': 6, 'ReadOnly': 0,
                  'Pt': [{'V': 94.0, 'Var': 20.0}, {'V': 95.7, 'Var': 0.0}, {'V': 105.0, 'Var': 0.0},
                         {'V': 108.0, 'Var': -20.0}]}], 'mid': None, 'error': '', 'model_id': 705}]}
 
@@ -2603,17 +2618,18 @@ class TestDevice:
         m.groups['Crv'][0].points['DeptRef'].sf_value = 3
         m.groups['Crv'][0].points['Pri'].sf_required = True
         m.groups['Crv'][0].points['Pri'].sf_value = 3
-        assert d.get_json(computed=True) == '''{"name": null, "did": null, "models": [{"ID": 705,''' + \
-               ''' "L": 67, "Ena": 1, "AdptCrvReq": 0, "AdptCrvRslt": 0, "NPt": 4, "NCrv": 3, "RvrtTms": 0,''' + \
-               ''' "RvrtRem": 0, "RvrtCrv": 0, "V_SF": -2, "DeptRef_SF": -2, "RspTms_SF": null, ''' + \
-               '''"Crv": [{"ActPt": 4, "DeptRef": 1000.0, "Pri": 1000.0, "VRef": 1, "VRefAuto": 0, ''' + \
-               '''"VRefAutoEna": null, "VRefAutoTms": null, "RspTms": 6, "ReadOnly": 1, ''' + \
-               '''"Pt": [{"V": 92.0, "Var": 30.0}, {"V": 96.7, "Var": 0.0}, {"V": 103.0, "Var": 0.0},''' + \
-               ''' {"V": 107.0, "Var": -30.0}]}, {"ActPt": 4, "DeptRef": 1, "Pri": 1, "VRef": 1,''' + \
-               ''' "VRefAuto": 0, "VRefAutoEna": null, "VRefAutoTms": null, "RspTms": 6, "ReadOnly": 0,''' + \
-               ''' "Pt": [{"V": 93.0, "Var": 30.0}, {"V": 95.7, "Var": 0.0}, {"V": 102.0, "Var": 0.0},''' + \
-               ''' {"V": 106.0, "Var": -40.0}]}, {"ActPt": 4, "DeptRef": 1, "Pri": 1, "VRef": 1, "VRefAuto": 0,''' + \
+        assert d.get_json(computed=True) == '''{"name": null, "did": null, "models":''' + \
+               ''' [{"ID": 705, "L": 67, "Ena": 1, "AdptCrvReq": 0, "AdptCrvRslt": 0,''' + \
+               ''' "NPt": 4, "NCrv": 3, "RvrtTms": 0, "RvrtRem": 0, "RvrtCrv": 0, "V_SF": -2,''' + \
+               ''' "DeptRef_SF": -2, "RspTms_SF": null, "Crv": [{"ActPt": 4, "DeptRef": 1000.0,''' + \
+               ''' "Pri": 1000.0, "VRef": 0.01, "VRefAuto": 0.0, "VRefAutoEna": null,''' + \
+               ''' "VRefAutoTms": null, "RspTms": 6, "ReadOnly": 1, "Pt": [{"V": 92.0, "Var": 30.0},''' + \
+               ''' {"V": 96.7, "Var": 0.0}, {"V": 103.0, "Var": 0.0}, {"V": 107.0, "Var": -30.0}]},''' + \
+               ''' {"ActPt": 4, "DeptRef": 1, "Pri": 1, "VRef": 0.01, "VRefAuto": 0.0,''' + \
                ''' "VRefAutoEna": null, "VRefAutoTms": null, "RspTms": 6, "ReadOnly": 0,''' + \
+               ''' "Pt": [{"V": 93.0, "Var": 30.0}, {"V": 95.7, "Var": 0.0}, {"V": 102.0, "Var": 0.0},''' + \
+               ''' {"V": 106.0, "Var": -40.0}]}, {"ActPt": 4, "DeptRef": 1, "Pri": 1, "VRef": 0.01,''' + \
+               ''' "VRefAuto": 0.0, "VRefAutoEna": null, "VRefAutoTms": null, "RspTms": 6, "ReadOnly": 0,''' + \
                ''' "Pt": [{"V": 94.0, "Var": 20.0}, {"V": 95.7, "Var": 0.0}, {"V": 105.0, "Var": 0.0},''' + \
                ''' {"V": 108.0, "Var": -20.0}]}], "mid": null, "error": "", "model_id": 705}]}'''
 
@@ -2733,14 +2749,15 @@ class TestDevice:
         m.groups['Crv'][0].points['DeptRef'].sf_value = 3
         m.groups['Crv'][0].points['Pri'].sf_required = True
         m.groups['Crv'][0].points['Pri'].sf_value = 3
-        assert d.get_mb(computed=True) == b'\x02\xc1\x00C\x00\x01\x00\x00\x00\x00\x00\x04\x00\x03\x00\x00\x00' \
-                                          b'\x00\x00\x00\x00\x00\x00\x00\xff\xfe\xff\xfe\x80\x00\x00\x04\x03' \
-                                          b'\xe8\x03\xe8\x00\x01\x00\x00\xff\xff\xff\xff\x00\x00\x00\x06\x00' \
-                                          b'\x01\x00\\\x00\x1e\x00`\x00\x00\x00g\x00\x00\x00k\x00\x1e\x00\x04' \
-                                          b'\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\xff\xff\x00\x00\x00\x06' \
-                                          b'\x00\x00\x00]\x00\x1e\x00_\x00\x00\x00f\x00\x00\x00j\x00(\x00\x04' \
-                                          b'\x00\x01\x00\x01\x00\x01\x00\x00\xff\xff\xff\xff\x00\x00\x00\x06' \
-                                          b'\x00\x00\x00^\x00\x14\x00_\x00\x00\x00i\x00\x00\x00l\x00\x14'
+        assert d.get_mb(computed=True) == b'\x02\xc1\x00C\x00\x01\x00\x00\x00\x00\x00\x04\x00\x03\x00\x00\x00\x00\x00' \
+                                          b'\x00\x00\x00\x00\x00\xff\xfe\xff\xfe\x80\x00\x00\x04\x03\xe8\x03\xe8\x00' \
+                                          b'\x00\x00\x00\xff\xff\xff\xff\x00\x00\x00\x06\x00\x01\x00\\\x00\x1e\x00`' \
+                                          b'\x00\x00\x00g\x00\x00\x00k\x00\x1e\x00\x04\x00\x01\x00\x01\x00\x00\x00' \
+                                          b'\x00\xff\xff\xff\xff\x00\x00\x00\x06\x00\x00\x00]\x00\x1e\x00_\x00\x00' \
+                                          b'\x00f\x00\x00\x00j\x00(\x00\x04\x00\x01\x00\x01\x00\x00\x00\x00\xff\xff' \
+                                          b'\xff\xff\x00\x00\x00\x06\x00\x00\x00^\x00\x14\x00_\x00\x00\x00i\x00\x00' \
+                                          b'\x00l\x00\x14'
+
 
     def test_set_mb(self):
         d = device.Device()

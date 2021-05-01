@@ -44,7 +44,7 @@ def get_model_info(model_id):
                 for pdef in points:
                     info = mb.point_type_info.get(pdef[mdef.TYPE])
                     plen = pdef.get(mdef.SIZE, None)
-                    if plen is None:
+                    if plen is not None:
                         glen += info.len
     except:
         raise
@@ -133,6 +133,11 @@ class Point(object):
         self.sf = None              # scale factor point name
         self.sf_value = None        # value of scale factor
         self.sf_required = False    # point has a scale factor
+        self.read_func = None       # function to be called on read
+        self.read_func_arg = None   # the argument passed to the read_func
+        self.write_func = None      # function to be called on write
+        self.write_func_arg = None  # the argument passed to the write_func
+
         if pdef:
             self.sf_required = (pdef.get(mdef.SF) is not None)
             if self.sf_required:
@@ -189,6 +194,10 @@ class Point(object):
         self.set_value(v, computed=True, dirty=True)
 
     def get_value(self, computed=False):
+        # call read function, if set
+        if self.read_func:
+            self.read_func(self.model, self.read_func_arg)
+
         v = self._value
         if computed and v is not None:
             if self.sf_required:
@@ -227,16 +236,29 @@ class Point(object):
                                                  (self.sf, self.pdef['name']))
                         else:
                             raise ModelError('Scale factor %s for point %s not found' % (self.sf, self.pdef['name']))
-            if self.sf_value:
+            if self.sf_value is not None:
                 self._value = round(round(float(v), abs(self.sf_value)) / math.pow(10, self.sf_value))
             else:
                 self._value = v
         else:
             self._value = v
 
+        # call write function, if set
+        # should be used to set indication for subsequent processing rather than do detailed processing
+        if self.write_func:
+            self.write_func(self.model, self.write_func_arg)
+
+    def set_read_func(self, func, arg=None):
+        self.read_func = func
+        self.read_func_arg = arg
+
+    def set_write_func(self, func, arg=None):
+        self.write_func = func
+        self.write_func_arg = arg
+
     def get_mb(self, computed=False):
         v = self._value
-        data = None
+        data = err = None
         if computed and v is not None:
             if self.sf_required:
                 if self.sf_value is None:
@@ -252,17 +274,27 @@ class Point(object):
                 sfv = self.sf_value
                 if sfv:
                     v = int(v * math.pow(10, sfv))
-                data = self.info.to_data(v, (int(self.len) * 2))
+                try:
+                    data = self.info.to_data(v, (int(self.len) * 2))
+                except Exception as e:
+                    err = 'Error getting point value %s %s: %s' % (self.pdef[mdef.NAME], v, e)
+                if err:
+                    raise ModelError(err)
         elif v is None:
             data = mb.create_unimpl_value(self.pdef[mdef.TYPE], len=(int(self.len) * 2))
 
         if data is None:
-            data = self.info.to_data(v, (int(self.len) * 2))
+            try:
+                data = self.info.to_data(v, (int(self.len) * 2))
+            except Exception as e:
+                err = 'Error getting point value %s %s: %s' % (self.pdef[mdef.NAME], v, e)
+            if err:
+                raise ModelError(err)
         return data
 
     def set_mb(self, data=None, computed=False, dirty=None):
+        mb_len = self.len
         try:
-            mb_len = self.len
             # if not enough data, do not set but consume the data
             if len(data) < mb_len * 2:
                 return len(data)
@@ -310,12 +342,14 @@ class Group(object):
             points = self.gdef.get(mdef.POINTS)
             if points:
                 for pdef in points:
-                    p = point_class(pdef, model=self.model, group=self, model_offset=model_offset, data=data,
-                                    data_offset=data_offset)
-                    self.points_len += p.len
-                    model_offset += p.len
-                    data_offset += p.len
-                    self.points[pdef[mdef.NAME]] = p
+                    # allow legacy model 1 to have an alternate length of 65 registers
+                    if self.len != 65 or model.model_id != 1 or pdef[mdef.NAME] != 'Pad':
+                        p = point_class(pdef, model=self.model, group=self, model_offset=model_offset, data=data,
+                                        data_offset=data_offset)
+                        self.points_len += p.len
+                        model_offset += p.len
+                        data_offset += p.len
+                        self.points[pdef[mdef.NAME]] = p
             # initialize groups
             groups = self.gdef.get(mdef.GROUPS)
             if groups:
@@ -644,13 +678,14 @@ class Device(object):
         model_list.append(model)
         # add by group id
         gname = model.gname
-        model_list = self.models.get(gname)
-        if model_list is None:
-            model_list = []
-            self.models[gname] = model_list
-        model_list.append(model)
-        # add to model list
-        self.model_list.append(model)
+        if gname is not None:
+            model_list = self.models.get(gname)
+            if model_list is None:
+                model_list = []
+                self.models[gname] = model_list
+            model_list.append(model)
+            # add to model list
+            self.model_list.append(model)
 
         model.device = self
 
