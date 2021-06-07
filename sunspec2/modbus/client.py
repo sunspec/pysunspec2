@@ -200,7 +200,7 @@ class SunSpecModbusClientDevice(device.Device):
     def write(self, addr, data):
         return
 
-    def scan(self, progress=None, delay=None, connect=True):
+    def scan(self, progress=None, delay=None, connect=True, full_model_read=True):
         """Scan all the models of the physical device and create the
         corresponding model objects within the device object based on the
         SunSpec model definitions.
@@ -259,7 +259,8 @@ class SunSpecModbusClientDevice(device.Device):
                     model_data = model_id_data + model_len_data
                     model = self.model_class(model_id=model_id, model_addr=addr, model_len=model_len, data=model_data,
                                              mb_device=self)
-                    model.read()
+                    if full_model_read:
+                        model.read()
                     model.mid = '%s_%s' % (self.did, mid)
                     mid += 1
                     self.add_model(model)
