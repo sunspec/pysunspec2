@@ -26,6 +26,7 @@ PARITY_NONE = 'N'
 PARITY_EVEN = 'E'
 
 REQ_COUNT_MAX = 125
+REQ_WRITE_COUNT_MAX = 123
 
 FUNC_READ_HOLDING = 3
 FUNC_READ_INPUT = 4
@@ -405,7 +406,7 @@ class ModbusClientRTU(object):
             if resp_slave_id != slave_id or resp_func != func or resp_addr != addr or resp_count != count:
                 raise ModbusClientError('Mobus response format error')
 
-    def write(self, slave_id, addr, data, trace_func=None, max_count=REQ_COUNT_MAX):
+    def write(self, slave_id, addr, data, trace_func=None, max_write_count=REQ_WRITE_COUNT_MAX):
         """
         Parameters:
             slave_id :
@@ -417,8 +418,8 @@ class ModbusClientRTU(object):
             trace_func :
                 Trace function to use for detailed logging. No detailed logging
                 is perform is a trace function is not supplied.
-            max_count :
-                Maximum register count for a single Modbus request.
+            max_write_count :
+                Maximum register count for a single Modbus write.
         """
 
         write_offset = 0
@@ -426,8 +427,8 @@ class ModbusClientRTU(object):
 
         if self.serial is not None:
             while (count > 0):
-                if count > max_count:
-                    write_count = max_count
+                if count > max_write_count:
+                    write_count = max_write_count
                 else:
                     write_count = count
                 start = int(write_offset * 2)
@@ -442,7 +443,7 @@ class ModbusClientRTU(object):
 
 class ModbusClientTCP(object):
     def __init__(self, slave_id=1, ipaddr='127.0.0.1', ipport=502, timeout=None, ctx=None, trace_func=None,
-                 max_count=REQ_COUNT_MAX, test=False):
+                 max_count=REQ_COUNT_MAX, max_write_count=REQ_WRITE_COUNT_MAX, test=False):
         self.slave_id = slave_id
         self.ipaddr = ipaddr
         self.ipport = ipport
@@ -451,6 +452,7 @@ class ModbusClientTCP(object):
         self.socket = None
         self.trace_func = trace_func
         self.max_count = max_count
+        self.max_write_count = max_write_count
 
         if ipport is None:
             self.ipport = TCP_DEFAULT_PORT
@@ -672,8 +674,8 @@ class ModbusClientTCP(object):
 
         try:
             while (count > 0):
-                if count > self.max_count:
-                    write_count = self.max_count
+                if count > self.max_write_count:
+                    write_count = self.max_write_count
                 else:
                     write_count = count
                     start = (write_offset * 2)
