@@ -205,6 +205,8 @@ class SunSpecModbusClientDevice(device.Device):
         corresponding model objects within the device object based on the
         SunSpec model definitions.
         """
+        self.base_addr = None
+        self.delete_models()
 
         data = error = ''
         connected = False

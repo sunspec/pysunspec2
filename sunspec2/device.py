@@ -10,6 +10,7 @@ import sunspec2.mb as mb
 class ModelError(Exception):
     pass
 
+
 ACCESS_REGION_REGS = 123
 
 this_dir, this_filename = os.path.split(__file__)
@@ -688,6 +689,10 @@ class Device(object):
             self.model_list.append(model)
 
         model.device = self
+
+    def delete_models(self):
+        self.models = {}
+        self.model_list = []
 
     def get_dict(self, computed=False):
         d = {'name': self.name, 'did': self.did, 'models': []}
