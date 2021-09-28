@@ -70,7 +70,9 @@ class SunSpecModbusClientGroup(device.Group):
                               data=data, data_offset=data_offset, group_class=group_class, point_class=point_class,
                               index=index)
 
-    def read(self):
+    def read(self, len=None):
+        if len is None:
+            len = self.len
         # check if currently connected
         connected = self.model.device.is_connected()
         if not connected:
@@ -82,7 +84,7 @@ class SunSpecModbusClientGroup(device.Group):
                 data += self.model.device.read(self.model.model_addr + self.offset + region[0], region[1])
             data = bytes(data)
         else:
-            data = self.model.device.read(self.model.model_addr + self.offset, self.len)
+            data = self.model.device.read(self.model.model_addr + self.offset, len)
         self.set_mb(data=data, dirty=False)
 
         # disconnect if was not connected
@@ -170,6 +172,9 @@ class SunSpecModbusClientModel(SunSpecModbusClientGroup):
 
     def add_error(self, error_info):
         self.error_info = '%s%s\n' % (self.error_info, error_info)
+
+    def read(self, len=None):
+        SunSpecModbusClientGroup.read(self, len=self.len + 2)
 
 
 class SunSpecModbusClientDevice(device.Device):
