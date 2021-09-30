@@ -4,6 +4,109 @@ import sunspec2.mb as mb
 import sunspec2.device as device
 import pytest
 
+@pytest.fixture
+def model_705_data():
+    return {
+        "ID": 705,
+        "Ena": 1,
+        "CrvSt": 1,
+        "AdptCrvReq": 0,
+        "AdptCrvRslt": 0,
+        "NPt": 4,
+        "NCrv": 3,
+        "RvrtTms": 0,
+        "RvrtRem": 0,
+        "RvrtCrv": 0,
+        "V_SF": -2,
+        "DeptRef_SF": -2,
+        "Crv": [
+            {
+                "ActPt": 4,
+                "DeptRef": 1,
+                "Pri": 1,
+                "VRef": 1,
+                "VRefAuto": 0,
+                "VRefTms": 5,
+                "RspTms": 6,
+                "ReadOnly": 1,
+                "Pt": [
+                    {
+                        "V": 9200,
+                        "Var": 3000
+                    },
+                    {
+                        "V": 9670,
+                        "Var": 0
+                    },
+                    {
+                        "V": 10300,
+                        "Var": 0
+                    },
+                    {
+                        "V": 10700,
+                        "Var": 3000
+                    }
+                ]
+            },
+            {
+                "ActPt": 4,
+                "DeptRef": 1,
+                "Pri": 1,
+                "VRef": 1,
+                "VRefAuto": 0,
+                "VRefTms": 5,
+                "RspTms": 6,
+                "ReadOnly": 0,
+                "Pt": [
+                    {
+                        "V": 9300,
+                        "Var": 3000
+                    },
+                    {
+                        "V": 9570,
+                        "Var": 0
+                    },
+                    {
+                        "V": 10200,
+                        "Var": 0
+                    },
+                    {
+                        "V": 10600,
+                        "Var": 4000
+                    }
+                ]
+            },
+            {
+                "ActPt": 4,
+                "DeptRef": 1,
+                "Pri": 1,
+                "VRef": 1,
+                "VRefAuto": 0,
+                "VRefTms": 5,
+                "RspTms": 6,
+                "ReadOnly": 0,
+                "Pt": [
+                    {
+                        "V": 9400,
+                        "Var": 2000
+                    },
+                    {
+                        "V": 9570,
+                        "Var": 0
+                    },
+                    {
+                        "V": 10500,
+                        "Var": 0
+                    },
+                    {
+                        "V": 10800,
+                        "Var": 2000
+                    }
+                ]
+            }
+        ]
+    }
+
 
 class TestFileClientPoint:
     def test___init__(self):
@@ -276,6 +379,12 @@ class TestFileClientPoint:
         p3.set_mb(b'\x0b\xb8', computed=True, dirty=True)
         assert p3.value == 30
         assert p3.dirty
+
+    def test_get_text(self, model_705_data):
+        m = file_client.FileClientModel(705, data=model_705_data)
+        p = m.NPt
+        expected_output = '      NPt                                                   4\n'
+        assert p.get_text() == expected_output
 
 
 class TestFileClientGroup:
@@ -1926,6 +2035,25 @@ class TestFileClientGroup:
         assert m.groups['Crv'][0].points['DeptRef'].value == 3
         assert m.groups['Crv'][0].points['Pri'].value == 3
 
+    def test_get_text(self, model_705_data):
+        m = file_client.FileClientModel(705, data=model_705_data)
+        g = m.groups['Crv'][0]
+        expected_output = \
+            '''      ActPt                                                 4\n      DeptRef                  ''' + \
+            '''                             1\n      Pri                                                   ''' + \
+            '''1\n      VRef                                                  1 VRefPct\n      VRefAuto    ''' + \
+            '''                                          0 VRefPct\n      VRefAutoEna                      ''' + \
+            '''                  None\n      VRefAutoTms                                        None Secs\n''' + \
+            '''      RspTms                                                6 Secs\n      ReadOnly          ''' + \
+            '''                                    1\n   01:V                                              ''' + \
+            '''    9200 VRefPct\n   01:Var                                                3000 DeptRef\n   ''' + \
+            '''02:V                                                  9670 VRefPct\n   02:Var               ''' + \
+            '''                                    0 DeptRef\n   03:V                                      ''' + \
+            '''           10300 VRefPct\n   03:Var                                                   0 Dept''' + \
+            '''Ref\n   04:V                                                 10700 VRefPct\n   04:Var       ''' + \
+            '''                                         3000 DeptRef\n'''
+        assert g.get_text() == expected_output
+
 
 class TestFileClientModel:
     def test__init__(self):
@@ -2058,6 +2186,63 @@ class TestFileClientModel:
         m = file_client.FileClientModel(704)
         m.add_error('test error')
         assert m.error_info == 'test error\n'
+
+    def test_get_text(self, model_705_data):
+        m = file_client.FileClientModel(705, data=model_705_data)
+        expected_output = '''      ID                                                  705\n      L           ''' + \
+                          '''                                         67\n      Ena                           ''' + \
+                          '''                        1\n      AdptCrvReq                                      ''' + \
+                          '''      0\n      AdptCrvRslt                                           0\n      NPt''' + \
+                          '''                                                   4\n      NCrv                 ''' + \
+                          '''                                 3\n      RvrtTms                                ''' + \
+                          '''               0 Secs\n      RvrtRem                                             ''' + \
+                          '''  0 Secs\n      RvrtCrv                                               0\n      V_''' + \
+                          '''SF                                                 -2\n      DeptRef_SF          ''' + \
+                          '''                                 -2\n      RspTms_SF                             ''' + \
+                          '''             None\n   01:ActPt                                                 ''' + \
+                          '''4\n   01:DeptRef                                               1\n   01:Pri    ''' + \
+                          '''                                               1\n   01:VRef                   ''' + \
+                          '''                               1 VRefPct\n   01:VRefAuto                           ''' + \
+                          '''                   0 VRefPct\n   01:VRefAutoEna                                    ''' + \
+                          '''    None\n   01:VRefAutoTms                                        None Secs\n   01''' + \
+                          ''':RspTms                                                6 Secs\n   01:ReadOnly      ''' + \
+                          '''                                        1\n01:01:V                                 ''' + \
+                          '''                 9200 VRefPct\n01:01:Var                                           ''' + \
+                          '''     3000 DeptRef\n01:02:V                                                  9670 VR''' + \
+                          '''efPct\n01:02:Var                                                   0 DeptRef\n01:03''' + \
+                          ''':V                                                 10300 VRefPct\n01:03:Var        ''' + \
+                          '''                                           0 DeptRef\n01:04:V                      ''' + \
+                          '''                           10700 VRefPct\n01:04:Var                                ''' + \
+                          '''                3000 DeptRef\n   02:ActPt                                          ''' + \
+                          '''       4\n   02:DeptRef                                               1\n   02:Pri ''' + \
+                          '''                                                  1\n   02:VRef                    ''' + \
+                          '''                              1 VRefPct\n   02:VRefAuto                            ''' + \
+                          '''                  0 VRefPct\n   02:VRefAutoEna                                     ''' + \
+                          '''   None\n   02:VRefAutoTms                                        None Secs\n   02:''' + \
+                          '''RspTms                                                6 Secs\n   02:ReadOnly       ''' + \
+                          '''                                       0\n02:01:V                                  ''' + \
+                          '''                9300 VRefPct\n02:01:Var                                            ''' + \
+                          '''    3000 DeptRef\n02:02:V                                                  9570 VRe''' + \
+                          '''fPct\n02:02:Var                                                   0 DeptRef\n02:03:''' + \
+                          '''V                                                 10200 VRefPct\n02:03:Var         ''' + \
+                          '''                                          0 DeptRef\n02:04:V                       ''' + \
+                          '''                          10600 VRefPct\n02:04:Var                                 ''' + \
+                          '''               4000 DeptRef\n   03:ActPt                                           ''' + \
+                          '''      4\n   03:DeptRef                                               1\n   03:Pri  ''' + \
+                          '''                                                 1\n   03:VRef                     ''' + \
+                          '''                             1 VRefPct\n   03:VRefAuto                             ''' + \
+                          '''                 0 VRefPct\n   03:VRefAutoEna                                      ''' + \
+                          '''  None\n   03:VRefAutoTms                                        None Secs\n   03:R''' + \
+                          '''spTms                                                6 Secs\n   03:ReadOnly        ''' + \
+                          '''                                      0\n03:01:V                                   ''' + \
+                          '''               9400 VRefPct\n03:01:Var                                             ''' + \
+                          '''   2000 DeptRef\n03:02:V                                                  9570 VRef''' + \
+                          '''Pct\n03:02:Var                                                   0 DeptRef\n03:03:V''' + \
+                          '''                                                 10500 VRefPct\n03:03:Var          ''' + \
+                          '''                                         0 DeptRef\n03:04:V                        ''' + \
+                          '''                         10800 VRefPct\n03:04:Var                                  ''' + \
+                          '''              2000 DeptRef\n'''
+        assert expected_output == m.get_text()
 
 
 class TestFileClientDevice:
@@ -2648,6 +2833,77 @@ class TestFileClientDevice:
         assert d.common
         assert d.DERMeasureAC
 
+    def test_get_text(self, model_705_data):
+        d = file_client.FileClientDevice()
+        m = file_client.FileClientModel(705, data=model_705_data)
+        d.add_model(m)
+        get_text_expected_output = '''Model: DERVoltVar (705)\n\n      ID                                   ''' + \
+                                   '''               705\n      L                                           ''' + \
+                                   '''         67\n      Ena                                                ''' + \
+                                   '''   1\n      AdptCrvReq                                            0\n ''' + \
+                                   '''     AdptCrvRslt                                           0\n      NPt  ''' + \
+                                   '''                                                 4\n      NCrv           ''' + \
+                                   '''                                       3\n      RvrtTms                  ''' + \
+                                   '''                             0 Secs\n      RvrtRem                       ''' + \
+                                   '''                        0 Secs\n      RvrtCrv                            ''' + \
+                                   '''                   0\n      V_SF                                         ''' + \
+                                   '''        -2\n      DeptRef_SF                                     ''' + \
+                                   '''      -2\n      RspTms_SF                                  ''' + \
+                                   '''        None\n   01:ActPt                                      ''' + \
+                                   '''           4\n   01:DeptRef                                     ''' + \
+                                   '''          1\n   01:Pri                                          ''' + \
+                                   '''         1\n   01:VRef                                          ''' + \
+                                   '''        1 VRefPct\n   01:VRefAuto                               ''' + \
+                                   '''               0 VRefPct\n   01:VRefAutoEna                     ''' + \
+                                   '''                   None\n   01:VRefAutoTms                      ''' + \
+                                   '''                  None Secs\n   01:RspTms                       ''' + \
+                                   '''                         6 Secs\n   01:ReadOnly                 ''' + \
+                                   '''                             1\n01:01:V                         ''' + \
+                                   '''                         9200 VRefPct\n01:01:Var                ''' + \
+                                   '''                                3000 DeptRef\n01:02:V           ''' + \
+                                   '''                                       9670 VRefPct\n01:02:Var   ''' + \
+                                   '''                                                0 DeptRef\n01:03:V    ''' + \
+                                   '''                                             10300 VRefPct\n01:03:Var    ''' + \
+                                   '''                                               0 DeptRef\n01:04:V      ''' + \
+                                   '''                                           10700 VRefPct\n01:04:Var   ''' + \
+                                   '''                                             3000 DeptRef\n   02:ActPt   ''' + \
+                                   '''                                              4\n   02:DeptRef          ''' + \
+                                   '''                                     1\n   02:Pri                      ''' + \
+                                   '''                             1\n   02:VRef                             ''' + \
+                                   '''                     1 VRefPct\n   02:VRefAuto                        ''' + \
+                                   '''                      0 VRefPct\n   02:VRefAutoEna                    ''' + \
+                                   '''                    None\n   02:VRefAutoTms                           ''' + \
+                                   '''             None Secs\n   02:RspTms                                  ''' + \
+                                   '''              6 Secs\n   02:ReadOnly                                  ''' + \
+                                   '''            0\n02:01:V                                             ''' + \
+                                   '''     9300 VRefPct\n02:01:Var                                       ''' + \
+                                   '''         3000 DeptRef\n02:02:V                                   ''' + \
+                                   '''               9570 VRefPct\n02:02:Var                           ''' + \
+                                   '''                        0 DeptRef\n02:03:V                        ''' + \
+                                   '''                         10200 VRefPct\n02:03:Var                 ''' + \
+                                   '''                                  0 DeptRef\n02:04:V              ''' + \
+                                   '''                                   10600 VRefPct\n02:04:Var       ''' + \
+                                   '''                                         4000 DeptRef\n   03:ActPt   ''' + \
+                                   '''                                              4\n   03:DeptRef        ''' + \
+                                   '''                                       1\n   03:Pri                  ''' + \
+                                   '''                                 1\n   03:VRef                        ''' + \
+                                   '''                          1 VRefPct\n   03:VRefAuto                    ''' + \
+                                   '''                          0 VRefPct\n   03:VRefAutoEna               ''' + \
+                                   '''                         None\n   03:VRefAutoTms                      ''' + \
+                                   '''                  None Secs\n   03:RspTms                            ''' + \
+                                   '''                    6 Secs\n   03:ReadOnly                         ''' + \
+                                   '''                     0\n03:01:V                                       ''' + \
+                                   '''           9400 VRefPct\n03:01:Var                                    ''' + \
+                                   '''            2000 DeptRef\n03:02:V                                    ''' + \
+                                   '''              9570 VRefPct\n03:02:Var                               ''' + \
+                                   '''                    0 DeptRef\n03:03:V                              ''' + \
+                                   '''                   10500 VRefPct\n03:03:Var                         ''' + \
+                                   '''                          0 DeptRef\n03:04:V                        ''' + \
+                                   '''                         10800 VRefPct\n03:04:Var                   ''' + \
+                                   '''                             2000 DeptRef\n'''
+        get_text_output = d.get_text()
+        # dont compare timestamps
+        assert get_text_output[get_text_output.index('Model'):] == get_text_expected_output
 
 class FileClient:
     pass
