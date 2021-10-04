@@ -5,10 +5,12 @@ import os
 import sunspec2.mdef as mdef
 import sunspec2.smdx as smdx
 import sunspec2.mb as mb
+import time
 
 
 class ModelError(Exception):
     pass
+
 
 ACCESS_REGION_REGS = 123
 
@@ -313,6 +315,34 @@ class Point(object):
             impl = self.info.is_impl(self.value)
         return impl
 
+    def get_text(self, index=None, parent_index=None):
+        txt = ''
+        name = self.pdef['name']
+        val = self.value
+        units = self.pdef.get('units')
+        group_index = ''
+        length = ''
+        if index:
+            if parent_index:
+                group_index = f'{parent_index:02}'
+                group_index += ':' + f'{index:02}'
+                txt += '%6s' % (group_index + ':')
+            else:
+                group_index = f'{index:02}'
+                txt += '%6s' % (group_index + ':')
+        else:
+            txt += ' ' * 6
+
+        txt += name
+        length = 55 - len(name)
+        txt += '%*s' % (length, str(val))
+        if units:
+            txt += ' ' + units + '\n'
+        else:
+            txt += '\n'
+
+        return txt
+
 
 class Group(object):
     def __init__(self, gdef=None, model=None, model_offset=0, group_len=0, data=None, data_offset=0, group_class=None,
@@ -616,6 +646,24 @@ class Group(object):
                         return None
         return int(offset/2)
 
+    def get_text(self, index=None, parent_index=None):
+        txt = ''
+        tmp_txt = ''
+        for p in self.points:
+            tmp_txt = self.points[p].get_text(index, parent_index)
+            if tmp_txt:
+                txt += tmp_txt
+        for g in self.groups:
+            if isinstance(self.groups[g], list):
+                for i in range(len(self.groups[g])):
+                    if index:
+                        txt += self.groups[g][i].get_text(i+1, parent_index=index)
+                    else:
+                        txt += self.groups[g][i].get_text(i+1)
+            else:
+                txt += self.groups[g].get_text(index)
+        return txt
+
 
 class Model(Group):
     def __init__(self, model_id=None, model_addr=0, model_len=0, model_def=None, data=None, group_class=Group):
@@ -689,6 +737,10 @@ class Device(object):
 
         model.device = self
 
+    def delete_models(self):
+        self.models = {}
+        self.model_list = []
+
     def get_dict(self, computed=False):
         d = {'name': self.name, 'did': self.did, 'models': []}
         for m in self.model_list:
@@ -746,3 +798,13 @@ class Device(object):
                     model_len = 0
                 model = Model(model_def=model_def, data=m, model_id=m['ID'], model_len=model_len)
                 self.add_model(model=model)
+
+    def get_text(self):
+        txt = 'Timestamp: %s\n' % (time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()))
+        for m in self.model_list:
+            if m.error_info:
+                txt += '\nError: ' + m.error_info + '\n'
+                continue
+            txt += '\nModel: %s (%s)\n\n' % (m.model_def['group']['name'], m.model_id)
+            txt += m.get_text()
+        return txt
