@@ -301,9 +301,9 @@ class Point(object):
             if len(data) < mb_len * 2:
                 return len(data)
             self.set_value(self.info.data_to(data[:mb_len * 2]), computed=computed, dirty=dirty)
+            self.sf_value = None
             if not self.info.is_impl(self.value):
                 self.set_value(None)
-                self.sf_value = None
         except Exception as e:
             self.model.add_error('Error setting value for %s: %s' % (self.pdef[mdef.NAME], str(e)))
         return mb_len
