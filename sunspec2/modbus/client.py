@@ -266,7 +266,7 @@ class SunSpecModbusClientDevice(device.Device):
                     model_data = model_id_data + model_len_data
                     model = self.model_class(model_id=model_id, model_addr=addr, model_len=model_len, data=model_data,
                                              mb_device=self)
-                    if full_model_read:
+                    if full_model_read and model.model_def:
                         model.read()
                     model.mid = '%s_%s' % (self.did, mid)
                     mid += 1
