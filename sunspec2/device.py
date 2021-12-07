@@ -409,32 +409,10 @@ class Group(object):
 
         # check if group fits in access region
         if self.len > ACCESS_REGION_REGS:
-            if self.points_len > ACCESS_REGION_REGS:
-                index = 0
-                count = 0
-                for p, point in self.points.items():
-                    if count + point.len > ACCESS_REGION_REGS:
-                        self.access_regions.append((index, count))
-                        index = count
-                        count = 0
-                    count += point.len
-                if count > 0:
-                    self.access_regions.append((index, count))
-            else:
-                self.access_regions.append((0, self.points_len))
-                groups_len = self.len - self.points_len
-                if groups_len > ACCESS_REGION_REGS:
-                    for g, group in self.groups.items():
-                        if isinstance(group, list) and len(group) > 0:
-                            glen = group[0].len
-                            if glen > ACCESS_REGION_REGS:
-                                raise ModelError('Nested groups too big')
-                            index = self.points_len
-                            for i in range(len(group)):
-                                self.access_regions.append((index, glen))
-                                index += glen
-                        elif group.len > ACCESS_REGION_REGS:
-                            raise ModelError('Nested single group too big')
+            index, count = self._init_access(self.access_regions, index=0, count=0)
+            # add last region if pending
+            if count > 0:
+                self.access_regions.append((index, count))
 
         len_point = self.points.get('L')
         if len_point:
@@ -445,6 +423,26 @@ class Group(object):
             id_val = id_point.pdef.get('value')
             if id_val:
                 id_point.set_value(id_point.pdef['value'])
+
+    def _init_access(self, access_regions, index, count):
+        # add points
+        if self.points:
+            for p, point in self.points.items():
+                if count + point.len > ACCESS_REGION_REGS:
+                    access_regions.append((index, count))
+                    index += count
+                    count = 0
+                count += point.len
+        # add groups
+        if self.groups:
+            for g, groups in self.groups.items():
+                if isinstance(groups, list) and len(groups) > 0:
+                    for group in groups:
+                        index, count = group._init_access(access_regions, index, count)
+                elif groups.len > ACCESS_REGION_REGS:
+                    index, count = groups._init_access(access_regions, index, count)
+
+        return index, count
 
     def __getattr__(self, attr):
         v = self.points.get(attr)
