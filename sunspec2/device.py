@@ -139,6 +139,7 @@ class Point(object):
         self.read_func_arg = None   # the argument passed to the read_func
         self.write_func = None      # function to be called on write
         self.write_func_arg = None  # the argument passed to the write_func
+        self.static = None
 
         if pdef:
             self.sf_required = (pdef.get(mdef.SF) is not None)
@@ -157,6 +158,10 @@ class Point(object):
 
             if data is not None:
                 self._set_data(data=data, offset=data_offset)
+
+            static = pdef.get('static', None)
+            if static and static == 'S':
+                self.static = True
 
     def __str__(self):
         return self.disp()
@@ -203,7 +208,7 @@ class Point(object):
         v = self._value
         if computed and v is not None:
             if self.sf_required:
-                if self.sf_value is None:
+                if self.sf_value is None or not self.static:
                     if self.sf:
                         sf = self.group.points.get(self.sf)
                         if sf is None:
@@ -224,7 +229,7 @@ class Point(object):
             self.dirty = dirty
         if computed:
             if self.sf_required:
-                if self.sf_value is None:
+                if self.sf_value is None or not self.static:
                     if self.sf:
                         sf = self.group.points.get(self.sf)
                         if sf is None:
@@ -263,7 +268,7 @@ class Point(object):
         data = err = None
         if computed and v is not None:
             if self.sf_required:
-                if self.sf_value is None:
+                if self.sf_value is None or not self.static:
                     if self.sf:
                         sf = self.group.points.get(self.sf)
                         if sf is None:
