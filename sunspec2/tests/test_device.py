@@ -330,7 +330,8 @@ class TestPoint:
         p_def = {
                     "name": "Ena",
                     "type": "enum16",
-                    "sf": 'test sf'
+                    "sf": 'test sf',
+                    "static": "S"
                 }
 
         p = device.Point(p_def)
@@ -344,6 +345,7 @@ class TestPoint:
         assert p.sf == 'test sf'
         assert p.sf_required is True
         assert p.sf_value is None
+        assert p.static
 
     def test__set_data(self):
         p_def = {
@@ -391,6 +393,7 @@ class TestPoint:
         p.sf_required = True
         p.sf_value = 3
         p.value = 4
+        setattr(p, "static", True)
         assert p.cvalue == 4000.0
 
         p_sf = device.Point()
@@ -398,10 +401,44 @@ class TestPoint:
         m = device.Model()
         setattr(m, 'points', points)
         p2 = device.Point(p_def, model=m)
+        setattr(p2, "static", True)
         p2.sf_value = -2
         p2.cvalue = 1.16
         assert p2.cvalue == 1.16
         assert p2.value == 116
+
+        # test static true
+        p_sf = device.Point()
+        setattr(p_sf, "_value", 3)
+        points = {'TestSF': p_sf}
+        m = device.Model()
+        g = device.Group()
+        setattr(m, 'points', points)
+        setattr(g, 'points', points)
+        p5 = device.Point(p_def, model=m)
+        setattr(p5, "static", True)
+        setattr(p5, "group", g)
+        p5.value = 4
+        assert p5.cvalue == 4000.0
+
+        setattr(p_sf, "_value", 4)
+        assert p5.cvalue == 4000.0
+
+        # test static false
+        p_sf = device.Point()
+        setattr(p_sf, "_value", 3)
+        points = {'TestSF': p_sf}
+        m = device.Model()
+        g = device.Group()
+        setattr(m, 'points', points)
+        setattr(g, 'points', points)
+        p4 = device.Point(p_def, model=m)
+        setattr(p4, "group", g)
+        p4.value = 4
+        assert p4.cvalue == 4000.0
+
+        setattr(p_sf, "_value", 4)
+        assert p4.cvalue == 40000.0
 
     def test_cvalue_setter(self):
         p_def = {
@@ -424,6 +461,46 @@ class TestPoint:
         assert p2.cvalue == 1.16
         assert p2.value == 116
 
+        # test static true
+        p_def2 = {
+            "name": "TestPoint",
+            "type": "uint16",
+            "sf": "TestSF"
+        }
+        p_sf = device.Point()
+        setattr(p_sf, "_value", 3)
+        points = {'TestSF': p_sf}
+        m = device.Model()
+        g = device.Group()
+        setattr(m, 'points', points)
+        setattr(g, 'points', points)
+        p5 = device.Point(p_def2, model=m)
+        setattr(p5, "static", True)
+        setattr(p5, "group", g)
+        p5.cvalue = 4000.0
+        assert p5.value == 4
+
+        setattr(p_sf, "_value", 4)
+        p5.cvalue = 4000.0
+        assert p5.value == 4
+
+        # test static false
+        p_sf = device.Point()
+        setattr(p_sf, "_value", 3)
+        points = {'TestSF': p_sf}
+        m = device.Model()
+        g = device.Group()
+        setattr(m, 'points', points)
+        setattr(g, 'points', points)
+        p4 = device.Point(p_def2, model=m)
+        setattr(p4, "group", g)
+        p4.cvalue = 4000.0
+        assert p4.value == 4
+
+        setattr(p_sf, "_value", 2)
+        p4.cvalue = 4000.0
+        assert p4.value == 40
+
     def test_get_value(self):
         p_def = {
             "access": "RW",
@@ -433,10 +510,12 @@ class TestPoint:
             "type": "uint16",
         }
         p = device.Point(p_def)
+        setattr(p, "static", True)
         p.value = 3
         assert p.get_value() == 3
 
         p2 = device.Point(p_def)
+        setattr(p2, "static", True)
         assert p2.get_value() is None
 
         # pdef w/ sf
@@ -464,6 +543,7 @@ class TestPoint:
         setattr(g, 'points', points)
 
         p9 = device.Point(pdef_sf, model=m2)
+        setattr(p9, "static", True)
         p9.group = g
         p9.value = 2020
         assert p9.get_value(computed=True) == 2020000.0
@@ -480,6 +560,7 @@ class TestPoint:
         setattr(m3, 'points', points2)
 
         p10 = device.Point(pdef_sf, model=m3)
+        setattr(p10, "static", True)
         g2 = device.Group()
         setattr(g2, 'points', {})
         p10.group = g2
@@ -497,6 +578,7 @@ class TestPoint:
                 "type": "uint16"
                 }
         p = device.Point(p_def)
+        setattr(p, "static", True)
         p.set_value(3)
         assert p.value == 3
 
@@ -515,6 +597,7 @@ class TestPoint:
         setattr(m, 'points', points)
 
         p3 = device.Point(pdef_computed, model=m)
+        setattr(p3, "static", True)
         g = device.Group
         setattr(g, 'points', {})
         p3.group = g
@@ -530,6 +613,7 @@ class TestPoint:
         setattr(m2, 'points', points2)
 
         p4 = device.Point(pdef_computed, model=m2)
+        setattr(p4, "static", True)
         p4.group = g
         with pytest.raises(device.ModelError) as exc:
             p4.set_value(1000, computed=True)
@@ -537,6 +621,7 @@ class TestPoint:
 
         # test computed float rounding
         p5 = device.Point(pdef_computed, model=m2)
+        setattr(p5, "static", True)
         p5.sf_value = -2
         p5.set_value(1.16, computed=True)
         assert p5.get_value(computed=True) == 1.16
@@ -549,6 +634,7 @@ class TestPoint:
             "sf": "TestSF"
         }
         p = device.Point(p_def)
+        setattr(p, "static", True)
         p.value = 3
         assert p.get_mb() == b'\x00\x03'
         p.value = None
@@ -560,6 +646,39 @@ class TestPoint:
         p.sf_required = True
         p.sf_value = 4
         assert p.get_mb(computed=True) == b'\x75\x30'
+
+        # test static true
+        p_sf = device.Point()
+        setattr(p_sf, "_value", 3)
+        points = {'TestSF': p_sf}
+        m = device.Model()
+        g = device.Group()
+        setattr(m, 'points', points)
+        setattr(g, 'points', points)
+        p2 = device.Point(p_def, model=m)
+        setattr(p2, "static", True)
+        setattr(p2, "group", g)
+        p2.value = 4
+        assert p2.get_mb(computed=True) == b'\x0f\xa0'
+
+        setattr(p_sf, "_value", 4)
+        assert p2.get_mb(computed=True) == b'\x0f\xa0'
+
+        # test static false
+        p_sf = device.Point()
+        setattr(p_sf, "_value", 3)
+        points = {'TestSF': p_sf}
+        m = device.Model()
+        g = device.Group()
+        setattr(m, 'points', points)
+        setattr(g, 'points', points)
+        p4 = device.Point(p_def, model=m)
+        setattr(p4, "group", g)
+        p4.value = 4
+        assert p4.get_mb(computed=True) == b'\x0f\xa0'
+
+        setattr(p_sf, "_value", 4)
+        assert p4.get_mb(computed=True) == b'\x9c\x40'
 
     def test_set_mb(self):
         p_def = {
@@ -617,6 +736,46 @@ class TestPoint:
         p6.set_mb(b'\x0b\xb8', computed=True, dirty=True)
         assert p6.value == 30
         assert p6.dirty
+
+        # test static true
+        p_def2 = {
+            "name": "TestPoint",
+            "type": "uint16",
+            "sf": "TestSF"
+        }
+        p_sf = device.Point()
+        setattr(p_sf, "_value", 3)
+        points = {'TestSF': p_sf}
+        m = device.Model()
+        g = device.Group()
+        setattr(m, 'points', points)
+        setattr(g, 'points', points)
+        p7 = device.Point(p_def2, model=m)
+        setattr(p7, "static", True)
+        setattr(p7, "group", g)
+        p7.set_mb(b'\x0f\xa0', computed=True, dirty=True)
+        assert p7.value == 4
+
+        setattr(p_sf, "_value", 4)
+        p7.set_mb(b'\x0f\xa0', computed=True, dirty=True)
+        assert p7.value == 4
+
+        # test static false
+        p_sf = device.Point()
+        setattr(p_sf, "_value", 3)
+        points = {'TestSF': p_sf}
+        m = device.Model()
+        g = device.Group()
+        setattr(m, 'points', points)
+        setattr(g, 'points', points)
+        p8 = device.Point(p_def2, model=m)
+        setattr(p8, "group", g)
+        p8.set_mb(b'\x9c\x40', computed=True, dirty=True)
+        assert p8.value == 40
+
+        setattr(p_sf, "_value", 4)
+        p8.set_mb(b'\x9c\x40', computed=True, dirty=True)
+        assert p8.value == 4
 
     def test_get_text(self, model_705_data):
         m = device.Model(705, data=model_705_data)
