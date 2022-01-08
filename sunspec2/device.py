@@ -444,7 +444,7 @@ class Group(object):
                 if isinstance(groups, list) and len(groups) > 0:
                     for group in groups:
                         index, count = group._init_access(access_regions, index, count)
-                elif groups.len > ACCESS_REGION_REGS:
+                else:
                     index, count = groups._init_access(access_regions, index, count)
 
         return index, count
