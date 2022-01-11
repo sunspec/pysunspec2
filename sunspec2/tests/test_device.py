@@ -125,7 +125,6 @@ def test_check_group_count():
 
 
 def test_get_model_def():
-
     with pytest.raises(mdef.ModelDefinitionError) as exc1:
         device.get_model_def('z')
     assert 'Invalid model id' in str(exc1.value)
@@ -187,140 +186,140 @@ def test_add_mappings():
     }
 
     group_def_w_mappings = {
-                "group": {
-                    "groups": [
-                        {
-                            "name": "PFWInj",
-                            "points": [
-                                {
-                                    "access": "RW",
-                                    "desc": "Power factor setpoint when injecting active power.",
-                                    "label": "Power Factor (W Inj) ",
-                                    "mandatory": "O",
-                                    "name": "PF",
-                                    "sf": "PF_SF",
-                                    "type": "uint16"
-                                }
-                            ],
-                            "type": "sync",
-                            "point_defs": {
-                                "PF": {
-                                    "access": "RW",
-                                    "desc": "Power factor setpoint when injecting active power.",
-                                    "label": "Power Factor (W Inj) ",
-                                    "mandatory": "O",
-                                    "name": "PF",
-                                    "sf": "PF_SF",
-                                    "type": "uint16"
-                                }
-                            },
-                            "group_defs": {}
-                        },
-                        {
-                            "name": "PFWInjRvrt",
-                            "points": [
-                                {
-                                    "access": "RW",
-                                    "desc": "Reversion power factor setpoint when injecting active power.",
-                                    "label": "Reversion Power Factor (W Inj) ",
-                                    "mandatory": "O",
-                                    "name": "PF",
-                                    "sf": "PF_SF",
-                                    "type": "uint16"
-                                }
-                            ],
-                            "type": "sync",
-                            "point_defs": {
-                                "PF": {
-                                    "access": "RW",
-                                    "desc": "Reversion power factor setpoint when injecting active power.",
-                                    "label": "Reversion Power Factor (W Inj) ",
-                                    "mandatory": "O",
-                                    "name": "PF",
-                                    "sf": "PF_SF",
-                                    "type": "uint16"
-                                }
-                            },
-                            "group_defs": {}
-                        }
-                    ],
-                    "name": "DERCtlAC",
+        "group": {
+            "groups": [
+                {
+                    "name": "PFWInj",
                     "points": [
                         {
-                            "name": "ID",
-                            "static": "S",
-                            "type": "uint16",
-                            "value": 704
+                            "access": "RW",
+                            "desc": "Power factor setpoint when injecting active power.",
+                            "label": "Power Factor (W Inj) ",
+                            "mandatory": "O",
+                            "name": "PF",
+                            "sf": "PF_SF",
+                            "type": "uint16"
                         }
                     ],
-                    "type": "group",
+                    "type": "sync",
                     "point_defs": {
-                        "ID": {
-                            "name": "ID",
-                            "static": "S",
-                            "type": "uint16",
-                            "value": 704
+                        "PF": {
+                            "access": "RW",
+                            "desc": "Power factor setpoint when injecting active power.",
+                            "label": "Power Factor (W Inj) ",
+                            "mandatory": "O",
+                            "name": "PF",
+                            "sf": "PF_SF",
+                            "type": "uint16"
                         }
                     },
-                    "group_defs": {
-                        "PFWInj": {
-                            "name": "PFWInj",
-                            "points": [
-                                {
-                                    "access": "RW",
-                                    "desc": "Power factor setpoint when injecting active power.",
-                                    "label": "Power Factor (W Inj) ",
-                                    "mandatory": "O",
-                                    "name": "PF",
-                                    "sf": "PF_SF",
-                                    "type": "uint16"
-                                }
-                            ],
-                            "type": "sync",
-                            "point_defs": {
-                                "PF": {
-                                    "access": "RW",
-                                    "desc": "Power factor setpoint when injecting active power.",
-                                    "label": "Power Factor (W Inj) ",
-                                    "mandatory": "O",
-                                    "name": "PF",
-                                    "sf": "PF_SF",
-                                    "type": "uint16"
-                                }
-                            },
-                            "group_defs": {}
-                        },
-                        "PFWInjRvrt": {
-                            "name": "PFWInjRvrt",
-                            "points": [
-                                {
-                                    "access": "RW",
-                                    "desc": "Reversion power factor setpoint when injecting active power.",
-                                    "label": "Reversion Power Factor (W Inj) ",
-                                    "mandatory": "O",
-                                    "name": "PF",
-                                    "sf": "PF_SF",
-                                    "type": "uint16"
-                                }
-                            ],
-                            "type": "sync",
-                            "point_defs": {
-                                "PF": {
-                                    "access": "RW",
-                                    "desc": "Reversion power factor setpoint when injecting active power.",
-                                    "label": "Reversion Power Factor (W Inj) ",
-                                    "mandatory": "O",
-                                    "name": "PF",
-                                    "sf": "PF_SF",
-                                    "type": "uint16"
-                                }
-                            },
-                            "group_defs": {}
-                        }
-                    }
+                    "group_defs": {}
                 },
-                "id": 704
+                {
+                    "name": "PFWInjRvrt",
+                    "points": [
+                        {
+                            "access": "RW",
+                            "desc": "Reversion power factor setpoint when injecting active power.",
+                            "label": "Reversion Power Factor (W Inj) ",
+                            "mandatory": "O",
+                            "name": "PF",
+                            "sf": "PF_SF",
+                            "type": "uint16"
+                        }
+                    ],
+                    "type": "sync",
+                    "point_defs": {
+                        "PF": {
+                            "access": "RW",
+                            "desc": "Reversion power factor setpoint when injecting active power.",
+                            "label": "Reversion Power Factor (W Inj) ",
+                            "mandatory": "O",
+                            "name": "PF",
+                            "sf": "PF_SF",
+                            "type": "uint16"
+                        }
+                    },
+                    "group_defs": {}
+                }
+            ],
+            "name": "DERCtlAC",
+            "points": [
+                {
+                    "name": "ID",
+                    "static": "S",
+                    "type": "uint16",
+                    "value": 704
+                }
+            ],
+            "type": "group",
+            "point_defs": {
+                "ID": {
+                    "name": "ID",
+                    "static": "S",
+                    "type": "uint16",
+                    "value": 704
+                }
+            },
+            "group_defs": {
+                "PFWInj": {
+                    "name": "PFWInj",
+                    "points": [
+                        {
+                            "access": "RW",
+                            "desc": "Power factor setpoint when injecting active power.",
+                            "label": "Power Factor (W Inj) ",
+                            "mandatory": "O",
+                            "name": "PF",
+                            "sf": "PF_SF",
+                            "type": "uint16"
+                        }
+                    ],
+                    "type": "sync",
+                    "point_defs": {
+                        "PF": {
+                            "access": "RW",
+                            "desc": "Power factor setpoint when injecting active power.",
+                            "label": "Power Factor (W Inj) ",
+                            "mandatory": "O",
+                            "name": "PF",
+                            "sf": "PF_SF",
+                            "type": "uint16"
+                        }
+                    },
+                    "group_defs": {}
+                },
+                "PFWInjRvrt": {
+                    "name": "PFWInjRvrt",
+                    "points": [
+                        {
+                            "access": "RW",
+                            "desc": "Reversion power factor setpoint when injecting active power.",
+                            "label": "Reversion Power Factor (W Inj) ",
+                            "mandatory": "O",
+                            "name": "PF",
+                            "sf": "PF_SF",
+                            "type": "uint16"
+                        }
+                    ],
+                    "type": "sync",
+                    "point_defs": {
+                        "PF": {
+                            "access": "RW",
+                            "desc": "Reversion power factor setpoint when injecting active power.",
+                            "label": "Reversion Power Factor (W Inj) ",
+                            "mandatory": "O",
+                            "name": "PF",
+                            "sf": "PF_SF",
+                            "type": "uint16"
+                        }
+                    },
+                    "group_defs": {}
+                }
             }
+        },
+        "id": 704
+    }
     device.add_mappings(group_def['group'])
     assert group_def == group_def_w_mappings
 
@@ -328,11 +327,11 @@ def test_add_mappings():
 class TestPoint:
     def test___init__(self):
         p_def = {
-                    "name": "Ena",
-                    "type": "enum16",
-                    "sf": 'test sf',
-                    "static": "S"
-                }
+            "name": "Ena",
+            "type": "enum16",
+            "sf": 'test sf',
+            "static": "S"
+        }
 
         p = device.Point(p_def)
         assert p.model is None
@@ -553,7 +552,6 @@ class TestPoint:
         assert p9.get_value(computed=True) == 1.16
         assert p9.get_value() == 116
 
-
         # computed exception
         m3 = device.Model()
         points2 = {}
@@ -571,12 +569,12 @@ class TestPoint:
 
     def test_set_value(self):
         p_def = {
-                "access": "RW",
-                "desc": "Power factor setpoint when injecting active power.",
-                "label": "Power Factor (W Inj) ",
-                "name": "PF",
-                "type": "uint16"
-                }
+            "access": "RW",
+            "desc": "Power factor setpoint when injecting active power.",
+            "label": "Power Factor (W Inj) ",
+            "name": "PF",
+            "type": "uint16"
+        }
         p = device.Point(p_def)
         setattr(p, "static", True)
         p.set_value(3)
@@ -1139,105 +1137,105 @@ class TestGroup:
             "id": 705
         }
         gdata_705 = {
-              "ID": 705,
-              "Ena": 1,
-              "CrvSt": 1,
-              "AdptCrvReq": 0,
-              "AdptCrvRslt": 0,
-              "NPt": 4,
-              "NCrv": 3,
-              "RvrtTms": 0,
-              "RvrtRem": 0,
-              "RvrtCrv": 0,
-              "V_SF": -2,
-              "DeptRef_SF": -2,
-              "Crv": [
+            "ID": 705,
+            "Ena": 1,
+            "CrvSt": 1,
+            "AdptCrvReq": 0,
+            "AdptCrvRslt": 0,
+            "NPt": 4,
+            "NCrv": 3,
+            "RvrtTms": 0,
+            "RvrtRem": 0,
+            "RvrtCrv": 0,
+            "V_SF": -2,
+            "DeptRef_SF": -2,
+            "Crv": [
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 1,
-                  "Pt": [
-                    {
-                      "V": 9200,
-                      "Var": 3000
-                    },
-                    {
-                      "V": 9670,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10300,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10700,
-                      "Var": -3000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 1,
+                    "Pt": [
+                        {
+                            "V": 9200,
+                            "Var": 3000
+                        },
+                        {
+                            "V": 9670,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10300,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10700,
+                            "Var": -3000
+                        }
+                    ]
                 },
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 0,
-                  "Pt": [
-                    {
-                      "V": 9300,
-                      "Var": 3000
-                    },
-                    {
-                      "V": 9570,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10200,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10600,
-                      "Var": -4000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 0,
+                    "Pt": [
+                        {
+                            "V": 9300,
+                            "Var": 3000
+                        },
+                        {
+                            "V": 9570,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10200,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10600,
+                            "Var": -4000
+                        }
+                    ]
                 },
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 0,
-                  "Pt": [
-                    {
-                      "V": 9400,
-                      "Var": 2000
-                    },
-                    {
-                      "V": 9570,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10500,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10800,
-                      "Var": -2000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 0,
+                    "Pt": [
+                        {
+                            "V": 9400,
+                            "Var": 2000
+                        },
+                        {
+                            "V": 9570,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10500,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10800,
+                            "Var": -2000
+                        }
+                    ]
                 }
-              ]
-            }
+            ]
+        }
         g = device.Group()
         assert g._group_data(gdata_705, 'Crv') == [{'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 1, 'VRefAuto': 0,
                                                     'VRefTms': 5, 'RspTms': 6, 'ReadOnly': 1,
@@ -1259,105 +1257,105 @@ class TestGroup:
 
     def test__get_data_group_count(self):
         gdata_705 = {
-              "ID": 705,
-              "Ena": 1,
-              "CrvSt": 1,
-              "AdptCrvReq": 0,
-              "AdptCrvRslt": 0,
-              "NPt": 4,
-              "NCrv": 3,
-              "RvrtTms": 0,
-              "RvrtRem": 0,
-              "RvrtCrv": 0,
-              "V_SF": -2,
-              "DeptRef_SF": -2,
-              "Crv": [
+            "ID": 705,
+            "Ena": 1,
+            "CrvSt": 1,
+            "AdptCrvReq": 0,
+            "AdptCrvRslt": 0,
+            "NPt": 4,
+            "NCrv": 3,
+            "RvrtTms": 0,
+            "RvrtRem": 0,
+            "RvrtCrv": 0,
+            "V_SF": -2,
+            "DeptRef_SF": -2,
+            "Crv": [
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 1,
-                  "Pt": [
-                    {
-                      "V": 9200,
-                      "Var": 3000
-                    },
-                    {
-                      "V": 9670,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10300,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10700,
-                      "Var": -3000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 1,
+                    "Pt": [
+                        {
+                            "V": 9200,
+                            "Var": 3000
+                        },
+                        {
+                            "V": 9670,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10300,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10700,
+                            "Var": -3000
+                        }
+                    ]
                 },
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 0,
-                  "Pt": [
-                    {
-                      "V": 9300,
-                      "Var": 3000
-                    },
-                    {
-                      "V": 9570,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10200,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10600,
-                      "Var": -4000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 0,
+                    "Pt": [
+                        {
+                            "V": 9300,
+                            "Var": 3000
+                        },
+                        {
+                            "V": 9570,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10200,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10600,
+                            "Var": -4000
+                        }
+                    ]
                 },
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 0,
-                  "Pt": [
-                    {
-                      "V": 9400,
-                      "Var": 2000
-                    },
-                    {
-                      "V": 9570,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10500,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10800,
-                      "Var": -2000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 0,
+                    "Pt": [
+                        {
+                            "V": 9400,
+                            "Var": 2000
+                        },
+                        {
+                            "V": 9570,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10500,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10800,
+                            "Var": -2000
+                        }
+                    ]
                 }
-              ]
-            }
+            ]
+        }
         g = device.Group()
         assert g._get_data_group_count(gdata_705['Crv']) == 3
 
@@ -1576,105 +1574,105 @@ class TestGroup:
             "id": 705
         }
         gdata_705 = {
-              "ID": 705,
-              "Ena": 1,
-              "CrvSt": 1,
-              "AdptCrvReq": 0,
-              "AdptCrvRslt": 0,
-              "NPt": 4,
-              "NCrv": 3,
-              "RvrtTms": 0,
-              "RvrtRem": 0,
-              "RvrtCrv": 0,
-              "V_SF": -2,
-              "DeptRef_SF": -2,
-              "Crv": [
+            "ID": 705,
+            "Ena": 1,
+            "CrvSt": 1,
+            "AdptCrvReq": 0,
+            "AdptCrvRslt": 0,
+            "NPt": 4,
+            "NCrv": 3,
+            "RvrtTms": 0,
+            "RvrtRem": 0,
+            "RvrtCrv": 0,
+            "V_SF": -2,
+            "DeptRef_SF": -2,
+            "Crv": [
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 1,
-                  "Pt": [
-                    {
-                      "V": 9200,
-                      "Var": 3000
-                    },
-                    {
-                      "V": 9670,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10300,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10700,
-                      "Var": -3000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 1,
+                    "Pt": [
+                        {
+                            "V": 9200,
+                            "Var": 3000
+                        },
+                        {
+                            "V": 9670,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10300,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10700,
+                            "Var": -3000
+                        }
+                    ]
                 },
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 0,
-                  "Pt": [
-                    {
-                      "V": 9300,
-                      "Var": 3000
-                    },
-                    {
-                      "V": 9570,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10200,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10600,
-                      "Var": -4000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 0,
+                    "Pt": [
+                        {
+                            "V": 9300,
+                            "Var": 3000
+                        },
+                        {
+                            "V": 9570,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10200,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10600,
+                            "Var": -4000
+                        }
+                    ]
                 },
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 0,
-                  "Pt": [
-                    {
-                      "V": 9400,
-                      "Var": 2000
-                    },
-                    {
-                      "V": 9570,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10500,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10800,
-                      "Var": -2000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 0,
+                    "Pt": [
+                        {
+                            "V": 9400,
+                            "Var": 2000
+                        },
+                        {
+                            "V": 9570,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10500,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10800,
+                            "Var": -2000
+                        }
+                    ]
                 }
-              ]
-            }
+            ]
+        }
 
         m = device.Model(705, data=gdata_705)
 
@@ -1702,105 +1700,105 @@ class TestGroup:
 
     def test_get_dict(self):
         gdata_705 = {
-              "ID": 705,
-              "Ena": 1,
-              "CrvSt": 1,
-              "AdptCrvReq": 0,
-              "AdptCrvRslt": 0,
-              "NPt": 4,
-              "NCrv": 3,
-              "RvrtTms": 0,
-              "RvrtRem": 0,
-              "RvrtCrv": 0,
-              "V_SF": -2,
-              "DeptRef_SF": -2,
-              "Crv": [
+            "ID": 705,
+            "Ena": 1,
+            "CrvSt": 1,
+            "AdptCrvReq": 0,
+            "AdptCrvRslt": 0,
+            "NPt": 4,
+            "NCrv": 3,
+            "RvrtTms": 0,
+            "RvrtRem": 0,
+            "RvrtCrv": 0,
+            "V_SF": -2,
+            "DeptRef_SF": -2,
+            "Crv": [
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 1,
-                  "Pt": [
-                    {
-                      "V": 9200,
-                      "Var": 3000
-                    },
-                    {
-                      "V": 9670,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10300,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10700,
-                      "Var": -3000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 1,
+                    "Pt": [
+                        {
+                            "V": 9200,
+                            "Var": 3000
+                        },
+                        {
+                            "V": 9670,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10300,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10700,
+                            "Var": -3000
+                        }
+                    ]
                 },
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 0,
-                  "Pt": [
-                    {
-                      "V": 9300,
-                      "Var": 3000
-                    },
-                    {
-                      "V": 9570,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10200,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10600,
-                      "Var": -4000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 0,
+                    "Pt": [
+                        {
+                            "V": 9300,
+                            "Var": 3000
+                        },
+                        {
+                            "V": 9570,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10200,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10600,
+                            "Var": -4000
+                        }
+                    ]
                 },
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 0,
-                  "Pt": [
-                    {
-                      "V": 9400,
-                      "Var": 2000
-                    },
-                    {
-                      "V": 9570,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10500,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10800,
-                      "Var": -2000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 0,
+                    "Pt": [
+                        {
+                            "V": 9400,
+                            "Var": 2000
+                        },
+                        {
+                            "V": 9570,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10500,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10800,
+                            "Var": -2000
+                        }
+                    ]
                 }
-              ]
-            }
+            ]
+        }
         m2 = device.Model(705, data=gdata_705)
         assert m2.groups['Crv'][0].get_dict() == {'ActPt': 4, 'DeptRef': 1, 'Pri': 1, 'VRef': 1, 'VRefAuto': 0,
                                                   'VRefAutoEna': None, 'VRefAutoTms': None,
@@ -1929,11 +1927,11 @@ class TestGroup:
                                                         {'V': 10300, 'Var': 0},
                                                         {'V': 10700, 'Var': -3000}]}
         new_dict = {'ActPt': 4, 'DeptRef': 4000, 'Pri': 5000, 'VRef': 3, 'VRefAuto': 2,
-                                                 'VRefAutoEna': None, 'VRefAutoTms': None,
-                                                 'RspTms': 2, 'ReadOnly': 2,
-                                                 'Pt': [{'V': 111, 'Var': 111}, {'V': 123, 'Var': 1112},
-                                                        {'V': 111, 'Var': 111},
-                                                        {'V': 123, 'Var': -1112}]}
+                    'VRefAutoEna': None, 'VRefAutoTms': None,
+                    'RspTms': 2, 'ReadOnly': 2,
+                    'Pt': [{'V': 111, 'Var': 111}, {'V': 123, 'Var': 1112},
+                           {'V': 111, 'Var': 111},
+                           {'V': 123, 'Var': -1112}]}
 
         m.groups['Crv'][0].set_dict(new_dict, dirty=True)
         assert m.groups['Crv'][0].get_dict() == new_dict
@@ -2443,24 +2441,28 @@ class TestGroup:
     def test_get_text(self, model_705_data):
         m = device.Model(705, data=model_705_data)
         g = m.groups['Crv'][0]
-        expected_output = \
-            '''      ActPt                                                 4\n      DeptRef                  ''' + \
-            '''                             1\n      Pri                                                   ''' + \
-            '''1\n      VRef                                                  1 VRefPct\n      VRefAuto    ''' + \
-            '''                                          0 VRefPct\n      VRefAutoEna                      ''' + \
-            '''                  None\n      VRefAutoTms                                        None Secs\n''' + \
-            '''      RspTms                                                6 Secs\n      ReadOnly          ''' + \
-            '''                                    1\n   01:V                                              ''' + \
-            '''    9200 VRefPct\n   01:Var                                                3000 DeptRef\n   ''' + \
-            '''02:V                                                  9670 VRefPct\n   02:Var               ''' + \
-            '''                                    0 DeptRef\n   03:V                                      ''' + \
-            '''           10300 VRefPct\n   03:Var                                                   0 Dept''' + \
-            '''Ref\n   04:V                                                 10700 VRefPct\n   04:Var       ''' + \
-            '''                                         3000 DeptRef\n'''
+        expected_output = '''      ActPt                                                 4\n''' + \
+                          '''      DeptRef                                               1\n''' + \
+                          '''      Pri                                                   1\n''' + \
+                          '''      VRef                                                  1 VNomPct\n''' + \
+                          '''      VRefAuto                                              0 VNomPct\n''' + \
+                          '''      VRefAutoEna                                        None\n''' + \
+                          '''      VRefAutoTms                                        None Secs\n''' + \
+                          '''      RspTms                                                6 Secs\n''' + \
+                          '''      ReadOnly                                              1\n''' + \
+                          '''   01:V                                                  9200 VNomPct\n''' + \
+                          '''   01:Var                                                3000 DeptRef\n''' + \
+                          '''   02:V                                                  9670 VNomPct\n''' + \
+                          '''   02:Var                                                   0 DeptRef\n''' + \
+                          '''   03:V                                                 10300 VNomPct\n''' + \
+                          '''   03:Var                                                   0 DeptRef\n''' + \
+                          '''   04:V                                                 10700 VNomPct\n''' + \
+                          '''   04:Var                                                3000 DeptRef\n'''
         assert g.get_text() == expected_output
 
 
 class TestModel:
+
     def test__init__(self):
         m = device.Model(704)
         assert m.model_id == 704
@@ -2477,105 +2479,105 @@ class TestModel:
         assert m2.error_info == 'Invalid model id: abc\n'
 
         gdata_705 = {
-              "ID": 705,
-              "Ena": 1,
-              "CrvSt": 1,
-              "AdptCrvReq": 0,
-              "AdptCrvRslt": 0,
-              "NPt": 4,
-              "NCrv": 3,
-              "RvrtTms": 0,
-              "RvrtRem": 0,
-              "RvrtCrv": 0,
-              "V_SF": -2,
-              "DeptRef_SF": -2,
-              "Crv": [
+            "ID": 705,
+            "Ena": 1,
+            "CrvSt": 1,
+            "AdptCrvReq": 0,
+            "AdptCrvRslt": 0,
+            "NPt": 4,
+            "NCrv": 3,
+            "RvrtTms": 0,
+            "RvrtRem": 0,
+            "RvrtCrv": 0,
+            "V_SF": -2,
+            "DeptRef_SF": -2,
+            "Crv": [
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 1,
-                  "Pt": [
-                    {
-                      "V": 9200,
-                      "Var": 3000
-                    },
-                    {
-                      "V": 9670,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10300,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10700,
-                      "Var": -3000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 1,
+                    "Pt": [
+                        {
+                            "V": 9200,
+                            "Var": 3000
+                        },
+                        {
+                            "V": 9670,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10300,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10700,
+                            "Var": -3000
+                        }
+                    ]
                 },
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 0,
-                  "Pt": [
-                    {
-                      "V": 9300,
-                      "Var": 3000
-                    },
-                    {
-                      "V": 9570,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10200,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10600,
-                      "Var": -4000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 0,
+                    "Pt": [
+                        {
+                            "V": 9300,
+                            "Var": 3000
+                        },
+                        {
+                            "V": 9570,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10200,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10600,
+                            "Var": -4000
+                        }
+                    ]
                 },
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 0,
-                  "Pt": [
-                    {
-                      "V": 9400,
-                      "Var": 2000
-                    },
-                    {
-                      "V": 9570,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10500,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10800,
-                      "Var": -2000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 0,
+                    "Pt": [
+                        {
+                            "V": 9400,
+                            "Var": 2000
+                        },
+                        {
+                            "V": 9570,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10500,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10800,
+                            "Var": -2000
+                        }
+                    ]
                 }
-              ]
-            }
+            ]
+        }
         # test repeating group model
         m2 = device.Model(705, data=gdata_705)
         assert m2.model_id == 705
@@ -2587,82 +2589,95 @@ class TestModel:
         assert m2.mid is None
         assert m2.device is None
 
-    def test_model_1(self):
 
-        mdata = {
-            "ID": 1,
-            "L": 68,
-            "Mn": "Test manuf",
-            "Md": "Test model",
-            "Opt": "Test options",
-            "Vr": "Test version",
-            "SN": "Test serial num",
-            "DA": 12,
-            "Pad": 0
-        }
-        m = device.Model(1, data=mdata)
+def test_model_1():
+    mdata = {
+        "ID": 1,
+        "L": 68,
+        "Mn": "Test manuf",
+        "Md": "Test model",
+        "Opt": "Test options",
+        "Vr": "Test version",
+        "SN": "Test serial num",
+        "DA": 12,
+        "Pad": 0
+    }
+    m = device.Model(1, data=mdata)
 
-    def test__error(self):
-        m = device.Model(704)
-        m.add_error('test error')
-        assert m.error_info == 'test error\n'
 
-    def test_get_text(self, model_705_data):
-        m = device.Model(705, data=model_705_data)
-        expected_output = '''      ID                                                  705\n      L           ''' + \
-                          '''                                         67\n      Ena                           ''' + \
-                          '''                        1\n      AdptCrvReq                                      ''' + \
-                          '''      0\n      AdptCrvRslt                                           0\n      NPt''' + \
-                          '''                                                   4\n      NCrv                 ''' + \
-                          '''                                 3\n      RvrtTms                                ''' + \
-                          '''               0 Secs\n      RvrtRem                                             ''' + \
-                          '''  0 Secs\n      RvrtCrv                                               0\n      V_''' + \
-                          '''SF                                                 -2\n      DeptRef_SF          ''' + \
-                          '''                                 -2\n      RspTms_SF                             ''' + \
-                          '''             None\n   01:ActPt                                                 ''' + \
-                          '''4\n   01:DeptRef                                               1\n   01:Pri    ''' + \
-                          '''                                               1\n   01:VRef                   ''' + \
-                          '''                               1 VRefPct\n   01:VRefAuto                           ''' + \
-                          '''                   0 VRefPct\n   01:VRefAutoEna                                    ''' + \
-                          '''    None\n   01:VRefAutoTms                                        None Secs\n   01''' + \
-                          ''':RspTms                                                6 Secs\n   01:ReadOnly      ''' + \
-                          '''                                        1\n01:01:V                                 ''' + \
-                          '''                 9200 VRefPct\n01:01:Var                                           ''' + \
-                          '''     3000 DeptRef\n01:02:V                                                  9670 VR''' + \
-                          '''efPct\n01:02:Var                                                   0 DeptRef\n01:03''' + \
-                          ''':V                                                 10300 VRefPct\n01:03:Var        ''' + \
-                          '''                                           0 DeptRef\n01:04:V                      ''' + \
-                          '''                           10700 VRefPct\n01:04:Var                                ''' + \
-                          '''                3000 DeptRef\n   02:ActPt                                          ''' + \
-                          '''       4\n   02:DeptRef                                               1\n   02:Pri ''' + \
-                          '''                                                  1\n   02:VRef                    ''' + \
-                          '''                              1 VRefPct\n   02:VRefAuto                            ''' + \
-                          '''                  0 VRefPct\n   02:VRefAutoEna                                     ''' + \
-                          '''   None\n   02:VRefAutoTms                                        None Secs\n   02:''' + \
-                          '''RspTms                                                6 Secs\n   02:ReadOnly       ''' + \
-                          '''                                       0\n02:01:V                                  ''' + \
-                          '''                9300 VRefPct\n02:01:Var                                            ''' + \
-                          '''    3000 DeptRef\n02:02:V                                                  9570 VRe''' + \
-                          '''fPct\n02:02:Var                                                   0 DeptRef\n02:03:''' + \
-                          '''V                                                 10200 VRefPct\n02:03:Var         ''' + \
-                          '''                                          0 DeptRef\n02:04:V                       ''' + \
-                          '''                          10600 VRefPct\n02:04:Var                                 ''' + \
-                          '''               4000 DeptRef\n   03:ActPt                                           ''' + \
-                          '''      4\n   03:DeptRef                                               1\n   03:Pri  ''' + \
-                          '''                                                 1\n   03:VRef                     ''' + \
-                          '''                             1 VRefPct\n   03:VRefAuto                             ''' + \
-                          '''                 0 VRefPct\n   03:VRefAutoEna                                      ''' + \
-                          '''  None\n   03:VRefAutoTms                                        None Secs\n   03:R''' + \
-                          '''spTms                                                6 Secs\n   03:ReadOnly        ''' + \
-                          '''                                      0\n03:01:V                                   ''' + \
-                          '''               9400 VRefPct\n03:01:Var                                             ''' + \
-                          '''   2000 DeptRef\n03:02:V                                                  9570 VRef''' + \
-                          '''Pct\n03:02:Var                                                   0 DeptRef\n03:03:V''' + \
-                          '''                                                 10500 VRefPct\n03:03:Var          ''' + \
-                          '''                                         0 DeptRef\n03:04:V                        ''' + \
-                          '''                         10800 VRefPct\n03:04:Var                                  ''' + \
-                          '''              2000 DeptRef\n'''
-        assert expected_output == m.get_text()
+def test__error():
+    m = device.Model(704)
+    m.add_error('test error')
+    assert m.error_info == 'test error\n'
+
+
+def test_get_text(model_705_data):
+    m = device.Model(705, data=model_705_data)
+    expected_output = '''      ID                                                  705\n''' + \
+                               '''      L                                                    67\n''' + \
+                               '''      Ena                                                   1\n''' + \
+                               '''      AdptCrvReq                                            0\n''' + \
+                               '''      AdptCrvRslt                                           0\n''' + \
+                               '''      NPt                                                   4\n''' + \
+                               '''      NCrv                                                  3\n''' + \
+                               '''      RvrtTms                                               0 Secs\n''' + \
+                               '''      RvrtRem                                               0 Secs\n''' + \
+                               '''      RvrtCrv                                               0\n''' + \
+                               '''      V_SF                                                 -2\n''' + \
+                               '''      DeptRef_SF                                           -2\n''' + \
+                               '''      RspTms_SF                                          None\n''' + \
+                               '''   01:ActPt                                                 4\n''' + \
+                               '''   01:DeptRef                                               1\n''' + \
+                               '''   01:Pri                                                   1\n''' + \
+                               '''   01:VRef                                                  1 VNomPct\n''' + \
+                               '''   01:VRefAuto                                              0 VNomPct\n''' + \
+                               '''   01:VRefAutoEna                                        None\n''' + \
+                               '''   01:VRefAutoTms                                        None Secs\n''' + \
+                               '''   01:RspTms                                                6 Secs\n''' + \
+                               '''   01:ReadOnly                                              1\n''' + \
+                               '''01:01:V                                                  9200 VNomPct\n''' + \
+                               '''01:01:Var                                                3000 DeptRef\n''' + \
+                               '''01:02:V                                                  9670 VNomPct\n''' + \
+                               '''01:02:Var                                                   0 DeptRef\n''' + \
+                               '''01:03:V                                                 10300 VNomPct\n''' + \
+                               '''01:03:Var                                                   0 DeptRef\n''' + \
+                               '''01:04:V                                                 10700 VNomPct\n''' + \
+                               '''01:04:Var                                                3000 DeptRef\n''' + \
+                               '''   02:ActPt                                                 4\n''' + \
+                               '''   02:DeptRef                                               1\n''' + \
+                               '''   02:Pri                                                   1\n''' + \
+                               '''   02:VRef                                                  1 VNomPct\n''' + \
+                               '''   02:VRefAuto                                              0 VNomPct\n''' + \
+                               '''   02:VRefAutoEna                                        None\n''' + \
+                               '''   02:VRefAutoTms                                        None Secs\n''' + \
+                               '''   02:RspTms                                                6 Secs\n''' + \
+                               '''   02:ReadOnly                                              0\n''' + \
+                               '''02:01:V                                                  9300 VNomPct\n''' + \
+                               '''02:01:Var                                                3000 DeptRef\n''' + \
+                               '''02:02:V                                                  9570 VNomPct\n''' + \
+                               '''02:02:Var                                                   0 DeptRef\n''' + \
+                               '''02:03:V                                                 10200 VNomPct\n''' + \
+                               '''02:03:Var                                                   0 DeptRef\n''' + \
+                               '''02:04:V                                                 10600 VNomPct\n''' + \
+                               '''02:04:Var                                                4000 DeptRef\n''' + \
+                               '''   03:ActPt                                                 4\n''' + \
+                               '''   03:DeptRef                                               1\n''' + \
+                               '''   03:Pri                                                   1\n''' + \
+                               '''   03:VRef                                                  1 VNomPct\n''' + \
+                               '''   03:VRefAuto                                              0 VNomPct\n''' + \
+                               '''   03:VRefAutoEna                                        None\n''' + \
+                               '''   03:VRefAutoTms                                        None Secs\n''' + \
+                               '''   03:RspTms                                                6 Secs\n''' + \
+                               '''   03:ReadOnly                                              0\n''' + \
+                               '''03:01:V                                                  9400 VNomPct\n''' + \
+                               '''03:01:Var                                                2000 DeptRef\n''' + \
+                               '''03:02:V                                                  9570 VNomPct\n''' + \
+                               '''03:02:Var                                                   0 DeptRef\n''' + \
+                               '''03:03:V                                                 10500 VNomPct\n''' + \
+                               '''03:03:Var                                                   0 DeptRef\n''' + \
+                               '''03:04:V                                                 10800 VNomPct\n''' + \
+                               '''03:04:Var                                                2000 DeptRef\n'''
+    assert expected_output == m.get_text()
 
 
 class TestDevice:
@@ -2702,105 +2717,105 @@ class TestDevice:
     def test_get_dict(self):
         d = device.Device()
         gdata_705 = {
-              "ID": 705,
-              "Ena": 1,
-              "CrvSt": 1,
-              "AdptCrvReq": 0,
-              "AdptCrvRslt": 0,
-              "NPt": 4,
-              "NCrv": 3,
-              "RvrtTms": 0,
-              "RvrtRem": 0,
-              "RvrtCrv": 0,
-              "V_SF": -2,
-              "DeptRef_SF": -2,
-              "Crv": [
+            "ID": 705,
+            "Ena": 1,
+            "CrvSt": 1,
+            "AdptCrvReq": 0,
+            "AdptCrvRslt": 0,
+            "NPt": 4,
+            "NCrv": 3,
+            "RvrtTms": 0,
+            "RvrtRem": 0,
+            "RvrtCrv": 0,
+            "V_SF": -2,
+            "DeptRef_SF": -2,
+            "Crv": [
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 1,
-                  "Pt": [
-                    {
-                      "V": 9200,
-                      "Var": 3000
-                    },
-                    {
-                      "V": 9670,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10300,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10700,
-                      "Var": -3000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 1,
+                    "Pt": [
+                        {
+                            "V": 9200,
+                            "Var": 3000
+                        },
+                        {
+                            "V": 9670,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10300,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10700,
+                            "Var": -3000
+                        }
+                    ]
                 },
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 0,
-                  "Pt": [
-                    {
-                      "V": 9300,
-                      "Var": 3000
-                    },
-                    {
-                      "V": 9570,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10200,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10600,
-                      "Var": -4000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 0,
+                    "Pt": [
+                        {
+                            "V": 9300,
+                            "Var": 3000
+                        },
+                        {
+                            "V": 9570,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10200,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10600,
+                            "Var": -4000
+                        }
+                    ]
                 },
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 0,
-                  "Pt": [
-                    {
-                      "V": 9400,
-                      "Var": 2000
-                    },
-                    {
-                      "V": 9570,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10500,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10800,
-                      "Var": -2000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 0,
+                    "Pt": [
+                        {
+                            "V": 9400,
+                            "Var": 2000
+                        },
+                        {
+                            "V": 9570,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10500,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10800,
+                            "Var": -2000
+                        }
+                    ]
                 }
-              ]
-            }
+            ]
+        }
         m = device.Model(705, data=gdata_705)
         d.add_model(m)
         assert d.get_dict() == {'name': None, 'did': None, 'models': [
@@ -2843,105 +2858,105 @@ class TestDevice:
     def test_get_json(self):
         d = device.Device()
         gdata_705 = {
-              "ID": 705,
-              "Ena": 1,
-              "CrvSt": 1,
-              "AdptCrvReq": 0,
-              "AdptCrvRslt": 0,
-              "NPt": 4,
-              "NCrv": 3,
-              "RvrtTms": 0,
-              "RvrtRem": 0,
-              "RvrtCrv": 0,
-              "V_SF": -2,
-              "DeptRef_SF": -2,
-              "Crv": [
+            "ID": 705,
+            "Ena": 1,
+            "CrvSt": 1,
+            "AdptCrvReq": 0,
+            "AdptCrvRslt": 0,
+            "NPt": 4,
+            "NCrv": 3,
+            "RvrtTms": 0,
+            "RvrtRem": 0,
+            "RvrtCrv": 0,
+            "V_SF": -2,
+            "DeptRef_SF": -2,
+            "Crv": [
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 1,
-                  "Pt": [
-                    {
-                      "V": 9200,
-                      "Var": 3000
-                    },
-                    {
-                      "V": 9670,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10300,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10700,
-                      "Var": -3000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 1,
+                    "Pt": [
+                        {
+                            "V": 9200,
+                            "Var": 3000
+                        },
+                        {
+                            "V": 9670,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10300,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10700,
+                            "Var": -3000
+                        }
+                    ]
                 },
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 0,
-                  "Pt": [
-                    {
-                      "V": 9300,
-                      "Var": 3000
-                    },
-                    {
-                      "V": 9570,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10200,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10600,
-                      "Var": -4000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 0,
+                    "Pt": [
+                        {
+                            "V": 9300,
+                            "Var": 3000
+                        },
+                        {
+                            "V": 9570,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10200,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10600,
+                            "Var": -4000
+                        }
+                    ]
                 },
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 0,
-                  "Pt": [
-                    {
-                      "V": 9400,
-                      "Var": 2000
-                    },
-                    {
-                      "V": 9570,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10500,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10800,
-                      "Var": -2000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 0,
+                    "Pt": [
+                        {
+                            "V": 9400,
+                            "Var": 2000
+                        },
+                        {
+                            "V": 9570,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10500,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10800,
+                            "Var": -2000
+                        }
+                    ]
                 }
-              ]
-            }
+            ]
+        }
         m = device.Model(705, data=gdata_705)
         d.add_model(m)
         assert d.get_json() == '''{"name": null, "did": null, "models": [{"ID": 705, "L": 67, "Ena": 1,''' + \
@@ -2981,105 +2996,105 @@ class TestDevice:
     def test_get_mb(self):
         d = device.Device()
         gdata_705 = {
-              "ID": 705,
-              "Ena": 1,
-              "CrvSt": 1,
-              "AdptCrvReq": 0,
-              "AdptCrvRslt": 0,
-              "NPt": 4,
-              "NCrv": 3,
-              "RvrtTms": 0,
-              "RvrtRem": 0,
-              "RvrtCrv": 0,
-              "V_SF": -2,
-              "DeptRef_SF": -2,
-              "Crv": [
+            "ID": 705,
+            "Ena": 1,
+            "CrvSt": 1,
+            "AdptCrvReq": 0,
+            "AdptCrvRslt": 0,
+            "NPt": 4,
+            "NCrv": 3,
+            "RvrtTms": 0,
+            "RvrtRem": 0,
+            "RvrtCrv": 0,
+            "V_SF": -2,
+            "DeptRef_SF": -2,
+            "Crv": [
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 1,
-                  "Pt": [
-                    {
-                      "V": 9200,
-                      "Var": 3000
-                    },
-                    {
-                      "V": 9670,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10300,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10700,
-                      "Var": 3000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 1,
+                    "Pt": [
+                        {
+                            "V": 9200,
+                            "Var": 3000
+                        },
+                        {
+                            "V": 9670,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10300,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10700,
+                            "Var": 3000
+                        }
+                    ]
                 },
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 0,
-                  "Pt": [
-                    {
-                      "V": 9300,
-                      "Var": 3000
-                    },
-                    {
-                      "V": 9570,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10200,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10600,
-                      "Var": 4000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 0,
+                    "Pt": [
+                        {
+                            "V": 9300,
+                            "Var": 3000
+                        },
+                        {
+                            "V": 9570,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10200,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10600,
+                            "Var": 4000
+                        }
+                    ]
                 },
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 0,
-                  "Pt": [
-                    {
-                      "V": 9400,
-                      "Var": 2000
-                    },
-                    {
-                      "V": 9570,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10500,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10800,
-                      "Var": 2000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 0,
+                    "Pt": [
+                        {
+                            "V": 9400,
+                            "Var": 2000
+                        },
+                        {
+                            "V": 9570,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10500,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10800,
+                            "Var": 2000
+                        }
+                    ]
                 }
-              ]
-            }
+            ]
+        }
         m = device.Model(705, data=gdata_705)
         d.add_model(m)
         assert d.get_mb() == b"\x02\xc1\x00C\x00\x01\x00\x00\x00\x00\x00\x04\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00" \
@@ -3106,105 +3121,105 @@ class TestDevice:
     def test_set_mb(self):
         d = device.Device()
         gdata_705 = {
-              "ID": 705,
-              "Ena": 1,
-              "CrvSt": 1,
-              "AdptCrvReq": 0,
-              "AdptCrvRslt": 0,
-              "NPt": 4,
-              "NCrv": 3,
-              "RvrtTms": 0,
-              "RvrtRem": 0,
-              "RvrtCrv": 0,
-              "V_SF": -2,
-              "DeptRef_SF": -2,
-              "Crv": [
+            "ID": 705,
+            "Ena": 1,
+            "CrvSt": 1,
+            "AdptCrvReq": 0,
+            "AdptCrvRslt": 0,
+            "NPt": 4,
+            "NCrv": 3,
+            "RvrtTms": 0,
+            "RvrtRem": 0,
+            "RvrtCrv": 0,
+            "V_SF": -2,
+            "DeptRef_SF": -2,
+            "Crv": [
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 1,
-                  "Pt": [
-                    {
-                      "V": 9200,
-                      "Var": 3000
-                    },
-                    {
-                      "V": 9670,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10300,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10700,
-                      "Var": 3000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 1,
+                    "Pt": [
+                        {
+                            "V": 9200,
+                            "Var": 3000
+                        },
+                        {
+                            "V": 9670,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10300,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10700,
+                            "Var": 3000
+                        }
+                    ]
                 },
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 0,
-                  "Pt": [
-                    {
-                      "V": 9300,
-                      "Var": 3000
-                    },
-                    {
-                      "V": 9570,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10200,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10600,
-                      "Var": 4000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 0,
+                    "Pt": [
+                        {
+                            "V": 9300,
+                            "Var": 3000
+                        },
+                        {
+                            "V": 9570,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10200,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10600,
+                            "Var": 4000
+                        }
+                    ]
                 },
                 {
-                  "ActPt": 4,
-                  "DeptRef": 1,
-                  "Pri": 1,
-                  "VRef": 1,
-                  "VRefAuto": 0,
-                  "VRefTms": 5,
-                  "RspTms": 6,
-                  "ReadOnly": 0,
-                  "Pt": [
-                    {
-                      "V": 9400,
-                      "Var": 2000
-                    },
-                    {
-                      "V": 9570,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10500,
-                      "Var": 0
-                    },
-                    {
-                      "V": 10800,
-                      "Var": 2000
-                    }
-                  ]
+                    "ActPt": 4,
+                    "DeptRef": 1,
+                    "Pri": 1,
+                    "VRef": 1,
+                    "VRefAuto": 0,
+                    "VRefTms": 5,
+                    "RspTms": 6,
+                    "ReadOnly": 0,
+                    "Pt": [
+                        {
+                            "V": 9400,
+                            "Var": 2000
+                        },
+                        {
+                            "V": 9570,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10500,
+                            "Var": 0
+                        },
+                        {
+                            "V": 10800,
+                            "Var": 2000
+                        }
+                    ]
                 }
-              ]
-            }
+            ]
+        }
         m = device.Model(705, data=gdata_705)
         d.add_model(m)
         assert d.get_mb() == b"\x02\xc1\x00C\x00\x01\x00\x00\x00\x00\x00\x04\x00\x03\x00\x00\x00\x00\x00\x00\x00" \
@@ -3251,70 +3266,71 @@ class TestDevice:
         d = device.Device()
         m = device.Model(705, data=model_705_data)
         d.add_model(m)
-        get_text_expected_output = '''Model: DERVoltVar (705)\n\n      ID                                   ''' + \
-                                   '''               705\n      L                                           ''' + \
-                                   '''         67\n      Ena                                                ''' + \
-                                   '''   1\n      AdptCrvReq                                            0\n ''' + \
-                                   '''     AdptCrvRslt                                           0\n      NPt  ''' + \
-                                   '''                                                 4\n      NCrv           ''' + \
-                                   '''                                       3\n      RvrtTms                  ''' + \
-                                   '''                             0 Secs\n      RvrtRem                       ''' + \
-                                   '''                        0 Secs\n      RvrtCrv                            ''' + \
-                                   '''                   0\n      V_SF                                         ''' + \
-                                   '''        -2\n      DeptRef_SF                                     ''' + \
-                                   '''      -2\n      RspTms_SF                                  ''' + \
-                                   '''        None\n   01:ActPt                                      ''' + \
-                                   '''           4\n   01:DeptRef                                     ''' + \
-                                   '''          1\n   01:Pri                                          ''' + \
-                                   '''         1\n   01:VRef                                          ''' + \
-                                   '''        1 VRefPct\n   01:VRefAuto                               ''' + \
-                                   '''               0 VRefPct\n   01:VRefAutoEna                     ''' + \
-                                   '''                   None\n   01:VRefAutoTms                      ''' + \
-                                   '''                  None Secs\n   01:RspTms                       ''' + \
-                                   '''                         6 Secs\n   01:ReadOnly                 ''' + \
-                                   '''                             1\n01:01:V                         ''' + \
-                                   '''                         9200 VRefPct\n01:01:Var                ''' + \
-                                   '''                                3000 DeptRef\n01:02:V           ''' + \
-                                   '''                                       9670 VRefPct\n01:02:Var   ''' + \
-                                   '''                                                0 DeptRef\n01:03:V    ''' + \
-                                   '''                                             10300 VRefPct\n01:03:Var    ''' + \
-                                   '''                                               0 DeptRef\n01:04:V      ''' + \
-                                   '''                                           10700 VRefPct\n01:04:Var   ''' + \
-                                   '''                                             3000 DeptRef\n   02:ActPt   ''' + \
-                                   '''                                              4\n   02:DeptRef          ''' + \
-                                   '''                                     1\n   02:Pri                      ''' + \
-                                   '''                             1\n   02:VRef                             ''' + \
-                                   '''                     1 VRefPct\n   02:VRefAuto                        ''' + \
-                                   '''                      0 VRefPct\n   02:VRefAutoEna                    ''' + \
-                                   '''                    None\n   02:VRefAutoTms                           ''' + \
-                                   '''             None Secs\n   02:RspTms                                  ''' + \
-                                   '''              6 Secs\n   02:ReadOnly                                  ''' + \
-                                   '''            0\n02:01:V                                             ''' + \
-                                   '''     9300 VRefPct\n02:01:Var                                       ''' + \
-                                   '''         3000 DeptRef\n02:02:V                                   ''' + \
-                                   '''               9570 VRefPct\n02:02:Var                           ''' + \
-                                   '''                        0 DeptRef\n02:03:V                        ''' + \
-                                   '''                         10200 VRefPct\n02:03:Var                 ''' + \
-                                   '''                                  0 DeptRef\n02:04:V              ''' + \
-                                   '''                                   10600 VRefPct\n02:04:Var       ''' + \
-                                   '''                                         4000 DeptRef\n   03:ActPt   ''' + \
-                                   '''                                              4\n   03:DeptRef        ''' + \
-                                   '''                                       1\n   03:Pri                  ''' + \
-                                   '''                                 1\n   03:VRef                        ''' + \
-                                   '''                          1 VRefPct\n   03:VRefAuto                    ''' + \
-                                   '''                          0 VRefPct\n   03:VRefAutoEna               ''' + \
-                                   '''                         None\n   03:VRefAutoTms                      ''' + \
-                                   '''                  None Secs\n   03:RspTms                            ''' + \
-                                   '''                    6 Secs\n   03:ReadOnly                         ''' + \
-                                   '''                     0\n03:01:V                                       ''' + \
-                                   '''           9400 VRefPct\n03:01:Var                                    ''' + \
-                                   '''            2000 DeptRef\n03:02:V                                    ''' + \
-                                   '''              9570 VRefPct\n03:02:Var                               ''' + \
-                                   '''                    0 DeptRef\n03:03:V                              ''' + \
-                                   '''                   10500 VRefPct\n03:03:Var                         ''' + \
-                                   '''                          0 DeptRef\n03:04:V                        ''' + \
-                                   '''                         10800 VRefPct\n03:04:Var                   ''' + \
-                                   '''                             2000 DeptRef\n'''
+        get_text_expected_output = '''Model: DERVoltVar (705)\n\n''' + \
+                                   '''      ID                                                  705\n''' + \
+                                   '''      L                                                    67\n''' + \
+                                   '''      Ena                                                   1\n''' + \
+                                   '''      AdptCrvReq                                            0\n''' + \
+                                   '''      AdptCrvRslt                                           0\n''' + \
+                                   '''      NPt                                                   4\n''' + \
+                                   '''      NCrv                                                  3\n''' + \
+                                   '''      RvrtTms                                               0 Secs\n''' + \
+                                   '''      RvrtRem                                               0 Secs\n''' + \
+                                   '''      RvrtCrv                                               0\n''' + \
+                                   '''      V_SF                                                 -2\n''' + \
+                                   '''      DeptRef_SF                                           -2\n''' + \
+                                   '''      RspTms_SF                                          None\n''' + \
+                                   '''   01:ActPt                                                 4\n''' + \
+                                   '''   01:DeptRef                                               1\n''' + \
+                                   '''   01:Pri                                                   1\n''' + \
+                                   '''   01:VRef                                                  1 VNomPct\n''' + \
+                                   '''   01:VRefAuto                                              0 VNomPct\n''' + \
+                                   '''   01:VRefAutoEna                                        None\n''' + \
+                                   '''   01:VRefAutoTms                                        None Secs\n''' + \
+                                   '''   01:RspTms                                                6 Secs\n''' + \
+                                   '''   01:ReadOnly                                              1\n''' + \
+                                   '''01:01:V                                                  9200 VNomPct\n''' + \
+                                   '''01:01:Var                                                3000 DeptRef\n''' + \
+                                   '''01:02:V                                                  9670 VNomPct\n''' + \
+                                   '''01:02:Var                                                   0 DeptRef\n''' + \
+                                   '''01:03:V                                                 10300 VNomPct\n''' + \
+                                   '''01:03:Var                                                   0 DeptRef\n''' + \
+                                   '''01:04:V                                                 10700 VNomPct\n''' + \
+                                   '''01:04:Var                                                3000 DeptRef\n''' + \
+                                   '''   02:ActPt                                                 4\n''' + \
+                                   '''   02:DeptRef                                               1\n''' + \
+                                   '''   02:Pri                                                   1\n''' + \
+                                   '''   02:VRef                                                  1 VNomPct\n''' + \
+                                   '''   02:VRefAuto                                              0 VNomPct\n''' + \
+                                   '''   02:VRefAutoEna                                        None\n''' + \
+                                   '''   02:VRefAutoTms                                        None Secs\n''' + \
+                                   '''   02:RspTms                                                6 Secs\n''' + \
+                                   '''   02:ReadOnly                                              0\n''' + \
+                                   '''02:01:V                                                  9300 VNomPct\n''' + \
+                                   '''02:01:Var                                                3000 DeptRef\n''' + \
+                                   '''02:02:V                                                  9570 VNomPct\n''' + \
+                                   '''02:02:Var                                                   0 DeptRef\n''' + \
+                                   '''02:03:V                                                 10200 VNomPct\n''' + \
+                                   '''02:03:Var                                                   0 DeptRef\n''' + \
+                                   '''02:04:V                                                 10600 VNomPct\n''' + \
+                                   '''02:04:Var                                                4000 DeptRef\n''' + \
+                                   '''   03:ActPt                                                 4\n''' + \
+                                   '''   03:DeptRef                                               1\n''' + \
+                                   '''   03:Pri                                                   1\n''' + \
+                                   '''   03:VRef                                                  1 VNomPct\n''' + \
+                                   '''   03:VRefAuto                                              0 VNomPct\n''' + \
+                                   '''   03:VRefAutoEna                                        None\n''' + \
+                                   '''   03:VRefAutoTms                                        None Secs\n''' + \
+                                   '''   03:RspTms                                                6 Secs\n''' + \
+                                   '''   03:ReadOnly                                              0\n''' + \
+                                   '''03:01:V                                                  9400 VNomPct\n''' + \
+                                   '''03:01:Var                                                2000 DeptRef\n''' + \
+                                   '''03:02:V                                                  9570 VNomPct\n''' + \
+                                   '''03:02:Var                                                   0 DeptRef\n''' + \
+                                   '''03:03:V                                                 10500 VNomPct\n''' + \
+                                   '''03:03:Var                                                   0 DeptRef\n''' + \
+                                   '''03:04:V                                                 10800 VNomPct\n''' + \
+                                   '''03:04:Var                                                2000 DeptRef\n'''
         get_text_output = d.get_text()
         # dont compare timestamps
         assert get_text_output[get_text_output.index('Model'):] == get_text_expected_output
