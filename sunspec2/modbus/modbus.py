@@ -528,7 +528,7 @@ class ModbusClientTCP(object):
                     data_len = struct.unpack('>H', resp[TCP_HDR_O_LEN:TCP_HDR_O_LEN + 2])
                     len_remaining = data_len[0] - (len(resp) - TCP_HDR_LEN)
             else:
-                raise ModbusClientError('Response timeout')
+                raise ModbusClientTimeout('Response timeout')
 
         if not (resp[TCP_HDR_LEN + 1] & 0x80):
             len_remaining = (resp[TCP_HDR_LEN + 2] + TCP_HDR_LEN) - len(resp)
@@ -591,6 +591,8 @@ class ModbusClientTCP(object):
                     read_offset += read_count
                 else:
                     break
+        except socket.timeout as e:
+            raise ModbusClientTimeout(str(e))
         finally:
             if local_connect:
                 self.disconnect()

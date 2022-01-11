@@ -182,7 +182,7 @@ class SunSpecModbusClientDevice(device.Device):
         device.Device.__init__(self, model_class=model_class)
         self.did = str(uuid.uuid4())
         self.retry_count = 2
-        self.base_addr_list = [0, 40000, 50000]
+        self.base_addr_list = [40000, 0, 50000]
         self.base_addr = None
 
     def connect(self):
@@ -227,11 +227,14 @@ class SunSpecModbusClientDevice(device.Device):
             for addr in self.base_addr_list:
                 try:
                     data = self.read(addr, 3)
-                    if data[:4] == b'SunS':
-                        self.base_addr = addr
-                        break
+                    if data:
+                        if data[:4] == b'SunS':
+                            self.base_addr = addr
+                            break
+                        else:
+                            error = 'Device responded - not SunSpec register map'
                     else:
-                        error = 'Device responded - not SunSpec register map'
+                        error = 'data time out'
                 except SunSpecModbusClientError as e:
                     if not error:
                         error = str(e)
