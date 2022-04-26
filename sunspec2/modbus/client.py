@@ -36,6 +36,10 @@ class SunSpecModbusClientError(Exception):
     pass
 
 
+class SunSpecModbusValueError(Exception):
+    pass
+
+
 class SunSpecModbusClientTimeout(SunSpecModbusClientError):
     pass
 
@@ -52,8 +56,11 @@ class SunSpecModbusClientPoint(device.Point):
 
     def write(self):
         """Write the point to the physical device"""
-
-        data = self.info.to_data(self.value, int(self.len) * 2)
+        try:
+            data = self.info.to_data(self.value, int(self.len) * 2)
+        except Exception as e:
+            raise SunSpecModbusValueError('Point value error for %s %s: %s' % (self.pdef.get(mdef.NAME), self.value,
+                                                                               str(e)))
         model_addr = self.model.model_addr
         point_offset = self.offset
         addr = model_addr + point_offset
@@ -112,7 +119,10 @@ class SunSpecModbusClientGroup(device.Group):
                 data = b''
             if point.dirty:
                 point_len = point.len
-                point_data = point.info.to_data(point.value, int(point_len) * 2)
+                try:
+                    point_data = point.info.to_data(point.value, int(point_len) * 2)
+                except Exception as e:
+                    raise SunSpecModbusValueError('Point value error for %s %s: %s' % (name, point.value, str(e)))
                 if not data:
                     start_addr = point_addr
                 next_addr = point_addr + point_len
