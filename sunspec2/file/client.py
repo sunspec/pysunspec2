@@ -52,7 +52,7 @@ class FileClientModel(FileClientGroup):
             self.add_error(str(e))
 
         FileClientGroup.__init__(self, gdef=gdef, model=self, model_offset=0, group_len=self.model_len, data=data,
-                                 data_offset=0, group_class=group_class)
+                                 data_offset=0, group_class=group_class, point_class=point_class)
 
     def add_error(self, error_info):
         self.error_info = '%s%s\n' % (self.error_info, error_info)
