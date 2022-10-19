@@ -456,9 +456,9 @@ class TestPoint:
         setattr(m, 'points', points)
         p2 = device.Point(p_def, model=m)
         p2.sf_value = -2
-        p2.cvalue = 1.16
-        assert p2.cvalue == 1.16
-        assert p2.value == 116
+        p2.cvalue = 1.38
+        assert p2.cvalue == 1.38
+        assert p2.value == 138
 
         # test static true
         p_def2 = {
