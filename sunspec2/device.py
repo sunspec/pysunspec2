@@ -220,7 +220,7 @@ class Point(object):
             if self.sf_value:
                 sfv = self.sf_value
                 if sfv:
-                    v = v * math.pow(10, sfv)
+                    v = round(v * math.pow(10, sfv), -1 * sfv)
         return v
 
     def set_value(self, data=None, computed=False, dirty=None):
