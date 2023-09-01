@@ -32,6 +32,21 @@ def test_from_smdx_file():
     assert smdx.from_smdx_file('sunspec2/models/smdx/smdx_00304.xml') == smdx_304
 
 
+def test_from_smdx_file_symbols():
+    mdef = smdx.from_smdx_file('sunspec2/models/smdx/smdx_00803.xml')
+    for point_def in mdef["group"]["groups"][0]["points"]:
+        if point_def["name"] != "StrSt":
+            continue
+        symbol = point_def["symbols"][1]
+        assert symbol["name"] == "CONTACTOR_STATUS"
+        assert symbol["label"] == "Contactor Status"
+        assert symbol["desc"].startswith("String")
+        assert symbol["detail"]
+        break
+    else:
+        pytest.fail("Point not found")
+
+
 def test_from_smdx():
     tree = ET.parse('sunspec2/models/smdx/smdx_00304.xml')
     root = tree.getroot()

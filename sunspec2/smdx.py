@@ -255,6 +255,8 @@ def from_smdx(element):
                     fixed_def[mdef.DESCRIPTION] = a.text
                 elif a.tag == SMDX_NOTES and a.text:
                     fixed_def[mdef.DETAIL] = a.text
+
+        # Assign point info to point definitions
         for p in e.findall(SMDX_POINT):
             pid = p.attrib.get(SMDX_ATTR_ID)
             label = desc = notes = None
@@ -266,22 +268,41 @@ def from_smdx(element):
                 elif a.tag == SMDX_NOTES and a.text:
                     notes = a.text
 
-            point_def = fixed_points_map.get(pid)
-            if point_def is not None:
+            for points_map in [fixed_points_map, repeating_points_map]:
+                point_def = points_map.get(pid)
+                if point_def is None:
+                    continue
+
                 if label:
                     point_def[mdef.LABEL] = label
                 if desc:
                     point_def[mdef.DESCRIPTION] = desc
                 if notes:
                     point_def[mdef.DETAIL] = notes
-            point_def = repeating_points_map.get(pid)
-            if point_def is not None:
-                if label:
-                    point_def[mdef.LABEL] = label
-                if desc:
-                    point_def[mdef.DESCRIPTION] = desc
-                if notes:
-                    point_def[mdef.DETAIL] = notes
+
+                # Assign symbol info to the point's symbol definitions
+                for s in p.findall(SMDX_SYMBOL):
+                    sid = s.attrib.get(SMDX_ATTR_ID)
+                    s_label = s_desc = s_notes = None
+                    for a in s.findall('*'):
+                        if a.tag == SMDX_LABEL and a.text:
+                            s_label = a.text
+                        elif a.tag == SMDX_DESCRIPTION and a.text:
+                            s_desc = a.text
+                        elif a.tag == SMDX_NOTES and a.text:
+                            s_notes = a.text
+
+                    for s in point_def.get(mdef.SYMBOLS):
+                        if s[mdef.NAME] != sid:
+                            continue
+
+                        if s_label:
+                            s[mdef.LABEL] = s_label
+                        if s_desc:
+                            s[mdef.DESCRIPTION] = s_desc
+                        if s_notes:
+                            s[mdef.DETAIL] = s_notes
+                        break
 
     model_def = {'id': mid, 'group': fixed_def}
     return model_def
