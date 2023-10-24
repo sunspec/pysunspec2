@@ -2847,6 +2847,13 @@ class TestFileClientDevice:
         assert d.common
         assert d.DERMeasureAC
 
+    def test_repeating_point(self):
+        d = file_client.FileClientDevice('sunspec2/tests/test_data/inverter_123.json')
+        d.scan()
+        assert d.models[129][-1].curve[0].Tms1.value == 200
+        assert d.models[129][-1].curve[1].Tms1.value == 0
+        assert d.models[129][-1].curve[2].Tms11.value is None
+
     def test_get_text(self, model_705_data):
         d = file_client.FileClientDevice()
         m = file_client.FileClientModel(705, data=model_705_data)

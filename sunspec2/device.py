@@ -540,7 +540,7 @@ class Group(object):
             # compute count based on model len if present, otherwise allocate when set
             model_len = self.model.len
             if model_len:
-                gdata = self._group_data(data=data, name=gdef[mdef.NAME])
+                gdata = self._group_data(data=data, name=gdef[mdef.NAME], index=0)
                 g = self.group_class(gdef=gdef, model=self.model, model_offset=model_offset, data=gdata,
                                      data_offset=data_offset, index=1)
                 group_points_len = g.points_len
@@ -560,7 +560,8 @@ class Group(object):
                         model_offset += g.len
                         data_offset += g.len
                     for i in range(count - 1):
-                        g = self.group_class(gdef=gdef, model=self.model, model_offset=model_offset, data=data,
+                        gdata = self._group_data(data=data, index=(i+1))
+                        g = self.group_class(gdef=gdef, model=self.model, model_offset=model_offset, data=gdata,
                                            data_offset=data_offset, index=i+2)
                         model_offset += g.len
                         data_offset += g.len
