@@ -4,3 +4,6 @@ venv
 .pytest_cache/
 __pycache__/
 
+.tox/
+*.egg-info/
+build/
