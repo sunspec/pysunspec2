@@ -400,6 +400,28 @@ The function is disabled, set the value to 1, and write to device, in order to e
 It is considered a best practice with Modbus to verify values written to the device by reading them back to ensure they
 were set properly. That step has been omitted to here to focus on the update sequence.
 
+Development
+============
+
+Executing the unit tests
+------------------------
+
+Make sure `tox` is installed on your computer (see [tox documentation](https://tox.wiki/) for details).
+
+The following command will let `tox` create a virtual environment with all necessary dependencies for each python 
+version supported by PySunspec and use it to execute the unit tests. 
+Each python version must already be installed on the host
+
+```sh
+tox
+```
+
+We can also run the test for one specific python version only:
+
+```sh
+tox -e py39
+```
+
 Contribution
 ============
 If you wish to contribute to the project, please contact support@sunspec.org to sign a CLA.
