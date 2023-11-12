@@ -680,8 +680,8 @@ class ModbusClientTCP(object):
                     write_count = self.max_write_count
                 else:
                     write_count = count
-                    start = (write_offset * 2)
-                    end = int((write_offset + write_count) * 2)
+                start = (write_offset * 2)
+                end = int((write_offset + write_count) * 2)
                 self._write(addr + write_offset, data[start:end])
                 count -= write_count
                 write_offset += write_count
