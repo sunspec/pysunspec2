@@ -9,7 +9,7 @@ from distutils.core import setup
 
 setup(
     name='pysunspec2',
-    version='1.0.10',
+    version='1.0.9',
     description='Python SunSpec Tools',
     author='SunSpec Alliance',
     author_email='support@sunspec.org',
