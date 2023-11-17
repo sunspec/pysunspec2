@@ -38,6 +38,10 @@ Installing from the setup.py file:
 or if the python path isn't configured:
  
  C:\> c:\\Python37\\python.exe setup.py install
+
+Note: To install the models while cloning the repository, make sure to add the recursive tag:
+
+ git clone https://github.com/sunspec/pysunspec2.git --recursive
  
 Interacting with a SunSpec Device
 =================================
