@@ -24,7 +24,7 @@ Features
 
 Requirements
 ============
-- Python >= 3.7 
+- Python >= 3.5 
 - pySerial (if using Modbus RTU)
 - openpyxl (if using Excel spreadsheet)
 - pytest (if running tests)
