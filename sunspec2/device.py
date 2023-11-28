@@ -19,7 +19,7 @@ models_dir = os.path.join(this_dir, 'models')
 
 model_defs_path = ['.', models_dir]
 model_path_options = ['.', 'json', 'smdx']
-
+model_defs_cache = {}
 
 def get_model_defs_path():
     return model_defs_path
@@ -72,6 +72,10 @@ def get_model_def(model_id, mapping=True):
     except:
         raise mdef.ModelDefinitionError('Invalid model id: %s' % model_id)
 
+    global model_defs_cache
+    if (model_id, mapping) in model_defs_cache:
+        return model_defs_cache[(model_id, mapping)].copy()
+
     model_def_file_json = mdef.to_json_filename(model_id)
     model_def_file_smdx = smdx.to_smdx_filename(model_id)
     model_def = None
@@ -98,6 +102,7 @@ def get_model_def(model_id, mapping=True):
             if model_def is not None:
                 if mapping:
                     add_mappings(model_def[mdef.GROUP])
+                model_defs_cache[(model_id, mapping)] = model_def.copy()
                 return model_def
     raise mdef.ModelDefinitionError('Model definition not found for model %s' % model_id)
 
