@@ -33,9 +33,9 @@ Installation
 =================================
 Installing using pip:
 
-pip install pysunspec2
+ pip install pysunspec2
 
-Installing using pip installs the models as well
+Installation using pip installs the models as well
 
 Installing from the setup.py file (deprecated):
 
