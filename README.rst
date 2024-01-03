@@ -31,7 +31,13 @@ Requirements
 
 Installation
 =================================
-Installing from the setup.py file:
+Installing using pip:
+
+pip install pysunspec2
+
+Installing using pip installs the models as well
+
+Installing from the setup.py file (deprecated):
 
  C:\> python setup.py install
  
