@@ -308,7 +308,7 @@ class SunSpecModbusClientDevice(device.Device):
 
 class SunSpecModbusClientDeviceTCP(SunSpecModbusClientDevice):
     def __init__(self, slave_id=1, ipaddr='127.0.0.1', ipport=502, timeout=None, ctx=None, trace_func=None,
-                 max_count=modbus_client.REQ_COUNT_MAX, max_write_count=modbus_client.REQ_WRITE_COUNT_MAX, test=False,
+                 max_count=modbus_client.REQ_COUNT_MAX, max_write_count=modbus_client.REQ_WRITE_COUNT_MAX,
                  model_class=SunSpecModbusClientModel):
         SunSpecModbusClientDevice.__init__(self, model_class=model_class)
         self.slave_id = slave_id
@@ -324,7 +324,8 @@ class SunSpecModbusClientDeviceTCP(SunSpecModbusClientDevice):
         self.client = modbus_client.ModbusClientTCP(slave_id=slave_id, ipaddr=ipaddr, ipport=ipport, timeout=timeout,
                                                     ctx=ctx, trace_func=trace_func,
                                                     max_count=modbus_client.REQ_COUNT_MAX,
-                                                    max_write_count=modbus_client.REQ_WRITE_COUNT_MAX, test=test)
+                                                    max_write_count=modbus_client.REQ_WRITE_COUNT_MAX)
+
         if self.client is None:
             raise SunSpecModbusClientError('No modbus tcp client set for device')
 
@@ -421,7 +422,7 @@ class SunSpecModbusClientDeviceRTU(SunSpecModbusClientDevice):
             Byte string containing register contents.
         """
 
-        return self.client.read(self.slave_id, addr, count, op=op, trace_func=self.trace_func, max_count=self.max_count)
+        return self.client.read(self.slave_id, addr, count, op=op, max_count=self.max_count)
 
     def write(self, addr, data):
         """Write Modbus device registers.
@@ -432,5 +433,4 @@ class SunSpecModbusClientDeviceRTU(SunSpecModbusClientDevice):
                 Byte string containing register contents.
         """
 
-        return self.client.write(self.slave_id, addr, data, trace_func=self.trace_func,
-                                 max_write_count=self.max_write_count)
+        return self.client.write(self.slave_id, addr, data, max_write_count=self.max_write_count)

@@ -4,8 +4,8 @@ pySunSpec2
 Overview
 ========
 pySunSpec is a python package that provides objects and applications that support interaction with SunSpec compliant
-devices and documents. pySunSpec runs in most environments that support Python and is tested on Windows 7 and
-Windows 10.
+devices and documents. pySunSpec runs in most environments that support Python and is tested on Windows 7, Windows 10,
+and Windows 11.
 
 This is the next generation of pySunSpec tools. It supports all SunSpec infomation model definitions and formats including smdx and
 json. The Python objects used for interacting with devices have some differences from version 1 and it is not backward
@@ -37,13 +37,13 @@ Installing using pip:
 
 Installation using pip installs the models as well
 
-Installing from the setup.py file (deprecated):
+Installing from the setup.py file:
 
- C:\> python setup.py install
+ C:\\pysunspec2> python -m pip install .
  
 or if the python path isn't configured:
  
- C:\> c:\\Python37\\python.exe setup.py install
+ C:\\pysunspec2> c:\\Python37\\python.exe -m pip install .
 
 Note: To install the models while cloning the repository, make sure to add the recursive tag:
 

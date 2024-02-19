@@ -31,6 +31,7 @@ REQ_WRITE_COUNT_MAX = 123
 FUNC_READ_HOLDING = 3
 FUNC_READ_INPUT = 4
 FUNC_WRITE_MULTIPLE = 16
+FUNC_WRITE_SINGLE = 6
 
 TEST_NAME = 'test_name'
 
@@ -41,6 +42,7 @@ TCP_RESP_MIN_LEN = 3
 TCP_HDR_O_LEN = 4
 TCP_READ_REQ_LEN = 6
 TCP_WRITE_MULT_REQ_LEN = 7
+TCP_WRITE_SINGLE_REQ_LEN = 4
 
 TCP_DEFAULT_PORT = 502
 TCP_DEFAULT_TIMEOUT = 2
@@ -131,7 +133,7 @@ def checkCRC(data, check):
     return computeCRC(data) == check
 
 
-class ModbusClientRTU(object):
+class ModbusClientRTU:
     """A Modbus RTU client that multiple devices can use to access devices over
     the same serial interface. Currently, the implementation does not support
     concurent device requests so the support of multiple devices must be single
@@ -176,11 +178,11 @@ class ModbusClientRTU(object):
         self.baudrate = baudrate
         self.parity = parity
         self.serial = None
-        self.timeout = .5
-        self.write_timeout = .5
+        self.timeout = 0.5
+        self.write_timeout = 0.5
         self.devices = {}
         self.trace_func = None
-        self.inter_frame_gap = .00175
+        self.inter_frame_gap = 0.00175
 
         baudrate = int(baudrate)
         if baudrate <= 19200:
@@ -245,7 +247,7 @@ class ModbusClientRTU(object):
             self.close()
             modbus_rtu_client_remove(self.name)
 
-    def _read(self, slave_id, addr, count, op=FUNC_READ_HOLDING, trace_func=None):
+    def _read(self, slave_id, addr, count, op=FUNC_READ_HOLDING):
         resp = bytearray()
         len_remaining = 5
         len_found = False
@@ -276,7 +278,7 @@ class ModbusClientRTU(object):
                 resp += c
                 len_remaining -= len_read
                 if len_found is False and len(resp) >= 5:
-                    if not (resp[1] & 0x80):
+                    if not resp[1] & 0x80:
                         len_remaining = (resp[2] + 5) - len(resp)
                         len_found = True
                     else:
@@ -300,8 +302,7 @@ class ModbusClientRTU(object):
 
         return resp[3:-2]
 
-    def read(self, slave_id, addr, count, op=FUNC_READ_HOLDING, trace_func=None, max_count=REQ_COUNT_MAX):
-
+    def read(self, slave_id, addr, count, op=FUNC_READ_HOLDING, max_count=REQ_COUNT_MAX):
         """
         Parameters:
             slave_id :
@@ -313,16 +314,12 @@ class ModbusClientRTU(object):
             op :
                 Modbus function code for request. Possible values:
                     :const:`FUNC_READ_HOLDING`, :const:`FUNC_READ_INPUT`.
-            trace_func :
-                Trace function to use for detailed logging. No detailed logging
-                is perform is a trace function is not supplied.
             max_count :
                 Maximum register count for a single Modbus request.
         Returns:
             Byte string containing register contents.
         """
         resp = bytearray()
-        read_count = 0
         read_offset = 0
 
         if self.serial is not None:
@@ -331,7 +328,7 @@ class ModbusClientRTU(object):
                     read_count = max_count
                 else:
                     read_count = count
-                data = self._read(slave_id, addr + read_offset, read_count, op=op, trace_func=trace_func)
+                data = self._read(slave_id, addr + read_offset, read_count, op=op)
                 if data:
                     resp += data
                     count -= read_count
@@ -343,7 +340,7 @@ class ModbusClientRTU(object):
 
         return bytes(resp)
 
-    def _write(self, slave_id, addr, data, trace_func=None):
+    def _write(self, slave_id, addr, data):
         resp = bytearray()
         len_remaining = 5
         len_found = False
@@ -400,13 +397,73 @@ class ModbusClientRTU(object):
             raise ModbusClientError('CRC error')
 
         if except_code:
-            raise ModbusClientException('Modbus exception: %d' % (except_code))
+            raise ModbusClientException('Modbus exception: %d' % except_code)
         else:
             resp_slave_id, resp_func, resp_addr, resp_count, resp_crc = struct.unpack('>BBHHH', bytes(resp))
             if resp_slave_id != slave_id or resp_func != func or resp_addr != addr or resp_count != count:
-                raise ModbusClientError('Mobus response format error')
+                raise ModbusClientError('Modbus response format error')
 
-    def write(self, slave_id, addr, data, trace_func=None, max_write_count=REQ_WRITE_COUNT_MAX):
+    def _write_single(self, slave_id, addr, data):
+        resp = bytearray()
+        len_remaining = 5
+        len_found = False
+        except_code = None
+        func = FUNC_WRITE_SINGLE
+
+        req = struct.pack('>BBH', int(slave_id), func, int(addr))
+        req += data
+        req += struct.pack('>H', computeCRC(req))
+
+        if self.trace_func:
+            # s = '{}:{}[addr={}] ->'.format(self.name, str(slave_id), addr)
+            s = '> '
+            for c in req:
+                s += '%02X' % c
+            self.trace_func(s)
+
+        self.serial.flushInput()
+
+        try:
+            time.sleep(self.inter_frame_gap)
+            self.serial.write(bytes(req))
+        except Exception as e:
+            raise ModbusClientError('Serial write error: %s' % str(e))
+
+        while len_remaining > 0:
+            c = self.serial.read(len_remaining)
+
+            len_read = len(c)
+            if len_read > 0:
+                resp += c
+                len_remaining -= len_read
+                if len_found is False and len(resp) >= 5:
+                    if not resp[1] & 0x80:
+                        len_remaining = 8 - len(resp)
+                        len_found = True
+                    else:
+                        except_code = resp[2]
+            else:
+                raise ModbusClientTimeout('Response timeout')
+
+        if self.trace_func:
+            # s = '{}:{}[addr={}] <--'.format(self.name, str(slave_id), addr)
+            s = '< '
+            for c in resp:
+                s += '%02X' % c
+            self.trace_func(s)
+
+        crc = (resp[-2] << 8) | resp[-1]
+        if not checkCRC(resp[:-2], crc):
+            raise ModbusClientError('CRC error')
+
+        if except_code:
+            raise ModbusClientException('Modbus exception: %d' % except_code)
+        else:
+            resp_slave_id, resp_func, _, resp_data, _ = struct.unpack('>BBHHH', bytes(resp))
+            if resp_slave_id != slave_id or resp_func != func or resp_data != data:
+                raise ModbusClientError('Modbus response format error')
+
+    def write(self, slave_id, addr, data, max_write_count=REQ_WRITE_COUNT_MAX):
         """
         Parameters:
             slave_id :
@@ -415,9 +472,6 @@ class ModbusClientRTU(object):
                 Starting Modbus address.
             data :
                 Byte string containing register contents.
-            trace_func :
-                Trace function to use for detailed logging. No detailed logging
-                is perform is a trace function is not supplied.
             max_write_count :
                 Maximum register count for a single Modbus write.
         """
@@ -426,24 +480,27 @@ class ModbusClientRTU(object):
         count = len(data)/2
 
         if self.serial is not None:
-            while (count > 0):
-                if count > max_write_count:
-                    write_count = max_write_count
-                else:
-                    write_count = count
-                start = int(write_offset * 2)
-                end = int((write_offset + write_count) * 2)
-                self._write(slave_id, addr + write_offset, data[start:end],
-                            trace_func=trace_func)
-                count -= write_count
-                write_offset += write_count
+            if count == 1:  # If only one register, use Func Code 0x06
+                # self._write_single(slave_id, addr, data)
+                self._write(slave_id, addr, data)  # TODO: Replace with above line after testing
+            else:
+                while count > 0:
+                    if count > max_write_count:
+                        write_count = max_write_count
+                    else:
+                        write_count = count
+                    start = int(write_offset * 2)
+                    end = int((write_offset + write_count) * 2)
+                    self._write(slave_id, addr + write_offset, data[start:end])
+                    count -= write_count
+                    write_offset += write_count
         else:
             raise ModbusClientError('Client serial port not open: %s' % self.name)
 
 
-class ModbusClientTCP(object):
+class ModbusClientTCP:
     def __init__(self, slave_id=1, ipaddr='127.0.0.1', ipport=502, timeout=None, ctx=None, trace_func=None,
-                 max_count=REQ_COUNT_MAX, max_write_count=REQ_WRITE_COUNT_MAX, test=False):
+                 max_count=REQ_COUNT_MAX, max_write_count=REQ_WRITE_COUNT_MAX):
         self.slave_id = slave_id
         self.ipaddr = ipaddr
         self.ipport = ipport
@@ -530,10 +587,7 @@ class ModbusClientTCP(object):
             else:
                 raise ModbusClientTimeout('Response timeout')
 
-        if not (resp[TCP_HDR_LEN + 1] & 0x80):
-            len_remaining = (resp[TCP_HDR_LEN + 2] + TCP_HDR_LEN) - len(resp)
-            len_found = True
-        else:
+        if resp[TCP_HDR_LEN + 1] & 0x80:
             except_code = resp[TCP_HDR_LEN + 2]
 
         if self.trace_func:
@@ -569,7 +623,6 @@ class ModbusClientTCP(object):
         """
 
         resp = bytearray()
-        read_count = 0
         read_offset = 0
         local_connect = False
 
@@ -578,7 +631,7 @@ class ModbusClientTCP(object):
             self.connect(self.timeout)
 
         try:
-            while (count > 0):
+            while count > 0:
                 if count > self.max_count:
                     read_count = self.max_count
                 else:
@@ -608,9 +661,8 @@ class ModbusClientTCP(object):
 
         write_len = len(data)
         write_count = int(write_len/2)
-        tmp = TCP_WRITE_MULT_REQ_LEN + write_len
-        req = struct.pack('>HHHBBHHB', 0, 0, TCP_WRITE_MULT_REQ_LEN + write_len, int(self.slave_id), func, int(addr),
-                          write_count, write_len)
+        req = struct.pack('>HHHBBHHB', 0, 0, TCP_WRITE_MULT_REQ_LEN + write_len, int(self.slave_id),
+                          func, int(addr), write_count, write_len)
         req += data
 
         if self.trace_func:
@@ -637,10 +689,7 @@ class ModbusClientTCP(object):
             else:
                 raise ModbusClientTimeout('Response timeout')
 
-        if not (resp[TCP_HDR_LEN + 1]) & 0x80:
-            len_remaining = (resp[TCP_HDR_LEN + 2] + TCP_HDR_LEN) - len(resp)
-            len_found = True
-        else:
+        if (resp[TCP_HDR_LEN + 1]) & 0x80:
             except_code = resp[TCP_HDR_LEN + 2]
 
         if self.trace_func:
@@ -651,7 +700,60 @@ class ModbusClientTCP(object):
             self.trace_func(s)
 
         if except_code:
-            raise ModbusClientException('Modbus exception: %d' % (except_code))
+            raise ModbusClientException('Modbus exception: %d' % except_code)
+
+    def _write_single(self, addr, data):
+        """
+        Write Single Modbus device register
+        """
+
+        resp = bytearray()
+        len_remaining = TCP_HDR_LEN + TCP_RESP_MIN_LEN
+        len_found = False
+        except_code = None
+        func = FUNC_WRITE_SINGLE
+
+        write_len = len(data)
+        req = struct.pack('>HHHBBH', 0, 0, TCP_WRITE_SINGLE_REQ_LEN + write_len, int(self.slave_id),
+                          func, int(addr))
+        req += data
+
+        if self.trace_func:
+            # s = '%s:%s:%s[addr=%s] ->' % (self.ipaddr, str(self.ipport), str(self.slave_id), addr)
+            s = '> '
+            for c in req:
+                s += '%02X' % c
+            self.trace_func(s)
+
+        try:
+            self.socket.sendall(req)
+        except Exception as e:
+            raise ModbusClientError('Socket write error: %s' % str(e))
+
+        while len_remaining > 0:
+            c = self.socket.recv(len_remaining)
+            len_read = len(c)
+            if len_read > 0:
+                resp += c
+                len_remaining -= len_read
+                if len_found is False and len(resp) >= TCP_HDR_LEN + TCP_RESP_MIN_LEN:
+                    data_len = struct.unpack('>H', resp[TCP_HDR_O_LEN:TCP_HDR_O_LEN + 2])
+                    len_remaining = data_len[0] - (len(resp) - TCP_HDR_LEN)
+            else:
+                raise ModbusClientTimeout('Response timeout')
+
+        if (resp[TCP_HDR_LEN + 1]) & 0x80:
+            except_code = resp[TCP_HDR_LEN + 2]
+
+        if self.trace_func:
+            # s = '%s:%s:%s[addr=%s] <--' % (self.ipaddr, str(self.ipport), str(self.slave_id), addr)
+            s = '< '
+            for c in resp:
+                s += '%02X' % c
+            self.trace_func(s)
+
+        if except_code:
+            raise ModbusClientException('Modbus exception: %d' % except_code)
 
     def write(self, addr, data):
         """ Write Modbus device registers. If no connection exists to the
@@ -662,10 +764,9 @@ class ModbusClientTCP(object):
             addr :
                 Starting Modbus address.
 
-            count :
+            data :
                 Byte string containing register contents.
         """
-        write_count = 0
         write_offset = 0
         local_connect = False
         count = len(data)/2
@@ -675,16 +776,19 @@ class ModbusClientTCP(object):
             self.connect(self.timeout)
 
         try:
-            while (count > 0):
-                if count > self.max_write_count:
-                    write_count = self.max_write_count
-                else:
-                    write_count = count
-                    start = (write_offset * 2)
+            if count == 1:
+                self._write_single(addr, data)  # If only one register, use Func Code 0x06
+            else:
+                while count > 0:
+                    if count > self.max_write_count:
+                        write_count = self.max_write_count
+                    else:
+                        write_count = count
+                    start = write_offset * 2
                     end = int((write_offset + write_count) * 2)
-                self._write(addr + write_offset, data[start:end])
-                count -= write_count
-                write_offset += write_count
+                    self._write(addr + write_offset, data[start:end])
+                    count -= write_count
+                    write_offset += write_count
         finally:
             if local_connect:
                 self.disconnect()
