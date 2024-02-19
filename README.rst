@@ -37,13 +37,13 @@ Installing using pip:
 
 Installation using pip installs the models as well
 
-Installing from the setup.py file (deprecated):
+Installing from the setup.py file:
 
- C:\> python setup.py install
+ C:\pysunspec2> python -m pip install .
  
 or if the python path isn't configured:
  
- C:\> c:\\Python37\\python.exe setup.py install
+ C:\pysunspec2> c:\\Python37\\python.exe setup.py install
 
 Note: To install the models while cloning the repository, make sure to add the recursive tag:
 
