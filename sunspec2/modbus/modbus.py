@@ -459,9 +459,10 @@ class ModbusClientRTU:
         if except_code:
             raise ModbusClientException('Modbus exception: %d' % except_code)
         else:
-            resp_slave_id, resp_func, _, resp_data, _ = struct.unpack('>BBHHH', bytes(resp))
-            if resp_slave_id != slave_id or resp_func != func or resp_data != data:
-                raise ModbusClientError('Modbus response format error')
+            resp_slave_id, resp_func, resp_addr, resp_data, _ = struct.unpack('>BBHHH', bytes(resp))
+            if (resp_slave_id != slave_id or resp_func != func or resp_addr != addr or
+                    resp_data != int.from_bytes(data, 'big')):
+                raise ModbusClientError('Modbus response error')
 
     def write(self, slave_id, addr, data, max_write_count=REQ_WRITE_COUNT_MAX):
         """
@@ -481,8 +482,7 @@ class ModbusClientRTU:
 
         if self.serial is not None:
             if count == 1:  # If only one register, use Func Code 0x06
-                # self._write_single(slave_id, addr, data)
-                self._write(slave_id, addr, data)  # TODO: Replace with above line after testing
+                self._write_single(slave_id, addr, data)
             else:
                 while count > 0:
                     if count > max_write_count:
