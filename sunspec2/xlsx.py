@@ -1,4 +1,3 @@
-
 """
     Copyright (C) 2020 SunSpec Alliance
 
@@ -22,7 +21,7 @@
     IN THE SOFTWARE.
 """
 
-import sunspec2.mdef as mdef
+from sunspec2 import mdef
 import sunspec2.spreadsheet as ss
 
 models_hdr = [('Model', 0),
@@ -44,29 +43,31 @@ column_width = {
     ss.STATIC_IDX: 12,
     ss.LABEL_IDX: 30,
     ss.DESCRIPTION_IDX: 60,
+    ss.DETAIL_IDX: 30,
+    ss.STANDARDS_IDX: 30,
     ss.NOTES_IDX: 60
 }
 
 group_styles = {
     'suns_group_1': {
-        'group_color': 'b8cce4', # 184, 204, 228
-        'point_color': 'dce6f1', # 220, 230, 241
+        'group_color': 'b8cce4',  # 184, 204, 228
+        'point_color': 'dce6f1',  # 220, 230, 241
     },
     'suns_group_2': {
-        'group_color': 'd8e4bc', # 216, 228, 188
-        'point_color': 'ebf1de', # 235, 241, 222
+        'group_color': 'd8e4bc',  # 216, 228, 188
+        'point_color': 'ebf1de',  # 235, 241, 222
     },
     'suns_group_3': {
-        'group_color': 'ccc0da', # 204, 192, 218
-        'point_color': 'e4dfec', # 228, 223, 236
+        'group_color': 'ccc0da',  # 204, 192, 218
+        'point_color': 'e4dfec',  # 228, 223, 236
     },
     'suns_group_4': {
-        'group_color': 'fcd5b4', # 252, 213, 180
-        'point_color': 'fde9d9', # 253, 233, 217
+        'group_color': 'fcd5b4',  # 252, 213, 180
+        'point_color': 'fde9d9',  # 253, 233, 217
     },
     'suns_group_5': {
-        'group_color': 'e6b8b7', # 230, 184, 183
-        'point_color': 'f2dcdb', # 242, 220, 219
+        'group_color': 'e6b8b7',  # 230, 184, 183
+        'point_color': 'f2dcdb',  # 242, 220, 219
     }
 }
 
@@ -174,7 +175,8 @@ try:
                 if 'suns_point_variable_entry' not in self.wb.named_styles:
                     fixed_entry_style = styles.NamedStyle(name='suns_point_variable_entry')
                     fixed_entry_style.fill = styles.PatternFill('solid',
-                                                                fgColor=self.params.get('point_variable_color', 'ecf9ec'))
+                                                                fgColor=self.params.get('point_variable_color',
+                                                                                        'ecf9ec'))
                     fixed_entry_style.font = styles.Font()
                     fixed_entry_style.border = styles.Border(top=thin, left=thin, right=thin, bottom=thin)
                     fixed_entry_style.alignment = styles.Alignment(horizontal='center', wrapText=True)
@@ -182,15 +184,16 @@ try:
                 if 'suns_point_variable_text' not in self.wb.named_styles:
                     fixed_text_style = styles.NamedStyle(name='suns_point_variable_text')
                     fixed_text_style.fill = styles.PatternFill('solid',
-                                                               fgColor=self.params.get('point_variable_color', 'ecf9ec'))
+                                                               fgColor=self.params.get('point_variable_color',
+                                                                                       'ecf9ec'))
                     fixed_text_style.font = styles.Font()
                     fixed_text_style.border = styles.Border(top=thin, left=thin, right=thin, bottom=thin)
                     fixed_text_style.alignment = styles.Alignment(horizontal='left', wrapText=True)
                     self.wb.add_named_style(fixed_text_style)
                 if 'suns_symbol_entry' not in self.wb.named_styles:
                     repeating_entry_style = styles.NamedStyle(name='suns_symbol_entry')
-                    repeating_entry_style.fill =styles.PatternFill('solid',
-                                                                   fgColor=self.params.get('symbol_color', 'fafafa'))
+                    repeating_entry_style.fill = styles.PatternFill('solid',
+                                                                    fgColor=self.params.get('symbol_color', 'fafafa'))
                     repeating_entry_style.font = styles.Font()
                     repeating_entry_style.border = styles.Border(top=thin, left=thin, right=thin, bottom=thin)
                     repeating_entry_style.alignment = styles.Alignment(horizontal='center', wrapText=True)
@@ -207,7 +210,7 @@ try:
                     symbol_text_style = styles.NamedStyle(name='suns_comment')
                     symbol_text_style.fill = styles.PatternFill('solid',
                                                                 fgColor=self.params.get('comment_color', 'dddddd'))
-                                                                # fgColor=self.params.get('symbol_color', 'fffcd9'))
+                    # fgColor=self.params.get('symbol_color', 'fffcd9'))
                     symbol_text_style.font = styles.Font()
                     symbol_text_style.border = styles.Border(top=thin, left=thin, right=thin, bottom=thin)
                     symbol_text_style.alignment = styles.Alignment(horizontal='left', wrapText=True)
@@ -310,7 +313,11 @@ try:
             self.set_cell(ws, row, ss.ACCESS_IDX + 1, values[ss.ACCESS_IDX], entry_style)
             self.set_cell(ws, row, ss.MANDATORY_IDX + 1, values[ss.MANDATORY_IDX], entry_style)
             self.set_cell(ws, row, ss.STATIC_IDX + 1, values[ss.STATIC_IDX], entry_style)
+
             self.set_info(ws, row, values, text_style)
+
+            self.set_cell(ws, row, ss.DETAIL_IDX + 1, values[ss.DETAIL_IDX], text_style)
+            self.set_cell(ws, row, ss.STANDARDS_IDX + 1, values[ss.STANDARDS_IDX], text_style)
 
         def set_symbol(self, ws, row, values):
             for i in range(len(values)):
@@ -320,24 +327,30 @@ try:
             self.set_info(ws, row, values, 'suns_symbol_text')
 
         def set_comment(self, ws, row, values):
-            ws.merge_cells('A%s:%s%s' % (row, chr(65+len(values)-1), row))
+            ws.merge_cells('A%s:%s%s' % (row, chr(65 + len(values) - 1), row))
             self.set_cell(ws, row, 1, values[0], 'suns_comment')
 
         def set_hdr(self, ws, values):
+            """
+            Create header
+
+            :param ws: worksheet
+            :param values: values
+            :return: None
+            """
             for i in range(len(values)):
                 self.set_cell(ws, 1, i + 1, values[i], 'suns_hdr')
                 width = column_width[i]
                 if width:
-                    ws.column_dimensions[chr(65+i)].width = column_width[i]
+                    ws.column_dimensions[chr(65 + i)].width = column_width[i]
 
         def spreadsheet_to_xlsx(self, mid, spreadsheet):
             if self.filename:
                 raise ValueError('Workbooks opened with existing file are read only')
-            has_notes = 'Notes' in spreadsheet[0]
+
             info = False
             label = None
             description = None
-            notes = None
             level = 1
 
             ws = self.wb.create_sheet(title=str(mid))
@@ -354,8 +367,6 @@ try:
                         if not info:
                             label = values[ss.LABEL_IDX]
                             description = values[ss.DESCRIPTION_IDX]
-                            if has_notes:
-                                notes = values[ss.NOTES_IDX]
                             info = True
                     # point
                     elif etype in mdef.point_type_info:
