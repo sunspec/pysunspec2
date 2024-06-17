@@ -223,7 +223,8 @@ class SunSpecModbusClientDevice(device.Device):
         self.base_addr = None
         self.delete_models()
 
-        data = error = ''
+        data = ''
+        error = ''
         connected = False
 
         if connect:
@@ -249,8 +250,8 @@ class SunSpecModbusClientDevice(device.Device):
                     if not error:
                         error = str(e)
                 except modbus_client.ModbusClientTimeout as e:
-                        if not error:
-                            error = str(e)
+                    if not error:
+                        error = str(e)
                 except modbus_client.ModbusClientException:
                     pass
 
@@ -269,7 +270,7 @@ class SunSpecModbusClientDevice(device.Device):
                 model_len_data = self.read(addr + 1, 1)
                 if model_len_data and len(model_len_data) == 2:
                     if progress is not None:
-                        cont = progress('Scanning model %s' % (model_id))
+                        cont = progress('Scanning model %s' % model_id)
                         if not cont:
                             raise SunSpecModbusClientError('Device scan terminated')
                     model_len = mb.data_to_u16(model_len_data)
@@ -390,14 +391,10 @@ class SunSpecModbusClientDeviceRTU(SunSpecModbusClientDevice):
         self.max_count = max_count
         self.max_write_count = max_write_count
 
-        self.client = modbus_client.modbus_rtu_client(name, baudrate, parity)
+        self.client = modbus_client.modbus_rtu_client(name, baudrate, parity, timeout)
         if self.client is None:
             raise SunSpecModbusClientError('No modbus rtu client set for device')
         self.client.add_device(self.slave_id, self)
-
-        if timeout is not None and self.client.serial is not None:
-            self.client.serial.timeout = timeout
-            self.client.serial.writeTimeout = timeout
 
     def open(self):
         self.client.open()
