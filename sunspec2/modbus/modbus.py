@@ -60,7 +60,7 @@ class ModbusClientException(ModbusClientError):
     pass
 
 
-def modbus_rtu_client(name=None, baudrate=None, parity=None):
+def modbus_rtu_client(name=None, baudrate=None, parity=None, timeout=0.5):
     global modbus_rtu_clients
 
     client = modbus_rtu_clients.get(name)
@@ -74,7 +74,7 @@ def modbus_rtu_client(name=None, baudrate=None, parity=None):
             baudrate = 9600
         if parity is None:
             parity = PARITY_NONE
-        client = ModbusClientRTU(name, baudrate, parity)
+        client = ModbusClientRTU(name, baudrate, parity, timeout)
         modbus_rtu_clients[name] = client
     return client
 
@@ -173,13 +173,13 @@ class ModbusClientRTU:
             devices currently using the client.
     """
 
-    def __init__(self, name='/dev/ttyUSB0', baudrate=9600, parity=None):
+    def __init__(self, name='/dev/ttyUSB0', baudrate=9600, parity=None, timeout=0.5):
         self.name = name
         self.baudrate = baudrate
         self.parity = parity
         self.serial = None
-        self.timeout = 0.5
-        self.write_timeout = 0.5
+        self.timeout = timeout
+        self.write_timeout = timeout
         self.devices = {}
         self.trace_func = None
         self.inter_frame_gap = 0.00175

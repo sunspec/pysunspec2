@@ -54,10 +54,6 @@ def test_find_name():
     assert spreadsheet.find_name(points, 'Incly') == points[1]
 
 
-def test_element_type():
-    pass
-
-
 def test_from_spreadsheet():
     model_spreadsheet = [
         ['Address Offset', 'Group Offset', 'Name', 'Value', 'Count', 'Type', 'Size', 'Scale Factor', 'Units',
