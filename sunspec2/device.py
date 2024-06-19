@@ -135,6 +135,8 @@ class Point(object):
         self.sf = None              # scale factor point name
         self.sf_value = None        # value of scale factor
         self.sf_required = False    # point has a scale factor
+        self.detail = None          # detailed description
+        self.standards = []         # list of standards requiring this point's implementation
         self.read_func = None       # function to be called on read
         self.read_func_arg = None   # the argument passed to the read_func
         self.write_func = None      # function to be called on write
@@ -162,6 +164,14 @@ class Point(object):
             static = pdef.get('static', None)
             if static and static == 'S':
                 self.static = True
+
+            standards = pdef.get('standards', None)
+            if standards:
+                if not isinstance(standards, list):
+                    standards = [standards]
+                self.standards = standards
+
+            self.detail = pdef.get('detail', None)
 
     def __str__(self):
         return self.disp()
@@ -221,6 +231,7 @@ class Point(object):
                 sfv = self.sf_value
                 if sfv:
                     v = round(v * math.pow(10, sfv), -1 * sfv)
+
         return v
 
     def set_value(self, data=None, computed=False, dirty=None):
@@ -325,8 +336,6 @@ class Point(object):
         name = self.pdef['name']
         val = self.value
         units = self.pdef.get('units')
-        group_index = ''
-        length = ''
         if index:
             if parent_index:
                 group_index = f'{parent_index:02}'
@@ -409,7 +418,7 @@ class Group(object):
             if self.len:
                 if self.len + 2 != mlen:
                     self.model.add_error('Model length %s not equal to calculated model length %s for model %s' %
-                                        (self.len + 2, mlen, self.model.model_id ))
+                                         (self.len + 2, mlen, self.model.model_id))
             self.len = mlen
 
         # check if group fits in access region
