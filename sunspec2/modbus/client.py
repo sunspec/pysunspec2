@@ -22,9 +22,7 @@
 
 import time
 import uuid
-import sunspec2.mdef as mdef
-import sunspec2.device as device
-import sunspec2.mb as mb
+from sunspec2 import mdef, device, mb
 import sunspec2.modbus.modbus as modbus_client
 
 TEST_NAME = 'test_name'
