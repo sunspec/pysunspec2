@@ -250,8 +250,9 @@ class SunSpecModbusClientDevice(device.Device):
                 except modbus_client.ModbusClientTimeout as e:
                     if not error:
                         error = str(e)
-                except modbus_client.ModbusClientException:
-                    pass
+                except modbus_client.ModbusClientException as e:
+                    if not error:
+                        error = 'Modbus Exception' + str(e)
 
                 if delay is not None:
                     time.sleep(delay)
