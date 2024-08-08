@@ -252,7 +252,7 @@ class SunSpecModbusClientDevice(device.Device):
                         error = str(e)
                 except modbus_client.ModbusClientException as e:
                     if not error:
-                        error = 'Modbus Exception' + str(e)
+                        error = 'Modbus Exception: ' + str(e)
 
                 if delay is not None:
                     time.sleep(delay)
@@ -399,7 +399,7 @@ class SunSpecModbusClientDeviceRTU(SunSpecModbusClientDevice):
         self.client.open()
 
     def close(self):
-        """Close the device. Called when device is not longer in use.
+        """Close the device. Called when device is no longer in use.
         """
 
         if self.client:
