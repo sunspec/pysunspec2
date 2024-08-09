@@ -289,11 +289,11 @@ def is_impl_ipv6addr(value):
 
 
 def is_impl_float32(value):
-    return (value == value) and (value != None)
+    return value is not None and value != SUNS_UNIMPL_FLOAT32
 
 
 def is_impl_float64(value):
-    return (value == value) and (value != None)
+    return value is not None and value != SUNS_UNIMPL_FLOAT64
 
 
 def is_impl_string(value):
