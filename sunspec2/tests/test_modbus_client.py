@@ -1458,7 +1458,7 @@ class TestSunSpecFileClientDevice(object):
         assert d.addr == 40002
 
     def test_scan(self):
-        d = file_client.FileClientDevice(filename='sunspec2/tests/test_data/device_1547.json', addr=40002)
+        d = file_client.FileClientDevice(filename='./sunspec2/tests/test_data/device_1547.json', addr=40002)
         d.scan()
         assert d.models['common'][0] is not None
         assert d.models['common'][0].Mn.cvalue == 'SunSpecTest'
@@ -1473,7 +1473,7 @@ class TestSunSpecFileClientDevice(object):
         pass
 
     def test_read(self):
-        d = file_client.FileClientDevice(filename='sunspec2/tests/test_data/device_1547.json', addr=40002)
+        d = file_client.FileClientDevice(filename='./sunspec2/tests/test_data/device_1547.json', addr=40002)
         d.scan()
         assert d.models['common'][0].model_addr == 40002
         assert d.models['common'][0].points_len == 68
@@ -1489,7 +1489,7 @@ class TestSunSpecFileClientDevice(object):
         assert d.models['DERCtlAC'][0].points_len == 59
 
     def test_write(self):
-        d = file_client.FileClientDevice(filename='sunspec2/tests/test_data/device_1547.json', addr=40002)
+        d = file_client.FileClientDevice(filename='./sunspec2/tests/test_data/device_1547.json', addr=40002)
         d.scan()
         d.models['common'][0].SN.cvalue = 'sn-000'
         d.write()

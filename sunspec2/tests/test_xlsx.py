@@ -6,8 +6,8 @@ import json
 
 
 def test___init__():
-    wb = xlsx.ModelWorkbook(filename='sunspec2/tests/test_data/wb_701-705.xlsx')
-    assert wb.filename == 'sunspec2/tests/test_data/wb_701-705.xlsx'
+    wb = xlsx.ModelWorkbook(filename='./sunspec2/tests/test_data/wb_701-705.xlsx')
+    assert wb.filename == './sunspec2/tests/test_data/wb_701-705.xlsx'
     assert wb.params == {}
 
     wb2 = xlsx.ModelWorkbook()
@@ -16,7 +16,7 @@ def test___init__():
 
 
 def test_get_models():
-    wb = xlsx.ModelWorkbook(filename='sunspec2/tests/test_data/wb_701-705.xlsx')
+    wb = xlsx.ModelWorkbook(filename='./sunspec2/tests/test_data/wb_701-705.xlsx')
     assert wb.get_models() == [701, 702, 703, 704, 705]
     wb2 = xlsx.ModelWorkbook()
     assert wb2.get_models() == []
@@ -31,7 +31,7 @@ def test_save(tmp_path):
 
 
 def test_xlsx_iter_rows():
-    wb = xlsx.ModelWorkbook(filename='sunspec2/tests/test_data/wb_701-705.xlsx')
+    wb = xlsx.ModelWorkbook(filename='./sunspec2/tests/test_data/wb_701-705.xlsx')
     iter_rows = wb.xlsx_iter_rows(wb.wb['704'])
     assert next(iter_rows) == ['Address Offset', 'Group Offset', 'Name',
                                'Value', 'Count', 'Type', 'Size', 'Scale Factor',
@@ -43,7 +43,7 @@ def test_xlsx_iter_rows():
 
 
 def test_spreadsheet_from_xlsx():
-    wb = xlsx.ModelWorkbook(filename='sunspec2/tests/test_data/wb_701-705.xlsx')
+    wb = xlsx.ModelWorkbook(filename='./sunspec2/tests/test_data/wb_701-705.xlsx')
     assert wb.spreadsheet_from_xlsx(704)[0:2] == [['Address Offset', 'Group Offset', 'Name', 'Value', 'Count',
                                                    'Type', 'Size', 'Scale Factor', 'Units', 'RW Access (RW)',
                                                    'Mandatory (M)', 'Static (S)', 'Label', 'Description',
@@ -66,8 +66,8 @@ def sort_nested_dicts(d):
 
 # need deep diff to compare from_xlsx to json file, right now just compares with its own output
 def test_from_xlsx():
-    wb = xlsx.ModelWorkbook(filename='sunspec2/tests/test_data/wb_701-705.xlsx')
-    with open('sunspec2/models/json/model_704.json') as f:
+    wb = xlsx.ModelWorkbook(filename='./sunspec2/tests/test_data/wb_701-705.xlsx')
+    with open('./sunspec2/models/json/model_704.json') as f:
         from_xlsx_output = json.load(f)
 
     a = sort_nested_dicts(wb.from_xlsx(704))
@@ -76,7 +76,7 @@ def test_from_xlsx():
 
 
 def test_set_cell():
-    wb = xlsx.ModelWorkbook(filename='sunspec2/tests/test_data/wb_701-705.xlsx')
+    wb = xlsx.ModelWorkbook(filename='./sunspec2/tests/test_data/wb_701-705.xlsx')
     with pytest.raises(ValueError) as exc:
         wb.set_cell(wb.wb['704'], 1, 2, 3)
     assert 'Workbooks opened with existing file are read only' in str(exc.value)
@@ -164,7 +164,7 @@ def test_set_hdr():
 
 
 def test_spreadsheet_to_xlsx():
-    wb = xlsx.ModelWorkbook(filename='sunspec2/tests/test_data/wb_701-705.xlsx')
+    wb = xlsx.ModelWorkbook(filename='./sunspec2/tests/test_data/wb_701-705.xlsx')
     with pytest.raises(ValueError) as exc:
         wb.spreadsheet_to_xlsx(702, [])
     assert 'Workbooks opened with existing file are read only' in str(exc.value)
@@ -201,7 +201,7 @@ def test_to_xlsx(tmp_path):
         ['', 2, 'Incly', '', '', 'int32', '', -2, 'Degrees', '', '', '', 'Y', 'Y-Axis inclination', '', ''],
         ['', 4, 'Inclz', '', '', 'int32', '', -2, 'Degrees', '', '', '', 'Z', 'Z-Axis inclination', '', '']
     ]
-    with open('sunspec2/models/json/model_304.json') as f:
+    with open('./sunspec2/models/json/model_304.json') as f:
         m_703 = json.load(f)
     wb = xlsx.ModelWorkbook()
     wb.to_xlsx(m_703)

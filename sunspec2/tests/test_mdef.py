@@ -28,7 +28,7 @@ def test_to_number_type():
 
 
 def test_validate_find_point():
-    with open('sunspec2/models/json/model_702.json') as f:
+    with open('./sunspec2/models/json/model_702.json') as f:
         model_json = json.load(f)
 
     assert mdef.validate_find_point(model_json['group'], 'ID') == model_json['group']['points'][0]
@@ -36,7 +36,7 @@ def test_validate_find_point():
 
 
 def test_validate_attrs():
-    with open('sunspec2/models/json/model_701.json') as f:
+    with open('./sunspec2/models/json/model_701.json') as f:
         model_json = json.load(f)
 
     # model
@@ -104,7 +104,7 @@ def test_validate_attrs():
 
 
 def test_validate_group_point_dup():
-    with open('sunspec2/models/json/model_704.json') as f:
+    with open('./sunspec2/models/json/model_704.json') as f:
         model_json = json.load(f)
 
     assert mdef.validate_group_point_dup(model_json['group']) == ''
@@ -145,7 +145,7 @@ def test_validate_symbols():
 
 
 def test_validate_sf():
-    with open('sunspec2/models/json/model_702.json') as f:
+    with open('./sunspec2/models/json/model_702.json') as f:
         model_json = json.load(f)
 
     model_point = model_json['group']['points'][2]
@@ -188,7 +188,7 @@ def test_validate_sf():
 
 
 def test_validate_point_def():
-    with open('sunspec2/models/json/model_702.json') as f:
+    with open('./sunspec2/models/json/model_702.json') as f:
         model_json = json.load(f)
 
     model_group = model_json['group']
@@ -222,14 +222,14 @@ def test_validate_point_def():
 
 
 def test_validate_group_def():
-    with open('sunspec2/models/json/model_702.json') as f:
+    with open('./sunspec2/models/json/model_702.json') as f:
         model_json = json.load(f)
 
     assert mdef.validate_group_def(model_json['group'], model_json['group']) == ''
 
 
 def test_validate_model_group_def():
-    with open('sunspec2/models/json/model_702.json') as f:
+    with open('./sunspec2/models/json/model_702.json') as f:
         model_json = json.load(f)
 
     assert mdef.validate_model_group_def(model_json, model_json['group']) == ''
@@ -269,25 +269,25 @@ def test_validate_model_group_def():
 
 
 def test_validate_model_def():
-    with open('sunspec2/models/json/model_702.json') as f:
+    with open('./sunspec2/models/json/model_702.json') as f:
         model_json = json.load(f)
 
     assert mdef.validate_model_def(model_json) == ''
 
 
 def test_from_json_str():
-    with open('sunspec2/models/json/model_63001.json') as f:
+    with open('./sunspec2/models/json/model_63001.json') as f:
         model_json = json.load(f)
         model_json_str = json.dumps(model_json)
         assert isinstance(mdef.from_json_str(model_json_str), dict)
 
 
 def test_from_json_file():
-    assert isinstance(mdef.from_json_file('sunspec2/models/json/model_63001.json'), dict)
+    assert isinstance(mdef.from_json_file('./sunspec2/models/json/model_63001.json'), dict)
 
 
 def test_to_json_str():
-    with open('sunspec2/models/json/model_63001.json') as f:
+    with open('./sunspec2/models/json/model_63001.json') as f:
         model_json = json.load(f)
         assert isinstance(mdef.to_json_str(model_json), str)
 
@@ -297,7 +297,7 @@ def test_to_json_filename():
 
 
 def test_to_json_file(tmp_path):
-    with open('sunspec2/models/json/model_63001.json') as f:
+    with open('./sunspec2/models/json/model_63001.json') as f:
         model_json = json.load(f)
         mdef.to_json_file(model_json, filedir=tmp_path)
 

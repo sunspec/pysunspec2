@@ -382,7 +382,7 @@ def test_from_csv():
         'id': 304
     }
 
-    csv_data = spreadsheet.from_csv('sunspec2/tests/test_data/smdx_304.csv')
+    csv_data = spreadsheet.from_csv('./sunspec2/tests/test_data/smdx_304.csv')
 
     assert model_def == csv_data
 
@@ -483,7 +483,7 @@ def test_spreadsheet_from_csv():
     ]
 
     counter = 0
-    for row in spreadsheet.spreadsheet_from_csv('sunspec2/tests/test_data/smdx_304.csv'):
+    for row in spreadsheet.spreadsheet_from_csv('./sunspec2/tests/test_data/smdx_304.csv'):
         same = True
         counter2 = 0
         for i in row:
