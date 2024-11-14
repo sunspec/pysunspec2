@@ -20,6 +20,9 @@ class MockSocket(object):
         self.connected = False
 
     def recv(self, size):
+        if len(self.buffer) == 0:
+            return b''
+        print(f"MockSocket.recv: size={size}. Message: {self.buffer[0]}")
         return self.buffer.pop(0)
 
     def sendall(self, data):

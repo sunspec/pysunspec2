@@ -57,43 +57,62 @@ def test_find_name():
 def test_from_spreadsheet():
     model_spreadsheet = [
         ['Address Offset', 'Group Offset', 'Name', 'Value', 'Count', 'Type', 'Size', 'Scale Factor', 'Units',
-         'RW Access (RW)', 'Mandatory (M)', 'Static (S)', 'Label', 'Description', 'Detailed Description'],
-        ['', '', 'inclinometer', '', '', 'group', '', '', '', '', '', '', 'Inclinometer Model', 'Include to support orientation measurements', ''],
-        [0, '', 'ID', 304, '', 'uint16', '', '', '', '', 'M', 'S', 'Model ID', 'Model identifier', ''],
-        [1, '', 'L', '', '', 'uint16', '', '', '', '', 'M', 'S', 'Model Length', 'Model length', ''],
-        ['', '', 'inclinometer.incl', '', 0, 'group', '', '', '', '', '', '', '', '', ''],
-        ['', 0, 'Inclx', '', '', 'int32', '', -2, 'Degrees', '', 'M', '', 'X', 'X-Axis inclination', ''],
-        ['', 2, 'Incly', '', '', 'int32', '', -2, 'Degrees', '', '', '', 'Y', 'Y-Axis inclination', ''],
-        ['', 4, 'Inclz', '', '', 'int32', '', -2, 'Degrees', '', '', '', 'Z', 'Z-Axis inclination', '']
+         'RW Access (RW)', 'Mandatory (M)', 'Static (S)', 'Label', 'Description', 'Detailed Description', 'Standards'],
+        ['', '', 'inclinometer', '', '', 'group', '', '', '', '', '', '', 'Inclinometer Model',
+         'Include to support orientation measurements', '', ''],
+        [0, '', 'ID', 304, '', 'uint16', '', '', '', '', 'M', 'S', 'Model ID', 'Model identifier', '', ''],
+        [1, '', 'L', '', '', 'uint16', '', '', '', '', 'M', 'S', 'Model Length', 'Model length', '', ''],
+        ['', '', 'inclinometer.incl', '', 0, 'group', '', '', '', '', '', '', '', '', '', ''],
+        ['', 0, 'Inclx', '', '', 'int32', '', -2, 'Degrees', '', 'M', '', 'X', 'X-Axis inclination', '', ''],
+        ['', 2, 'Incly', '', '', 'int32', '', -2, 'Degrees', '', '', '', 'Y', 'Y-Axis inclination', '', ''],
+        ['', 4, 'Inclz', '', '', 'int32', '', -2, 'Degrees', '', '', '', 'Z', 'Z-Axis inclination', '', '']
     ]
-    model_def = {'group': {'name': 'inclinometer', 'type': 'group', 'label': 'Inclinometer Model',
-                           'desc': 'Include to support orientation measurements', 'points': [
-            {'name': 'ID', 'type': 'uint16', 'size': 1, 'mandatory': 'M', 'static': 'S', 'label': 'Model ID',
-             'desc': 'Model identifier', 'value': 304},
-            {'name': 'L', 'type': 'uint16', 'size': 1, 'mandatory': 'M', 'static': 'S', 'label': 'Model Length',
-             'desc': 'Model length'}], 'groups': [{'name': 'incl', 'type': 'group', 'count': 0, 'points': [
-            {'name': 'Inclx', 'type': 'int32', 'size': 2, 'sf': -2, 'units': 'Degrees', 'mandatory': 'M', 'label': 'X',
-             'desc': 'X-Axis inclination'},
-            {'name': 'Incly', 'type': 'int32', 'size': 2, 'sf': -2, 'units': 'Degrees', 'label': 'Y',
-             'desc': 'Y-Axis inclination'},
-            {'name': 'Inclz', 'type': 'int32', 'size': 2, 'sf': -2, 'units': 'Degrees', 'label': 'Z',
-             'desc': 'Z-Axis inclination'}]}]}, 'id': 304}
+    model_def = {
+        'group':
+            {
+                'name': 'inclinometer', 'type': 'group', 'label': 'Inclinometer Model',
+                'desc': 'Include to support orientation measurements', 'points':
+                [
+                    {'name': 'ID', 'type': 'uint16', 'size': 1, 'mandatory': 'M', 'static': 'S',
+                     'label': 'Model ID',
+                     'desc': 'Model identifier', 'value': 304, 'standards': []},
+                    {'name': 'L', 'type': 'uint16', 'size': 1, 'mandatory': 'M', 'static': 'S',
+                     'label': 'Model Length',
+                     'desc': 'Model length', 'standards': []}
+                ],
+                'groups': [
+                    {'name': 'incl', 'type': 'group', 'count': 0, 'points': [
+                        {'name': 'Inclx', 'type': 'int32', 'size': 2, 'sf': -2, 'units': 'Degrees',
+                         'mandatory': 'M', 'label': 'X',
+                         'desc': 'X-Axis inclination', 'standards': []},
+                        {'name': 'Incly', 'type': 'int32', 'size': 2, 'sf': -2, 'units': 'Degrees',
+                         'label': 'Y',
+                         'desc': 'Y-Axis inclination', 'standards': []},
+                        {'name': 'Inclz', 'type': 'int32', 'size': 2, 'sf': -2, 'units': 'Degrees',
+                         'label': 'Z',
+                         'desc': 'Z-Axis inclination', 'standards': []}]}
+                ]
+            },
+        'id': 304
+    }
 
-    assert spreadsheet.from_spreadsheet(model_spreadsheet) == model_def
+    spreadsheet_data = spreadsheet.from_spreadsheet(model_spreadsheet)
+
+    assert spreadsheet_data == model_def
 
 
 def test_to_spreadsheet():
     model_spreadsheet = [
         ['Address Offset', 'Group Offset', 'Name', 'Value', 'Count', 'Type', 'Size', 'Scale Factor', 'Units',
-         'RW Access (RW)', 'Mandatory (M)', 'Static (S)', 'Label', 'Description'],
+         'RW Access (RW)', 'Mandatory (M)', 'Static (S)', 'Label', 'Description', 'Detailed Description', 'Standards'],
         ['', '', 'inclinometer', '', '', 'group', '', '', '', '', '', '', 'Inclinometer Model',
-         'Include to support orientation measurements'],
-        [0, '', 'ID', 304, '', 'uint16', 1, '', '', '', 'M', 'S', 'Model ID', 'Model identifier'],
-        [1, '', 'L', '', '', 'uint16', 1, '', '', '', 'M', 'S', 'Model Length', 'Model length'],
-        ['', '', 'inclinometer.incl', '', 0, 'group', '', '', '', '', '', '', '', ''],
-        ['', 0, 'Inclx', '', '', 'int32', 2, -2, 'Degrees', '', 'M', '', 'X', 'X-Axis inclination'],
-        ['', 2, 'Incly', '', '', 'int32', 2, -2, 'Degrees', '', '', '', 'Y', 'Y-Axis inclination'],
-        ['', 4, 'Inclz', '', '', 'int32', 2, -2, 'Degrees', '', '', '', 'Z', 'Z-Axis inclination']
+         'Include to support orientation measurements', '', ''],
+        [0, '', 'ID', 304, '', 'uint16', 1, '', '', '', 'M', 'S', 'Model ID', 'Model identifier', '', ''],
+        [1, '', 'L', '', '', 'uint16', 1, '', '', '', 'M', 'S', 'Model Length', 'Model length', '', ''],
+        ['', '', 'inclinometer.incl', '', 0, 'group', '', '', '', '', '', '', '', '', '', ''],
+        ['', 0, 'Inclx', '', '', 'int32', 2, -2, 'Degrees', '', 'M', '', 'X', 'X-Axis inclination', '', ''],
+        ['', 2, 'Incly', '', '', 'int32', 2, -2, 'Degrees', '', '', '', 'Y', 'Y-Axis inclination', '', ''],
+        ['', 4, 'Inclz', '', '', 'int32', 2, -2, 'Degrees', '', '', '', 'Z', 'Z-Axis inclination', '', '']
     ]
 
     model_def = {
@@ -218,15 +237,16 @@ def test_to_spreadsheet_group():
     ss = []
     spreadsheet.to_spreadsheet_group(ss, model_def['group'], has_notes=False)
     assert ss == [
-        ['', '', 'DERCapacity', '', '', 'group', '', '', '', '', '', '', 'DER Capacity', 'DER capacity model.'],
-        ['', 0, 'ID', 702, '', 'uint16', 1, '', '', '', 'M', 'S', 'DER Capacity Model ID', 'DER capacity model id.'],
+        ['', '', 'DERCapacity', '', '', 'group', '', '', '', '', '', '', 'DER Capacity', 'DER capacity model.', '', ''],
+        ['', 0, 'ID', 702, '', 'uint16', 1, '', '', '', 'M', 'S', 'DER Capacity Model ID',
+         'DER capacity model id.', '', ''],
         ['', 1, 'L', '', '', 'uint16', 1, '', '', '', 'M', 'S', 'DER Capacity Model Length',
-         'DER capacity name  model length.'],
-        ['Nameplate Ratings - Specifies capacity ratings', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+         'DER capacity name  model length.', '', ''],
+        ['Nameplate Ratings - Specifies capacity ratings', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
         ['', 2, 'WMaxRtg', '', '', 'uint16', 1, 'W_SF', 'W', '', '', '', 'Active Power Max Rating',
-         'Maximum active power rating at unity power factor in watts.'],
-        ['', '', 'CAT_A', 1, '', '', '', '', '', '', '', '', '', ''],
-        ['', '', 'CAT_B', 2, '', '', '', '', '', '', '', '', '', '']]
+         'Maximum active power rating at unity power factor in watts.', '', ''],
+        ['', '', 'CAT_A', 1, '', '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', 'CAT_B', 2, '', '', '', '', '', '', '', '', '', '', '', '']]
 
 
 def test_to_spreadsheet_point():
@@ -278,7 +298,7 @@ def test_to_spreadsheet_point():
     p_size_not_int['size'] = 'abc'
     with pytest.raises(Exception) as exc4:
         spreadsheet.to_spreadsheet_point(ss, p_size_not_int, has_notes=False)
-    assert 'Point size is for point AbnOpCatRtg not an iteger value' in str(exc4.value)
+    assert 'Point size is for point AbnOpCatRtg not an integer value' in str(exc4.value)
 
 
 def test_to_spreadsheet_symbol():
@@ -335,20 +355,36 @@ def test_spreadsheet_equal():
 
 
 def test_from_csv():
-    model_def = {'group': {'name': 'inclinometer', 'type': 'group', 'label': 'Inclinometer Model',
-                           'desc': 'Include to support orientation measurements', 'points': [
-            {'name': 'ID', 'type': 'uint16', 'size': 1, 'mandatory': 'M', 'static': 'S', 'label': 'Model ID',
-             'desc': 'Model identifier', 'value': 304},
-            {'name': 'L', 'type': 'uint16', 'size': 1, 'mandatory': 'M', 'static': 'S', 'label': 'Model Length',
-             'desc': 'Model length'}], 'groups': [{'name': 'incl', 'type': 'group', 'count': 0, 'points': [
-            {'name': 'Inclx', 'type': 'int32', 'size': 2, 'sf': -2, 'units': 'Degrees', 'mandatory': 'M', 'label': 'X',
-             'desc': 'X-Axis inclination'},
-            {'name': 'Incly', 'type': 'int32', 'size': 2, 'sf': -2, 'units': 'Degrees', 'label': 'Y',
-             'desc': 'Y-Axis inclination'},
-            {'name': 'Inclz', 'type': 'int32', 'size': 2, 'sf': -2, 'units': 'Degrees', 'label': 'Z',
-             'desc': 'Z-Axis inclination'}]}]}, 'id': 304}
+    model_def = {
+        'group': {
+            'name': 'inclinometer', 'type': 'group', 'label': 'Inclinometer Model',
+            'desc': 'Include to support orientation measurements',
+            'points': [
+                {'name': 'ID', 'type': 'uint16', 'size': 1, 'mandatory': 'M', 'static': 'S', 'label': 'Model ID',
+                 'desc': 'Model identifier', 'value': 304, 'standards': []},
+                {'name': 'L', 'type': 'uint16', 'size': 1, 'mandatory': 'M', 'static': 'S', 'label': 'Model Length',
+                 'desc': 'Model length', 'standards': []}
+            ],
+            'groups': [
+                {'name': 'incl', 'type': 'group', 'count': 0,
+                 'points': [
+                     {'name': 'Inclx', 'type': 'int32', 'size': 2, 'sf': -2, 'units': 'Degrees', 'mandatory': 'M',
+                      'label': 'X',
+                      'desc': 'X-Axis inclination', 'standards': []},
+                     {'name': 'Incly', 'type': 'int32', 'size': 2, 'sf': -2, 'units': 'Degrees', 'label': 'Y',
+                      'desc': 'Y-Axis inclination', 'standards': []},
+                     {'name': 'Inclz', 'type': 'int32', 'size': 2, 'sf': -2, 'units': 'Degrees', 'label': 'Z',
+                      'desc': 'Z-Axis inclination', 'standards': []}
+                 ]
+                 }
+            ]
+        },
+        'id': 304
+    }
 
-    assert model_def == spreadsheet.from_csv('sunspec2/tests/test_data/smdx_304.csv')
+    csv_data = spreadsheet.from_csv('./sunspec2/tests/test_data/smdx_304.csv')
+
+    assert model_def == csv_data
 
 
 def test_to_csv(tmp_path):
@@ -435,19 +471,19 @@ def test_to_csv(tmp_path):
 def test_spreadsheet_from_csv():
     spreadsheet_smdx_304 = [
         ['Address Offset', 'Group Offset', 'Name', 'Value', 'Count', 'Type', 'Size', 'Scale Factor', 'Units',
-         'RW Access (RW)', 'Mandatory (M)', 'Static (S)', 'Label', 'Description', 'Detailed Description'],
+         'RW Access (RW)', 'Mandatory (M)', 'Static (S)', 'Label', 'Description', 'Detailed Description', 'Standards'],
         ['', '', 'inclinometer', '', '', 'group', '', '', '', '', '', '', 'Inclinometer Model',
-         'Include to support orientation measurements', ''],
-        ['', '', 'ID', 304, '', 'uint16', '', '', '', '', 'M', 'S', 'Model ID', 'Model identifier', ''],
-        ['', '', 'L', '', '', 'uint16', '', '', '', '', 'M', 'S', 'Model Length', 'Model length', ''],
-        ['', '', 'inclinometer.incl', '', 0, 'group', '', '', '', '', '', '', '', '', ''],
-        ['', '', 'Inclx', '', '', 'int32', '', -2, 'Degrees', '', 'M', '', 'X', 'X-Axis inclination', ''],
-        ['', '', 'Incly', '', '', 'int32', '', -2, 'Degrees', '', '', '', 'Y', 'Y-Axis inclination', ''],
-        ['', '', 'Inclz', '', '', 'int32', '', -2, 'Degrees', '', '', '', 'Z', 'Z-Axis inclination', '']
+         'Include to support orientation measurements', '', ''],
+        ['', '', 'ID', 304, '', 'uint16', '', '', '', '', 'M', 'S', 'Model ID', 'Model identifier', '', ''],
+        ['', '', 'L', '', '', 'uint16', '', '', '', '', 'M', 'S', 'Model Length', 'Model length', '', ''],
+        ['', '', 'inclinometer.incl', '', 0, 'group', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', 'Inclx', '', '', 'int32', '', -2, 'Degrees', '', 'M', '', 'X', 'X-Axis inclination', '', ''],
+        ['', '', 'Incly', '', '', 'int32', '', -2, 'Degrees', '', '', '', 'Y', 'Y-Axis inclination', '', ''],
+        ['', '', 'Inclz', '', '', 'int32', '', -2, 'Degrees', '', '', '', 'Z', 'Z-Axis inclination', '', '']
     ]
 
     counter = 0
-    for row in spreadsheet.spreadsheet_from_csv('sunspec2/tests/test_data/smdx_304.csv'):
+    for row in spreadsheet.spreadsheet_from_csv('./sunspec2/tests/test_data/smdx_304.csv'):
         same = True
         counter2 = 0
         for i in row:

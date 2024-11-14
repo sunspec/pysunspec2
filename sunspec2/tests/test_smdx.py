@@ -29,11 +29,11 @@ def test_from_smdx_file():
         {'name': 'Inclz', 'type': 'int32', 'size': 2, 'units': 'Degrees', 'sf': -2, 'label': 'Z',
          'desc': 'Z-Axis inclination'}]}], 'label': 'Inclinometer Model',
                                      'desc': 'Include to support orientation measurements'}}
-    assert smdx.from_smdx_file('sunspec2/models/smdx/smdx_00304.xml') == smdx_304
+    assert smdx.from_smdx_file('./sunspec2/models/smdx/smdx_00304.xml') == smdx_304
 
 
 def test_from_smdx():
-    tree = ET.parse('sunspec2/models/smdx/smdx_00304.xml')
+    tree = ET.parse('./sunspec2/models/smdx/smdx_00304.xml')
     root = tree.getroot()
 
     mdef_not_found = copy.deepcopy(root)
