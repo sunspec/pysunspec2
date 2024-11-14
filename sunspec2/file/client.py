@@ -82,7 +82,7 @@ class FileClientDevice(device.Device):
                         model.mid = '%s_%s' % (self.did, mid)
                         mid += 1
                         self.add_model(model)
-                        addr += model_len + 2
+                        addr += model.len
         except Exception as e:
             raise FileClientError(str(e))
 

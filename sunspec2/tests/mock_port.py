@@ -2,7 +2,7 @@ class MockPort(object):
     PARITY_NONE = 'N'
     PARITY_EVEN = 'E'
 
-    def __init__(self, port, baudrate, bytesize, parity, stopbits, xonxoff, timeout, writeTimeout):
+    def __init__(self, port, baudrate, bytesize, parity, stopbits, xonxoff, timeout):
         self.connected = True
         self.port = port
         self.baudrate = baudrate
@@ -11,7 +11,6 @@ class MockPort(object):
         self.stopbits = stopbits
         self.xonxoff = xonxoff
         self.timeout = timeout
-        self.writeTimeout = writeTimeout
 
         self.buffer = []
         self.request = []
@@ -23,7 +22,10 @@ class MockPort(object):
         self.connected = False
 
     def read(self, count):
-        return self.buffer.pop(0)
+        if len(self.buffer) == 0:
+            return b''
+        print(f"MockPort.read: count={count}. Message: {self.buffer[0]}")
+        return self.buffer.pop(0)  # get the first element
 
     def write(self, data):
         self.request.append(data)
@@ -39,5 +41,5 @@ class MockPort(object):
         self.buffer = []
 
 
-def mock_port(port, baudrate, bytesize, parity, stopbits, xonxoff, timeout, writeTimeout):
-    return MockPort(port, baudrate, bytesize, parity, stopbits, xonxoff, timeout, writeTimeout)
+def mock_port(port, baudrate, bytesize, parity, stopbits, xonxoff, timeout):
+    return MockPort(port, baudrate, bytesize, parity, stopbits, xonxoff, timeout)

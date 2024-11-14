@@ -4,7 +4,9 @@ import socket
 import sunspec2.tests.mock_socket as MockSocket
 import serial
 import sunspec2.tests.mock_port as MockPort
-
+import sunspec2.file.client as file_client
+import sunspec2.modbus.modbus as suns_modbus
+import struct
 
 class TestSunSpecModbusClientPoint:
     def test_read(self, monkeypatch):
@@ -110,29 +112,30 @@ class TestSunSpecModbusClientPoint:
 
         # tcp
         d_tcp = client.SunSpecModbusClientDeviceTCP(slave_id=1, ipaddr='127.0.0.1', ipport=8502)
-        tcp_buffer = [b'\x00\x00\x00\x00\x00\t\x01\x03\x06',
-                      b'SunS\x00\x01',
-                      b'\x00\x00\x00\x00\x00\x05\x01\x03\x02',
-                      b'\x00B',
-                      b'\x00\x00\x00\x00\x00\x8b\x01\x03\x88',
+        # simulate a sequence of exchanges with the device
+        tcp_buffer = [b'\x00\x00\x00\x00\x00\t\x01\x03\x06',  # Readback first 6 registers
+                      b'SunS\x00\x01',  # SunSpec ID + common model header (ID = 1)
+                      b'\x00\x00\x00\x00\x00\x05\x01\x03\x02',  # Read back L register to get common model length
+                      b'\x00B',  # common model length = 0x42 = 66 = 'B'
+                      b'\x00\x00\x00\x00\x00\x8b\x01\x03\x88',  # Readback 0x88 bytes in common model (0x44 = 68 regs)
                       b'\x00\x01\x00BSunSpecTest\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
                       b'\x00\x00\x00\x00\x00TestDevice-1\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
                       b'\x00\x00\x00\x00\x00\x00opt_a_b_c\x00\x00\x00\x00\x00\x00\x001.2.3\x00\x00\x00\x00\x00'
                       b'\x00\x00\x00\x00\x00\x00sn-123456789\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
                       b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00',
-                      b'\x00\x00\x00\x00\x00\x05\x01\x03\x02',
-                      b'\x00~',
-                      b'\x00\x00\x00\x00\x00\x05\x01\x03\x02',
-                      b'\x00@',
-                      b'\x00\x00\x00\x00\x00\x87\x01\x03\x84',
+                      b'\x00\x00\x00\x00\x00\x05\x01\x03\x02',  # Readback/response to query next model
+                      b'\x00~',  # 126 = '~' = 0x7e
+                      b'\x00\x00\x00\x00\x00\x05\x01\x03\x02',  # readback next model len
+                      b'\x00@',  # 64 = '@' = 0x40
+                      b'\x00\x00\x00\x00\x00\x87\x01\x03\x84',  # readback next model data (0x84 bytes = 66 regs)
                       b'\x00~\x00@\x00\x03\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x80\x00\x80\x00\x80\x00\xff'
                       b'\xff\xff\xff\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00'
                       b'\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80'
                       b'\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff'
                       b'\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
                       b'\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff',
-                      b'\x00\x00\x00\x00\x00\x05\x01\x03\x02',
-                      b'\xff\xff']
+                      b'\x00\x00\x00\x00\x00\x05\x01\x03\x02',  # readback next model
+                      b'\xff\xff']  # terminator
         d_tcp.client.connect()
         d_tcp.client.socket._set_buffer(tcp_buffer)
         d_tcp.scan()
@@ -154,7 +157,7 @@ class TestSunSpecModbusClientPoint:
         assert d_tcp.common[0].SN.value == 'will be overwritten by read'
         assert d_tcp.common[0].SN.dirty
 
-        tcp_read_buffer = [b'\x00\x00\x00\x00\x00#\x01\x03 ',
+        tcp_read_buffer = [b'\x00\x00\x00\x00\x00#\x01\x03 ',  # Read back data to verify write
                            b'sn-000\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
                            b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00']
         d_tcp.client.socket.clear_buffer()
@@ -165,19 +168,19 @@ class TestSunSpecModbusClientPoint:
 
         # rtu
         d_rtu = client.SunSpecModbusClientDeviceRTU(slave_id=1, name="COM2")
-        rtu_buffer = [
+        rtu_buffer = [  # simulate a sequence of responses from the device scan
             b'\x01\x03\x06Su',
-            b'nS\x00\x01\x8d\xe4',
+            b'nS\x00\x01\x8d\xe4',  # Response: SunSpec ID + common model header (ID = 1) + CRC
             b'\x01\x03\x02\x00B',
-            b'8u',
-            b'\x01\x03\x88\x00\x01',
+            b'8u',  # Response: common model length = 0x42 = 66 = 'B' + CRC
+            b'\x01\x03\x88\x00\x01',  # Readback registers in common model (0x44 = 68 regs)
             b'\x00BSunSpecTest\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
             b'\x00\x00TestDevice-2\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
             b'\x00\x00opt_a_b_c\x00\x00\x00\x00\x00\x00\x001.2.3\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
             b'\x00sn-123456789\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-            b'\x00\x00\x01\x00\x00\xb9\xfb',
-            b'\x01\x03\x02\xff\xff',
-            b'\xb9\xf4'
+            b'\x00\x00\x01\x00\x00\xb9\xfb',  # Common model data
+            b'\x01\x03\x02\xff\xff',  # Terminator data
+            b'\xb9\xf4'  # CRC
         ]
         d_rtu.open()
         d_rtu.client.serial._set_buffer(rtu_buffer)
@@ -190,17 +193,26 @@ class TestSunSpecModbusClientPoint:
         assert d_rtu.common[0].DA.value == 2
         assert d_rtu.common[0].DA.dirty
 
+        # 0x01: This is the device address, 1.
+        # 0x06: This is the function code for "Write Single Register"/0x10 (16) = "Write Multiple Registers".
+        # 0x9c84: This is the register address, 0x9c84 is 40068. (DA)
+        # 0x0002: This is the data value to be written to the register, 2.
+        # Cyclic Redundancy Check (CRC) - struct.pack('>H', suns_modbus.computeCRC(b'\x01\x06\x9c\x84\x00\x02'))
         rtu_read_buffer = [
-            b'\x01\x10\x9c\x84\x00',
-            b'\x01o\xb0'
+            b'\x01\x06\x9c\x84\x00\x02',
+            suns_modbus.computeCRC(b'\x01\x06\x9c\x84\x00\x02').to_bytes(2, 'big')
         ]
         d_rtu.client.serial.clear_buffer()
         d_rtu.client.serial._set_buffer(rtu_read_buffer)
         d_rtu.common[0].write()
 
+        # 0x01: Slave Address (1).
+        # 0x03: Function Code (Read Holding Registers). T
+        # 0x02: Byte Count (2). This tells you that the response contains 2 bytes of data.
+        # 0x0002: Data (2 in decimal). This is the actual data read from the holding registers. DA = 2
         rtu_read_buffer = [
-            b'\x01\x03\x02\x00\x02',
-            b'9\x85'
+            b'\x01\x03\x02\x00\x02',  # Read back data to verify write
+            struct.pack('>H', suns_modbus.computeCRC(b'\x01\x03\x02\x00\x02'))
         ]
         d_rtu.client.serial.clear_buffer()
         d_rtu.client.serial._set_buffer(rtu_read_buffer)
@@ -472,31 +484,6 @@ class TestSunSpecModbusClientGroup:
 
         # rtu
         d_rtu = client.SunSpecModbusClientDeviceRTU(slave_id=1, name="COM2")
-        # rtu_buffer = [
-        #               b'\x01\x83\x02\xc0\xf1',
-        #               b'\x01\x03\x06Su',
-        #               b'nS\x00\x01\x8d\xe4',
-        #               b'\x01\x03\x02\x00B',
-        #               b'8u',
-        #               b'\x01\x03\x88\x00\x01',
-        #               b'\x00BSunSpecTest\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-        #               b'\x00\x00\x00TestDevice-1\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-        #               b'\x00\x00\x00\x00opt_a_b_c\x00\x00\x00\x00\x00\x00\x001.2.3\x00\x00\x00\x00\x00\x00\x00\x00'
-        #               b'\x00\x00\x00sn-123456789\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-        #               b'\x00\x00\x00\x00\x01\x00\x00M\xf9',
-        #               b'\x01\x03\x02\x00~',
-        #               b'8d',
-        #               b'\x01\x03\x02\x00@',
-        #               b'\xb9\xb4',
-        #               b'\x01\x03\x84\x00~',
-        #               b'\x00@\x00\x03\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x80\x00\x80\x00\x80\x00'
-        #               b'\xff\xff\xff\xff\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff'
-        #               b'\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00'
-        #               b'\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff'
-        #               b'\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\xff\xff\x80\x00\x00\x00\x00\x00'
-        #               b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff\xffI',
-        #               b'\x01\x03\x02\xff\xff',
-        #               b'\xb9\xf4']
         rtu_buffer = [
             b'\x01\x03\x06Su',
             b'nS\x00\x01\x8d\xe4',
@@ -522,7 +509,10 @@ class TestSunSpecModbusClientGroup:
         assert d_rtu.common[0].DA.value == 2
         assert d_rtu.common[0].DA.dirty
 
-        rtu_read_buffer = [b'\x01\x10\x9c\x84\x00', b'\x01o\xb0']
+        rtu_read_buffer = [
+            b'\x01\x06\x9c\x84\x00\x02',
+            struct.pack('>H', suns_modbus.computeCRC(b'\x01\x06\x9c\x84\x00\x02'))
+        ]
         d_rtu.client.serial.clear_buffer()
         d_rtu.client.serial._set_buffer(rtu_read_buffer)
         d_rtu.common[0].write()
@@ -1459,6 +1449,53 @@ class TestSunSpecModbusClientDeviceRTU:
         c_rtu.scan()
         get_text_output = c_rtu.get_text()
         assert get_text_output[get_text_output.index('Model'):] == expected_output
+
+
+class TestSunSpecFileClientDevice(object):
+    def test___init__(self):
+        d = file_client.FileClientDevice(filename=None, addr=40002)
+        assert d.filename is None
+        assert d.addr == 40002
+
+    def test_scan(self):
+        d = file_client.FileClientDevice(filename='sunspec2/tests/test_data/device_1547.json', addr=40002)
+        d.scan()
+        assert d.models['common'][0] is not None
+        assert d.models['common'][0].Mn.cvalue == 'SunSpecTest'
+        assert d.models['common'][0].Md.cvalue == 'Test-1547-1'
+        assert d.models['common'][0].Opt.cvalue == 'opt_a_b_c'
+        assert d.models['common'][0].Vr.cvalue == '1.2.3'
+        assert d.models['common'][0].SN.cvalue == 'sn-123456789'
+        assert d.models['common'][0].DA.cvalue == 1
+        assert d.models['common'][0].Pad.cvalue == 0
+
+    def test_close(self):
+        pass
+
+    def test_read(self):
+        d = file_client.FileClientDevice(filename='sunspec2/tests/test_data/device_1547.json', addr=40002)
+        d.scan()
+        assert d.models['common'][0].model_addr == 40002
+        assert d.models['common'][0].points_len == 68
+        assert d.models['common'][0].len == 68
+        assert d.models['DERMeasureAC'][0].model_addr == 40070
+        assert d.models['DERMeasureAC'][0].points_len == 155
+        assert d.models['DERMeasureAC'][0].len == 155
+        assert d.models['DERMeasureAC'][0].ID.cvalue == 701
+        assert d.models['DERMeasureAC'][0].L.cvalue == 153
+        assert d.models['DERCapacity'][0].L.cvalue == 50
+        assert d.models['DERCapacity'][0].len == 52
+        assert d.models['DERCtlAC'][0].len == 67
+        assert d.models['DERCtlAC'][0].points_len == 59
+
+    def test_write(self):
+        d = file_client.FileClientDevice(filename='sunspec2/tests/test_data/device_1547.json', addr=40002)
+        d.scan()
+        d.models['common'][0].SN.cvalue = 'sn-000'
+        d.write()
+        d.read()
+        assert d.models['common'][0].SN.cvalue == 'sn-000'
+
 
 
 if __name__ == "__main__":

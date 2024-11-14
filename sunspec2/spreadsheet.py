@@ -123,7 +123,7 @@ def from_spreadsheet(spreadsheet):
     point = None
     detail = None
     standards = []
-    comments = []
+    comments = []  # Speadsheet comments - single gray lines
     parent = ''
 
     for row in spreadsheet[1:]:
@@ -191,14 +191,25 @@ def from_spreadsheet(spreadsheet):
             if detail:
                 point[mdef.DETAIL] = detail
             if standards:
-                point[mdef.STANDARDS] = list(standards)
+                if isinstance(standards, str):
+                    stds_list = standards.split(',')
+                    for std in stds_list:
+                        stds_list[stds_list.index(std)] = std.strip()
+                    point[mdef.STANDARDS] = stds_list
+            else:
+                point[mdef.STANDARDS] = []
+
             group[mdef.POINTS].append(point)
 
             # set the model id
             if not parent and name == mdef.MODEL_ID_POINT_NAME:
                 model_def[mdef.ID] = value
-
-            comments = []  # Speadsheet comments - single gray lines
+            if comments:
+                if len(comments) > 1:
+                    point[mdef.COMMENTS] = [comments[-1]]
+                else:
+                    point[mdef.COMMENTS] = comments
+            comments = []  # reset comments
 
         # group
         elif etype in mdef.group_types:
@@ -215,10 +226,7 @@ def from_spreadsheet(spreadsheet):
             else:
                 if group is not None:
                     raise PySunSpecException('Redefintion of top-level group %s with %s' % (group[mdef.ID], name))
-            if parent:
-                name = '%s.%s' % (parent, path[-1])
-            else:
-                name = path[-1]
+
             new_group = {mdef.NAME: path[-1], mdef.TYPE: etype}
             if label:
                 new_group[mdef.LABEL] = label
@@ -228,8 +236,9 @@ def from_spreadsheet(spreadsheet):
                 new_group[mdef.NOTES] = notes
             if detail:
                 new_group[mdef.DETAIL] = detail
-
-            comments = []
+            if comments:
+                new_group[mdef.COMMENTS] = comments
+            comments = []  # reset comments
 
             count = mdef.to_number_type(row[count_idx])
             if count is not None and count != '':
@@ -241,6 +250,7 @@ def from_spreadsheet(spreadsheet):
                     group[mdef.GROUPS] = []
                 group[mdef.GROUPS].append(new_group)
             group = new_group
+
         # symbol - has name and value with no type
         elif name and value is not None and value != '':
             if point is None:
@@ -259,7 +269,6 @@ def from_spreadsheet(spreadsheet):
                 symbol[mdef.NOTES] = notes
             if detail:
                 symbol[mdef.DETAIL] = detail
-
             comments = []
 
         elif not row_is_empty(row, 1):
