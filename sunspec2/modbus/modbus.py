@@ -202,8 +202,10 @@ class ModbusClientRTU:
 
             self.serial = serial.Serial(port=self.name, baudrate=self.baudrate,
                                         bytesize=8, parity=parity,
-                                        stopbits=1, xonxoff=0,
-                                        timeout=self.timeout, writeTimeout=self.write_timeout)
+                                        stopbits=1,
+                                        timeout=self.timeout,
+                                        xonxoff=False,
+                                        )
 
         except Exception as e:
             if self.serial is not None:

@@ -407,7 +407,7 @@ except:
     # provide indication the openpyxl library not available
     class ModelWorkbook(object):
         def __init__(self, filename=None, model_dir=None, license_summary=False):
-            raise Exception('openpyxl library not installed, it is required for working with .xlsx files')
+            raise ImportError('openpyxl library not installed, it is required for working with .xlsx files')
 
 if __name__ == "__main__":
     pass

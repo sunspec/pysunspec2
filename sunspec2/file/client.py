@@ -77,12 +77,12 @@ class FileClientDevice(device.Device):
                     model_id = m.get('ID')
                     model_len = m.get('L')
                     if model_id != mb.SUNS_END_MODEL_ID:
-                        model = self.model_class(model_id=model_id, model_addr=addr, model_len=model_len, model_def=None,
-                                                 data=m)
+                        model = self.model_class(model_id=model_id, model_addr=addr, model_len=model_len,
+                                                 model_def=None, data=m)
                         model.mid = '%s_%s' % (self.did, mid)
                         mid += 1
                         self.add_model(model)
-                        addr += model.len + 2
+                        addr += model.len
         except Exception as e:
             raise FileClientError(str(e))
 

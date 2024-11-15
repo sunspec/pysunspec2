@@ -2842,7 +2842,7 @@ class TestFileClientDevice:
         assert d.find_mid('mid_test') == m
 
     def test_scan(self):
-        d = file_client.FileClientDevice('sunspec2/tests/test_data/device_1547.json')
+        d = file_client.FileClientDevice('./sunspec2/tests/test_data/device_1547.json')
         d.scan()
         assert d.common
         assert d.DERMeasureAC

@@ -232,8 +232,10 @@ class SunSpecModbusClientDevice(device.Device):
             if delay is not None:
                 time.sleep(delay)
 
+        error_dict = {}
         if self.base_addr is None:
             for addr in self.base_addr_list:
+                error_dict[addr] = ''
                 try:
                     data = self.read(addr, 3)
                     if data:
@@ -241,20 +243,24 @@ class SunSpecModbusClientDevice(device.Device):
                             self.base_addr = addr
                             break
                         else:
-                            error = 'Device responded - not SunSpec register map'
+                            error_dict[addr] = 'Device responded - not SunSpec register map'
                     else:
-                        error = 'data time out'
+                        error_dict[addr] = 'Data time out'
                 except SunSpecModbusClientError as e:
-                    if not error:
-                        error = str(e)
+                    error_dict[addr] = str(e)
                 except modbus_client.ModbusClientTimeout as e:
-                    if not error:
-                        error = str(e)
-                except modbus_client.ModbusClientException:
-                    pass
+                    error_dict[addr] = str(e)
+                except modbus_client.ModbusClientException as e:
+                    error_dict[addr] = str(e)
+                except Exception as e:
+                    error_dict[addr] = str(e)
 
                 if delay is not None:
                     time.sleep(delay)
+
+        error = 'Error scanning SunSpec base addresses. \n'
+        for k, v in error_dict.items():
+            error += 'Base address %s error = %s. \n' % (k, v)
 
         if self.base_addr is not None:
             model_id_data = data[4:6]
@@ -297,8 +303,6 @@ class SunSpecModbusClientDevice(device.Device):
                     time.sleep(delay)
 
         else:
-            if not error:
-                error = 'Unknown error'
             raise SunSpecModbusClientError(error)
 
         if connected:
@@ -398,7 +402,7 @@ class SunSpecModbusClientDeviceRTU(SunSpecModbusClientDevice):
         self.client.open()
 
     def close(self):
-        """Close the device. Called when device is not longer in use.
+        """Close the device. Called when device is no longer in use.
         """
 
         if self.client:
