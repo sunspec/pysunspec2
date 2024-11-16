@@ -332,8 +332,8 @@ class SunSpecModbusClientDeviceTCP(SunSpecModbusClientDevice):
         if self.client is None:
             raise SunSpecModbusClientError('No modbus tcp client set for device')
 
-    def connect(self):
-        self.client.connect()
+    def connect(self, timeout=None):
+        self.client.connect(timeout)
 
     def disconnect(self):
         self.client.disconnect()
