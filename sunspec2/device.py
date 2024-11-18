@@ -19,7 +19,7 @@ models_dir = os.path.join(this_dir, 'models')
 
 model_defs_path = ['.', models_dir]
 model_path_options = ['.', 'json', 'smdx']
-
+model_defs_cache = {}
 
 def get_model_defs_path():
     return model_defs_path
@@ -72,6 +72,10 @@ def get_model_def(model_id, mapping=True):
     except:
         raise mdef.ModelDefinitionError('Invalid model id: %s' % model_id)
 
+    global model_defs_cache
+    if (model_id, mapping) in model_defs_cache:
+        return model_defs_cache[(model_id, mapping)].copy()
+
     model_def_file_json = mdef.to_json_filename(model_id)
     model_def_file_smdx = smdx.to_smdx_filename(model_id)
     model_def = None
@@ -98,6 +102,7 @@ def get_model_def(model_id, mapping=True):
             if model_def is not None:
                 if mapping:
                     add_mappings(model_def[mdef.GROUP])
+                model_defs_cache[(model_id, mapping)] = model_def.copy()
                 return model_def
     raise mdef.ModelDefinitionError('Model definition not found for model %s' % model_id)
 
@@ -549,7 +554,7 @@ class Group(object):
             # compute count based on model len if present, otherwise allocate when set
             model_len = self.model.len
             if model_len:
-                gdata = self._group_data(data=data, name=gdef[mdef.NAME])
+                gdata = self._group_data(data=data, name=gdef[mdef.NAME], index=0)
                 g = self.group_class(gdef=gdef, model=self.model, model_offset=model_offset, data=gdata,
                                      data_offset=data_offset, index=1)
                 group_points_len = g.points_len
@@ -569,7 +574,8 @@ class Group(object):
                         model_offset += g.len
                         data_offset += g.len
                     for i in range(count - 1):
-                        g = self.group_class(gdef=gdef, model=self.model, model_offset=model_offset, data=data,
+                        gdata = self._group_data(data=data, index=(i+1))
+                        g = self.group_class(gdef=gdef, model=self.model, model_offset=model_offset, data=gdata,
                                            data_offset=data_offset, index=i+2)
                         model_offset += g.len
                         data_offset += g.len
