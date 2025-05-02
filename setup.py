@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-  Copyright (c) 2020, SunSpec Alliance
+  Copyright (c) 2025, SunSpec Alliance
   All Rights Reserved
 """
 
