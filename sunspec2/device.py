@@ -21,8 +21,10 @@ model_defs_path = ['.', models_dir]
 model_path_options = ['.', 'json', 'smdx']
 model_defs_cache = {}
 
-def get_model_defs_path():
-    return model_defs_path
+
+def clear_model_defs_cache():
+    global model_defs_cache
+    model_defs_cache = {}
 
 
 def set_model_defs_path(path_list):
@@ -30,6 +32,11 @@ def set_model_defs_path(path_list):
         raise mdef.ModelDefinitionError('Invalid path list type, path list is not a list')
     global model_defs_path
     model_defs_path = path_list
+    clear_model_defs_cache()
+
+
+def get_model_defs_path():
+    return model_defs_path
 
 
 def get_model_info(model_id):
