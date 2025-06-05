@@ -4,8 +4,8 @@ pySunSpec2
 Overview
 ========
 pySunSpec is a python package that provides objects and applications that support interaction with SunSpec compliant
-devices and documents. pySunSpec runs in most environments that support Python and is tested on Windows 7 and
-Windows 10.
+devices and documents. pySunSpec runs in most environments that support Python and is tested on Windows 7, Windows 10,
+and Windows 11.
 
 This is the next generation of pySunSpec tools. It supports all SunSpec infomation model definitions and formats including smdx and
 json. The Python objects used for interacting with devices have some differences from version 1 and it is not backward
@@ -24,12 +24,31 @@ Features
 
 Requirements
 ============
-- Python 3.5-3.8
+- Python >= 3.5 
 - pySerial (if using Modbus RTU)
 - openpyxl (if using Excel spreadsheet)
 - pytest (if running tests)
 
+Installation
+=================================
+Installing using pip:
 
+ pip install pysunspec2
+
+Installation using pip installs the models as well
+
+Installing from the setup.py file:
+
+ C:\\pysunspec2> python -m pip install .
+ 
+or if the python path isn't configured:
+ 
+ C:\\pysunspec2> c:\\Python37\\python.exe -m pip install .
+
+Note: To install the models while cloning the repository, make sure to add the recursive tag:
+
+ git clone https://github.com/sunspec/pysunspec2.git --recursive
+ 
 Interacting with a SunSpec Device
 =================================
 
@@ -390,3 +409,29 @@ The function is disabled, set the value to 1, and write to device, in order to e
 
 It is considered a best practice with Modbus to verify values written to the device by reading them back to ensure they
 were set properly. That step has been omitted to here to focus on the update sequence.
+
+Development
+============
+
+Executing the unit tests
+------------------------
+
+Make sure `tox` is installed on your computer (see [tox documentation](https://tox.wiki/) for details).
+
+The following command will let `tox` create a virtual environment with all necessary dependencies for each python 
+version supported by PySunspec and use it to execute the unit tests. 
+Each python version must already be installed on the host
+
+```sh
+tox
+```
+
+We can also run the test for one specific python version only:
+
+```sh
+tox -e py39
+```
+
+Contribution
+============
+If you wish to contribute to the project, please contact support@sunspec.org to sign a CLA.

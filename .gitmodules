@@ -1,4 +1,4 @@
 [submodule "sunspec2/models"]
 	path = sunspec2/models
 	url = https://github.com/sunspec/models.git
-	branch = development
+	branch = master

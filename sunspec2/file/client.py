@@ -52,7 +52,7 @@ class FileClientModel(FileClientGroup):
             self.add_error(str(e))
 
         FileClientGroup.__init__(self, gdef=gdef, model=self, model_offset=0, group_len=self.model_len, data=data,
-                                 data_offset=0, group_class=group_class)
+                                 data_offset=0, group_class=group_class, point_class=point_class)
 
     def add_error(self, error_info):
         self.error_info = '%s%s\n' % (self.error_info, error_info)
@@ -77,8 +77,8 @@ class FileClientDevice(device.Device):
                     model_id = m.get('ID')
                     model_len = m.get('L')
                     if model_id != mb.SUNS_END_MODEL_ID:
-                        model = self.model_class(model_id=model_id, model_addr=addr, model_len=model_len, model_def=None,
-                                                 data=m)
+                        model = self.model_class(model_id=model_id, model_addr=addr, model_len=model_len,
+                                                 model_def=None, data=m)
                         model.mid = '%s_%s' % (self.did, mid)
                         mid += 1
                         self.add_model(model)
@@ -90,6 +90,9 @@ class FileClientDevice(device.Device):
         return ''
 
     def write(self):
+        return
+
+    def close(self):
         return
 
 

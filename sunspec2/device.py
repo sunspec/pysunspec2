@@ -5,18 +5,21 @@ import os
 import sunspec2.mdef as mdef
 import sunspec2.smdx as smdx
 import sunspec2.mb as mb
+import time
 
 
 class ModelError(Exception):
     pass
 
 
+ACCESS_REGION_REGS = 123
+
 this_dir, this_filename = os.path.split(__file__)
 models_dir = os.path.join(this_dir, 'models')
 
 model_defs_path = ['.', models_dir]
 model_path_options = ['.', 'json', 'smdx']
-
+model_defs_cache = {}
 
 def get_model_defs_path():
     return model_defs_path
@@ -43,7 +46,7 @@ def get_model_info(model_id):
                 for pdef in points:
                     info = mb.point_type_info.get(pdef[mdef.TYPE])
                     plen = pdef.get(mdef.SIZE, None)
-                    if plen is None:
+                    if plen is not None:
                         glen += info.len
     except:
         raise
@@ -68,6 +71,10 @@ def get_model_def(model_id, mapping=True):
         model_id = int(model_id)
     except:
         raise mdef.ModelDefinitionError('Invalid model id: %s' % model_id)
+
+    global model_defs_cache
+    if (model_id, mapping) in model_defs_cache:
+        return model_defs_cache[(model_id, mapping)].copy()
 
     model_def_file_json = mdef.to_json_filename(model_id)
     model_def_file_smdx = smdx.to_smdx_filename(model_id)
@@ -95,9 +102,9 @@ def get_model_def(model_id, mapping=True):
             if model_def is not None:
                 if mapping:
                     add_mappings(model_def[mdef.GROUP])
+                model_defs_cache[(model_id, mapping)] = model_def.copy()
                 return model_def
-    raise mdef.ModelDefinitionError('Model definition not found for model %s\nLooking in: %s' %
-                                    (model_id, os.path.join(path, path_option, model_def_file_json)))
+    raise mdef.ModelDefinitionError('Model definition not found for model %s' % model_id)
 
 
 # add id mapping for points and groups for more efficient lookup by id
@@ -133,6 +140,14 @@ class Point(object):
         self.sf = None              # scale factor point name
         self.sf_value = None        # value of scale factor
         self.sf_required = False    # point has a scale factor
+        self.detail = None          # detailed description
+        self.standards = []         # list of standards requiring this point's implementation
+        self.read_func = None       # function to be called on read
+        self.read_func_arg = None   # the argument passed to the read_func
+        self.write_func = None      # function to be called on write
+        self.write_func_arg = None  # the argument passed to the write_func
+        self.static = None
+
         if pdef:
             self.sf_required = (pdef.get(mdef.SF) is not None)
             if self.sf_required:
@@ -150,6 +165,18 @@ class Point(object):
 
             if data is not None:
                 self._set_data(data=data, offset=data_offset)
+
+            static = pdef.get('static', None)
+            if static and static == 'S':
+                self.static = True
+
+            standards = pdef.get('standards', None)
+            if standards:
+                if not isinstance(standards, list):
+                    standards = [standards]
+                self.standards = standards
+
+            self.detail = pdef.get('detail', None)
 
     def __str__(self):
         return self.disp()
@@ -189,10 +216,14 @@ class Point(object):
         self.set_value(v, computed=True, dirty=True)
 
     def get_value(self, computed=False):
+        # call read function, if set
+        if self.read_func:
+            self.read_func(self.model, self.read_func_arg)
+
         v = self._value
         if computed and v is not None:
             if self.sf_required:
-                if self.sf_value is None:
+                if self.sf_value is None or not self.static:
                     if self.sf:
                         sf = self.group.points.get(self.sf)
                         if sf is None:
@@ -204,7 +235,8 @@ class Point(object):
             if self.sf_value:
                 sfv = self.sf_value
                 if sfv:
-                    v = v * math.pow(10, sfv)
+                    v = round(v * math.pow(10, sfv), -1 * sfv)
+
         return v
 
     def set_value(self, data=None, computed=False, dirty=None):
@@ -213,7 +245,7 @@ class Point(object):
             self.dirty = dirty
         if computed:
             if self.sf_required:
-                if self.sf_value is None:
+                if self.sf_value is None or not self.static:
                     if self.sf:
                         sf = self.group.points.get(self.sf)
                         if sf is None:
@@ -227,19 +259,32 @@ class Point(object):
                                                  (self.sf, self.pdef['name']))
                         else:
                             raise ModelError('Scale factor %s for point %s not found' % (self.sf, self.pdef['name']))
-            if self.sf_value:
-                self._value = int(round(float(v), abs(self.sf_value)) / math.pow(10, self.sf_value))
+            if self.sf_value is not None:
+                self._value = round(round(float(v), abs(self.sf_value)) / math.pow(10, self.sf_value))
             else:
                 self._value = v
         else:
             self._value = v
 
+        # call write function, if set
+        # should be used to set indication for subsequent processing rather than do detailed processing
+        if self.write_func:
+            self.write_func(self.model, self.write_func_arg)
+
+    def set_read_func(self, func, arg=None):
+        self.read_func = func
+        self.read_func_arg = arg
+
+    def set_write_func(self, func, arg=None):
+        self.write_func = func
+        self.write_func_arg = arg
+
     def get_mb(self, computed=False):
         v = self._value
-        data = None
+        data = err = None
         if computed and v is not None:
             if self.sf_required:
-                if self.sf_value is None:
+                if self.sf_value is None or not self.static:
                     if self.sf:
                         sf = self.group.points.get(self.sf)
                         if sf is None:
@@ -252,19 +297,29 @@ class Point(object):
                 sfv = self.sf_value
                 if sfv:
                     v = int(v * math.pow(10, sfv))
-                data = self.info.to_data(v, (int(self.len) * 2))
+                try:
+                    data = self.info.to_data(v, (int(self.len) * 2))
+                except Exception as e:
+                    err = 'Error getting point value %s %s: %s' % (self.pdef[mdef.NAME], v, e)
+                if err:
+                    raise ModelError(err)
         elif v is None:
             data = mb.create_unimpl_value(self.pdef[mdef.TYPE], len=(int(self.len) * 2))
 
         if data is None:
-            data = self.info.to_data(v, (int(self.len) * 2))
+            try:
+                data = self.info.to_data(v, (int(self.len) * 2))
+            except Exception as e:
+                err = 'Error getting point value %s %s: %s' % (self.pdef[mdef.NAME], v, e)
+            if err:
+                raise ModelError(err)
         return data
 
     def set_mb(self, data=None, computed=False, dirty=None):
+        mb_len = self.len
         try:
-            mb_len = self.len
             # if not enough data, do not set but consume the data
-            if len(data) < mb_len:
+            if len(data) < mb_len * 2:
                 return len(data)
             self.set_value(self.info.data_to(data[:mb_len * 2]), computed=computed, dirty=dirty)
             if not self.info.is_impl(self.value):
@@ -274,10 +329,43 @@ class Point(object):
             self.model.add_error('Error setting value for %s: %s' % (self.pdef[mdef.NAME], str(e)))
         return mb_len
 
+    def is_impl(self):
+        impl = False
+        v = self.value
+        if v is not None:
+            impl = self.info.is_impl(self.value)
+        return impl
+
+    def get_text(self, index=None, parent_index=None):
+        txt = ''
+        name = self.pdef['name']
+        val = self.value
+        units = self.pdef.get('units')
+        if index:
+            if parent_index:
+                group_index = f'{parent_index:02}'
+                group_index += ':' + f'{index:02}'
+                txt += '%6s' % (group_index + ':')
+            else:
+                group_index = f'{index:02}'
+                txt += '%6s' % (group_index + ':')
+        else:
+            txt += ' ' * 6
+
+        txt += name
+        length = 55 - len(name)
+        txt += '%*s' % (length, str(val))
+        if units:
+            txt += ' ' + units + '\n'
+        else:
+            txt += '\n'
+
+        return txt
+
 
 class Group(object):
     def __init__(self, gdef=None, model=None, model_offset=0, group_len=0, data=None, data_offset=0, group_class=None,
-                 point_class=Point, index=None):
+                 point_class=None, index=None):
         self.gdef = gdef
         self.model = model
         self.gname = None
@@ -288,9 +376,12 @@ class Group(object):
         self.points_len = 0
         self.group_class = group_class
         self.index = index
+        self.access_regions = []
 
         if group_class is None:
             self.group_class = self.__class__
+        if point_class is None:
+            point_class = Point
 
         if gdef is not None:
             self.gname = gdef[mdef.NAME]
@@ -300,12 +391,14 @@ class Group(object):
             points = self.gdef.get(mdef.POINTS)
             if points:
                 for pdef in points:
-                    p = point_class(pdef, model=self.model, group=self, model_offset=model_offset, data=data,
-                                    data_offset=data_offset)
-                    self.points_len += p.len
-                    model_offset += p.len
-                    data_offset += p.len
-                    self.points[pdef[mdef.NAME]] = p
+                    # allow legacy model 1 to have an alternate length of 65 registers
+                    if self.len != 65 or model.model_id != 1 or pdef[mdef.NAME] != 'Pad':
+                        p = point_class(pdef, model=self.model, group=self, model_offset=model_offset, data=data,
+                                        data_offset=data_offset)
+                        self.points_len += p.len
+                        model_offset += p.len
+                        data_offset += p.len
+                        self.points[pdef[mdef.NAME]] = p
             # initialize groups
             groups = self.gdef.get(mdef.GROUPS)
             if groups:
@@ -330,8 +423,15 @@ class Group(object):
             if self.len:
                 if self.len + 2 != mlen:
                     self.model.add_error('Model length %s not equal to calculated model length %s for model %s' %
-                                        (self.len + 2, mlen, self.model.model_id ))
+                                         (self.len + 2, mlen, self.model.model_id))
             self.len = mlen
+
+        # check if group fits in access region
+        if self.len > ACCESS_REGION_REGS:
+            index, count = self._init_access(self.access_regions, index=0, count=0)
+            # add last region if pending
+            if count > 0:
+                self.access_regions.append((index, count))
 
         len_point = self.points.get('L')
         if len_point:
@@ -342,6 +442,26 @@ class Group(object):
             id_val = id_point.pdef.get('value')
             if id_val:
                 id_point.set_value(id_point.pdef['value'])
+
+    def _init_access(self, access_regions, index, count):
+        # add points
+        if self.points:
+            for p, point in self.points.items():
+                if count + point.len > ACCESS_REGION_REGS:
+                    access_regions.append((index, count))
+                    index += count
+                    count = 0
+                count += point.len
+        # add groups
+        if self.groups:
+            for g, groups in self.groups.items():
+                if isinstance(groups, list) and len(groups) > 0:
+                    for group in groups:
+                        index, count = group._init_access(access_regions, index, count)
+                else:
+                    index, count = groups._init_access(access_regions, index, count)
+
+        return index, count
 
     def __getattr__(self, attr):
         v = self.points.get(attr)
@@ -434,7 +554,7 @@ class Group(object):
             # compute count based on model len if present, otherwise allocate when set
             model_len = self.model.len
             if model_len:
-                gdata = self._group_data(data=data, name=gdef[mdef.NAME])
+                gdata = self._group_data(data=data, name=gdef[mdef.NAME], index=0)
                 g = self.group_class(gdef=gdef, model=self.model, model_offset=model_offset, data=gdata,
                                      data_offset=data_offset, index=1)
                 group_points_len = g.points_len
@@ -446,7 +566,7 @@ class Group(object):
                     if remaining != 0:
                         raise ModelError('Repeating group count not consistent with model length for model %s,'
                                          'model repeating len = %s, model repeating group len = %s' %
-                                         (self.model._id, repeating_len, group_points_len))
+                                         (self.model.model_id, repeating_len, group_points_len))
 
                     count = int(repeating_len / group_points_len)
                     if count > 0:
@@ -454,7 +574,8 @@ class Group(object):
                         model_offset += g.len
                         data_offset += g.len
                     for i in range(count - 1):
-                        g = self.group_class(gdef=gdef, model=self.model, model_offset=model_offset, data=data,
+                        gdata = self._group_data(data=data, index=(i+1))
+                        g = self.group_class(gdef=gdef, model=self.model, model_offset=model_offset, data=gdata,
                                            data_offset=data_offset, index=i+2)
                         model_offset += g.len
                         data_offset += g.len
@@ -543,6 +664,24 @@ class Group(object):
                         return None
         return int(offset/2)
 
+    def get_text(self, index=None, parent_index=None):
+        txt = ''
+        tmp_txt = ''
+        for p in self.points:
+            tmp_txt = self.points[p].get_text(index, parent_index)
+            if tmp_txt:
+                txt += tmp_txt
+        for g in self.groups:
+            if isinstance(self.groups[g], list):
+                for i in range(len(self.groups[g])):
+                    if index:
+                        txt += self.groups[g][i].get_text(i+1, parent_index=index)
+                    else:
+                        txt += self.groups[g][i].get_text(i+1)
+            else:
+                txt += self.groups[g].get_text(index)
+        return txt
+
 
 class Model(Group):
     def __init__(self, model_id=None, model_addr=0, model_len=0, model_def=None, data=None, group_class=Group):
@@ -605,15 +744,20 @@ class Device(object):
         model_list.append(model)
         # add by group id
         gname = model.gname
-        model_list = self.models.get(gname)
-        if model_list is None:
-            model_list = []
-            self.models[gname] = model_list
-        model_list.append(model)
-        # add to model list
-        self.model_list.append(model)
+        if gname is not None:
+            model_list = self.models.get(gname)
+            if model_list is None:
+                model_list = []
+                self.models[gname] = model_list
+            model_list.append(model)
+            # add to model list
+            self.model_list.append(model)
 
         model.device = self
+
+    def delete_models(self):
+        self.models = {}
+        self.model_list = []
 
     def get_dict(self, computed=False):
         d = {'name': self.name, 'did': self.did, 'models': []}
@@ -663,6 +807,22 @@ class Device(object):
             else:
                 model_id = m['ID']
             if model_id != mdef.END_MODEL_ID:
-                model_def = get_model_def(model_id)
-                model = Model(model_def=model_def, data=m, model_id=m['ID'])
+                model_def = model_len = None
+                try:
+                    model_def = get_model_def(model_id)
+                except:
+                    model_len = m.get('L')
+                if not model_len:
+                    model_len = 0
+                model = Model(model_def=model_def, data=m, model_id=m['ID'], model_len=model_len)
                 self.add_model(model=model)
+
+    def get_text(self):
+        txt = 'Timestamp: %s\n' % (time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()))
+        for m in self.model_list:
+            if m.error_info:
+                txt += '\nError: ' + m.error_info + '\n'
+                continue
+            txt += '\nModel: %s (%s)\n\n' % (m.model_def['group']['name'], m.model_id)
+            txt += m.get_text()
+        return txt

@@ -24,8 +24,7 @@
 import csv
 import json
 import copy
-
-import sunspec2.mdef as mdef
+from sunspec2 import mdef
 
 ADDRESS_OFFSET = 'Address Offset'
 GROUP_OFFSET = 'Group Offset'
@@ -42,9 +41,12 @@ STATIC = 'Static (S)'
 LABEL = 'Label'
 DESCRIPTION = 'Description'
 NOTES = 'Notes'
+DETAIL = 'Detailed Description'
+STANDARDS = 'Standards'
+
 
 columns = [ADDRESS_OFFSET, GROUP_OFFSET, NAME, VALUE, COUNT, TYPE, SIZE, SCALE_FACTOR,
-           UNITS, ACCESS, MANDATORY, STATIC, LABEL, DESCRIPTION, NOTES]
+           UNITS, ACCESS, MANDATORY, STATIC, LABEL, DESCRIPTION, DETAIL, STANDARDS, NOTES]
 
 empty_row = [''] * len(columns)
 
@@ -63,6 +65,12 @@ STATIC_IDX = columns.index(STATIC)
 LABEL_IDX = columns.index(LABEL)
 DESCRIPTION_IDX = columns.index(DESCRIPTION)
 NOTES_IDX = columns.index(NOTES)
+DETAIL_IDX = columns.index(DETAIL)
+STANDARDS_IDX = columns.index(STANDARDS)
+
+
+class PySunSpecException(Exception):
+    pass
 
 
 def idx(row, attr, mandatory=False):
@@ -70,7 +78,7 @@ def idx(row, attr, mandatory=False):
         return row.index(attr)
     except:
         if mandatory:
-            raise ValueError('Missing required attribute column: %s' % (attr))
+            raise ValueError('Missing required attribute column: %s' % attr)
 
 
 def row_is_empty(row, idx):
@@ -86,15 +94,10 @@ def find_name(entities, name):
             return e
 
 
-def element_type(row):
-    type_idx = idx(row, TYPE, mandatory=True)
-
-
 def from_spreadsheet(spreadsheet):
     model_def = {}
     row = spreadsheet[0]
-    address_offset_idx = idx(row, ADDRESS_OFFSET)
-    group_offset_idx = idx(row, GROUP_OFFSET)
+
     name_idx = idx(row, NAME, mandatory=True)
     value_idx = mdef.to_number_type(idx(row, VALUE, mandatory=True))
     count_idx = mdef.to_number_type(idx(row, COUNT, mandatory=True))
@@ -107,16 +110,20 @@ def from_spreadsheet(spreadsheet):
     static_idx = idx(row, STATIC, mandatory=True)
     label_idx = idx(row, LABEL)
     description_idx = idx(row, DESCRIPTION)
+    detail_idx = idx(row, DETAIL)
+    standards_idx = idx(row, STANDARDS)
+
     has_notes = False
-    # if notes col not present, notes_idx will be None
-    notes_idx = idx(row, NOTES)
+    notes_idx = idx(row, NOTES)  # if notes col not present, notes_idx will be None
     if notes_idx and row[notes_idx] == 'Notes':
         has_notes = True
     row_num = 1
 
     group = None
     point = None
-    comments = []
+    detail = None
+    standards = []
+    comments = []  # Speadsheet comments - single gray lines
     parent = ''
 
     for row in spreadsheet[1:]:
@@ -130,6 +137,10 @@ def from_spreadsheet(spreadsheet):
             label = row[label_idx]
         if len(row) > description_idx:
             description = row[description_idx]
+        if len(row) > detail_idx:
+            detail = row[detail_idx]
+        if len(row) > standards_idx:
+            standards = row[standards_idx]
         if has_notes:
             notes = row[notes_idx]
             if notes is None:
@@ -142,11 +153,13 @@ def from_spreadsheet(spreadsheet):
                 if not group.get(mdef.POINTS):
                     group[mdef.POINTS] = []
                 if find_name(group[mdef.POINTS], name) is not None:
-                    raise Exception('Duplicate point definition in group %s: %s' % (group[mdef.NAME], name))
+                    raise PySunSpecException('Duplicate point definition in group %s: %s' % (group[mdef.NAME], name))
             else:
-                raise Exception('Point %s defined outside of group' % name)
-
-            size = mdef.to_number_type(row[size_idx])
+                raise PySunSpecException('Point %s defined outside of group' % name)
+            if etype == mdef.TYPE_STRING:
+                size = mdef.to_number_type(row[size_idx])
+            else:
+                size = mdef.point_type_info[etype]['len']
             sf = mdef.to_number_type(row[scale_factor_idx])
             units = row[units_idx]
             access = row[access_idx]
@@ -175,14 +188,29 @@ def from_spreadsheet(spreadsheet):
                 point[mdef.NOTES] = notes
             if value is not None and value != '':
                 point[mdef.VALUE] = value
-            if comments:
-                point[mdef.COMMENTS] = list(comments)
+            if detail:
+                point[mdef.DETAIL] = detail
+            if standards:
+                if isinstance(standards, str):
+                    stds_list = standards.split(',')
+                    for std in stds_list:
+                        stds_list[stds_list.index(std)] = std.strip()
+                    point[mdef.STANDARDS] = stds_list
+            else:
+                point[mdef.STANDARDS] = []
+
             group[mdef.POINTS].append(point)
 
             # set the model id
             if not parent and name == mdef.MODEL_ID_POINT_NAME:
                 model_def[mdef.ID] = value
-            comments = []
+            if comments:
+                if len(comments) > 1:
+                    point[mdef.COMMENTS] = [comments[-1]]
+                else:
+                    point[mdef.COMMENTS] = comments
+            comments = []  # reset comments
+
         # group
         elif etype in mdef.group_types:
             path = name.split('.')
@@ -193,15 +221,12 @@ def from_spreadsheet(spreadsheet):
                 for g in path[1:-1]:
                     group = find_name(group[mdef.GROUPS], g)
                     if group is None:
-                        raise Exception('Unknown parent group id %s in group id %s' % (g, group))
+                        raise PySunSpecException('Unknown parent group id %s in group id %s' % (g, group))
                     parent += '.%s' % group[mdef.NAME]
             else:
                 if group is not None:
-                    raise Exception('Redefintion of top-level group %s with %s' % (group[mdef.ID], name))
-            if parent:
-                name = '%s.%s' % (parent, path[-1])
-            else:
-                name = path[-1]
+                    raise PySunSpecException('Redefintion of top-level group %s with %s' % (group[mdef.ID], name))
+
             new_group = {mdef.NAME: path[-1], mdef.TYPE: etype}
             if label:
                 new_group[mdef.LABEL] = label
@@ -209,9 +234,12 @@ def from_spreadsheet(spreadsheet):
                 new_group[mdef.DESCRIPTION] = description
             if has_notes:
                 new_group[mdef.NOTES] = notes
+            if detail:
+                new_group[mdef.DETAIL] = detail
             if comments:
-                new_group[mdef.COMMENTS] = list(comments)
-            comments = []
+                new_group[mdef.COMMENTS] = comments
+            comments = []  # reset comments
+
             count = mdef.to_number_type(row[count_idx])
             if count is not None and count != '':
                 new_group[mdef.COUNT] = count
@@ -222,14 +250,15 @@ def from_spreadsheet(spreadsheet):
                     group[mdef.GROUPS] = []
                 group[mdef.GROUPS].append(new_group)
             group = new_group
+
         # symbol - has name and value with no type
         elif name and value is not None and value != '':
             if point is None:
-                raise Exception('Unknown point for symbol %s' % name)
+                raise PySunSpecException('Unknown point for symbol %s' % name)
             if not point.get(mdef.SYMBOLS):
                 point[mdef.SYMBOLS] = []
             if find_name(point[mdef.SYMBOLS], name) is not None:
-                raise Exception('Duplicate symbol definition in point %s: %s' % (point[mdef.ID], name))
+                raise PySunSpecException('Duplicate symbol definition in point %s: %s' % (point[mdef.ID], name))
             symbol = {mdef.NAME: name, mdef.VALUE: value}
             point[mdef.SYMBOLS].append(symbol)
             if label:
@@ -238,9 +267,10 @@ def from_spreadsheet(spreadsheet):
                 symbol[mdef.DESCRIPTION] = description
             if has_notes:
                 symbol[mdef.NOTES] = notes
-            if comments:
-                symbol[mdef.COMMENTS] = list(comments)
+            if detail:
+                symbol[mdef.DETAIL] = detail
             comments = []
+
         elif not row_is_empty(row, 1):
             raise ValueError('Invalid spreadsheet entry row %s: %s' % (row_num, row))
         # comment - no name, value, or type
@@ -251,6 +281,13 @@ def from_spreadsheet(spreadsheet):
 
 
 def to_spreadsheet(model_def):
+    """
+    Entry point to generate a spreadsheet from a model definition
+
+    :param model_def: Model definition
+    :return: Spreadsheet
+    """
+
     # check if model_def has notes attr by searching string
     mdef_str = json.dumps(model_def)
     has_notes = '\"notes\"' in mdef_str
@@ -261,15 +298,25 @@ def to_spreadsheet(model_def):
         c_columns.remove('Notes')
         spreadsheet = [c_columns]
     to_spreadsheet_group(spreadsheet, model_def[mdef.GROUP], has_notes, addr_offset=0)
-    return(spreadsheet)
+    return spreadsheet
 
 
 def to_spreadsheet_group(ss, group, has_notes, parent='', addr_offset=None):
+    """
+    Add a group to the spreadsheet
+
+    :param ss: Spreadsheet
+    :param group: SunSpec group
+    :param has_notes: whether the spreadsheet has notes
+    :param parent: group parent
+    :param addr_offset: register offset
+    :return: None
+    """
     # process comments
     for c in group.get(mdef.COMMENTS, []):
         to_spreadsheet_comment(ss, c, has_notes=has_notes)
+
     # add group info
-    row = None
     if has_notes:
         row = [''] * len(columns)
     else:
@@ -281,14 +328,24 @@ def to_spreadsheet_group(ss, group, has_notes, parent='', addr_offset=None):
             name = '%s.%s' % (parent, name)
         row[NAME_IDX] = name
     else:
-        raise Exception('Group missing name attribute')
+        raise PySunSpecException('Group missing name attribute')
+
     row[TYPE_IDX] = group.get(mdef.TYPE, '')
     row[COUNT_IDX] = group.get(mdef.COUNT, '')
     row[LABEL_IDX] = group.get(mdef.LABEL, '')
     row[DESCRIPTION_IDX] = group.get(mdef.DESCRIPTION, '')
+    row[DETAIL_IDX] = group.get(mdef.DETAIL, '')
+
+    row[STANDARDS_IDX] = group.get(mdef.STANDARDS, [])
+    if len(row[STANDARDS_IDX]) > 0:
+        row[STANDARDS_IDX] = ', '.join(row[STANDARDS_IDX])
+    else:
+        row[STANDARDS_IDX] = ''
+
     if has_notes:
         row[NOTES_IDX] = group.get(mdef.NOTES, '')
     ss.append(row)
+
     # process points
     group_offset = 0
     for p in group.get(mdef.POINTS, []):
@@ -297,6 +354,7 @@ def to_spreadsheet_group(ss, group, has_notes, parent='', addr_offset=None):
             addr_offset += plen
         if group_offset is not None:
             group_offset += plen
+
     # process groups
     addr_offset = None
     for g in group.get(mdef.GROUPS, []):
@@ -304,95 +362,158 @@ def to_spreadsheet_group(ss, group, has_notes, parent='', addr_offset=None):
 
 
 def to_spreadsheet_point(ss, point, has_notes, addr_offset=None, group_offset=None):
+    """
+    Add a point to the spreadsheet
+
+    :param ss: Spreadsheet
+    :param point: SunSpec point
+    :param has_notes: whether the spreadsheet has notes
+    :param addr_offset: register offset
+    :param group_offset: group offset
+    :return: plen, integer point length in bytes
+    """
+
     # process comments
     for c in point.get(mdef.COMMENTS, []):
         to_spreadsheet_comment(ss, c, has_notes=has_notes)
+
     # add point info
-    row = None
     if has_notes:
         row = [''] * len(columns)
     else:
         row = [''] * (len(columns) - 1)
+
     name = point.get(mdef.NAME, '')
     if name:
         row[NAME_IDX] = name
     else:
-        raise Exception('Point missing name attribute')
+        raise PySunSpecException('Point missing name attribute')
+
     ptype = point.get(mdef.TYPE, '')
-    if ptype != '':
-        row[TYPE_IDX] = ptype
-    else:
-        raise Exception('Point %s missing type attribute' % name)
+    if ptype == '':
+        raise PySunSpecException('Point %s missing type attribute' % name)
+
+    if mdef.point_type_info.get(ptype) is None:
+        raise PySunSpecException('Unknown point type %s for point %s' % (ptype, name))
+
+    row[TYPE_IDX] = ptype
+
     if addr_offset is not None:
         row[ADDRESS_OFFSET_IDX] = addr_offset
     elif group_offset is not None:
         row[GROUP_OFFSET_IDX] = group_offset
+
     access = point.get(mdef.ACCESS, '')
     if access != mdef.ACCESS_RW:
         access = ''
     row[ACCESS_IDX] = access
+
     mandatory = point.get(mdef.MANDATORY, '')
     if mandatory != mdef.MANDATORY_TRUE:
         mandatory = ''
     row[MANDATORY_IDX] = mandatory
+
     static = point.get(mdef.STATIC, '')
     if static != mdef.STATIC_TRUE:
         static = ''
     row[STATIC_IDX] = static
+
     row[UNITS_IDX] = point.get(mdef.UNITS, '')
     row[SCALE_FACTOR_IDX] = mdef.to_number_type(point.get(mdef.SF, ''))
-    row[SIZE_IDX] = mdef.to_number_type(point.get(mdef.SIZE, ''))
+
+    if ptype == mdef.TYPE_STRING:
+        row[SIZE_IDX] = mdef.to_number_type(point.get(mdef.SIZE, ''))
+    else:
+        row[SIZE_IDX] = mdef.point_type_info[ptype]['len']
+
     row[VALUE_IDX] = mdef.to_number_type(point.get(mdef.VALUE, ''))
     row[LABEL_IDX] = point.get(mdef.LABEL, '')
     row[DESCRIPTION_IDX] = point.get(mdef.DESCRIPTION, '')
+    row[DETAIL_IDX] = point.get(mdef.DETAIL, '')
+
+    row[STANDARDS_IDX] = point.get(mdef.STANDARDS, [])
+    if len(row[STANDARDS_IDX]) > 0:
+        row[STANDARDS_IDX] = ', '.join(row[STANDARDS_IDX])
+    else:
+        row[STANDARDS_IDX] = ''
+
     if has_notes:
         row[NOTES_IDX] = point.get(mdef.NOTES, '')
     ss.append(row)
+
     # process symbols
-    for s in point.get(mdef.SYMBOLS, []):
-        to_spreadsheet_symbol(ss, s, has_notes=has_notes)
+    symbols = point.get(mdef.SYMBOLS, [])
+    if symbols:
+        symbols = sorted(symbols, key=lambda sy: sy['value'])
+        for s in symbols:
+            to_spreadsheet_symbol(ss, s, has_notes=has_notes)
+
     # return point length
     try:
         plen = mdef.point_type_info[ptype]['len']
     except KeyError:
-        raise Exception('Unknown point type %s for point %s' % (ptype, name))
+        raise PySunSpecException('Unknown point type %s for point %s' % (ptype, name))
+
     if not plen:
         try:
             plen = int(row[SIZE_IDX])
         except ValueError:
-            raise Exception('Point size is for point %s not an iteger value: %s' % (name, row[SIZE_IDX]))
+            raise PySunSpecException('Point size is for point %s not an integer value: %s' % (name, row[SIZE_IDX]))
+
     return plen
 
 
 def to_spreadsheet_symbol(ss, symbol, has_notes):
+    """
+    Add a symbol to the spreadsheet
+
+    :param ss: Spreadsheet
+    :param symbol: symbol value
+    :param has_notes: whether the spreadsheet has notes
+    :return: None
+    """
     # process comments
     for c in symbol.get(mdef.COMMENTS, []):
         to_spreadsheet_comment(ss, c, has_notes=has_notes)
+
     # add symbol info
     row = None
     if has_notes:
         row = [''] * len(columns)
     else:
         row = [''] * (len(columns) - 1)
+
     name = symbol.get(mdef.NAME, '')
     if name:
         row[NAME_IDX] = name
     else:
-        raise Exception('Symbol missing name attribute')
+        raise PySunSpecException('Symbol missing name attribute')
+
     value = symbol.get(mdef.VALUE, '')
     if value != '':
         row[VALUE_IDX] = value
     else:
-        raise Exception('Symbol %s missing value' % name)
+        raise PySunSpecException('Symbol %s missing value' % name)
+
     row[LABEL_IDX] = symbol.get(mdef.LABEL, '')
     row[DESCRIPTION_IDX] = symbol.get(mdef.DESCRIPTION, '')
+    row[DETAIL_IDX] = symbol.get(mdef.DETAIL, '')
+
     if has_notes:
         row[NOTES_IDX] = symbol.get(mdef.NOTES, '')
+
     ss.append(row)
 
 
 def to_spreadsheet_comment(ss, comment, has_notes):
-    # add comment info
+    """
+    Add a group comment to the spreadsheet - single gray line with information on the group/point
+
+    :param ss: spreadsheet
+    :param comment: comment to add
+    :param has_notes: whether the spreadsheet has notes
+    :return: None
+    """
     row = None
     if has_notes:
         row = [''] * len(columns)
@@ -405,10 +526,10 @@ def to_spreadsheet_comment(ss, comment, has_notes):
 def spreadsheet_equal(ss1, ss2):
     count = len(ss1)
     if count != len(ss2):
-        raise Exception('Different length: %s %s' % (count, len(ss2)))
+        raise PySunSpecException('Different length: %s %s' % (count, len(ss2)))
     for i in range(count):
         if ss1[i] != ss2[i]:
-            raise Exception('Line %s different: %s %s' % (i + 1, ss1[i], ss2[i]))
+            raise PySunSpecException('Line %s different: %s %s' % (i + 1, ss1[i], ss2[i]))
     return True
 
 
@@ -425,7 +546,6 @@ def spreadsheet_from_csv(filename=None, csv_str=None):
     file = ''
 
     if filename:
-        import sys
         file = open(filename)
     if file:
         for row in csv.reader(file):

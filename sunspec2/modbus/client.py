@@ -22,9 +22,7 @@
 
 import time
 import uuid
-import sunspec2.mdef as mdef
-import sunspec2.device as device
-import sunspec2.mb as mb
+from sunspec2 import mdef, device, mb
 import sunspec2.modbus.modbus as modbus_client
 
 TEST_NAME = 'test_name'
@@ -37,6 +35,10 @@ RTU = 'Modbus RTU'
 TCP = 'Modbus TCP'
 
 class SunSpecModbusClientError(Exception):
+    pass
+
+
+class SunSpecModbusValueError(Exception):
     pass
 
 
@@ -56,8 +58,11 @@ class SunSpecModbusClientPoint(device.Point):
 
     def write(self):
         """Write the point to the physical device"""
-
-        data = self.info.to_data(self.value, int(self.len) * 2)
+        try:
+            data = self.info.to_data(self.value, int(self.len) * 2)
+        except Exception as e:
+            raise SunSpecModbusValueError('Point value error for %s %s: %s' % (self.pdef.get(mdef.NAME), self.value,
+                                                                               str(e)))
         model_addr = self.model.model_addr
         point_offset = self.offset
         addr = model_addr + point_offset
@@ -67,13 +72,35 @@ class SunSpecModbusClientPoint(device.Point):
 
 class SunSpecModbusClientGroup(device.Group):
 
-    def read(self):
+    def __init__(self, gdef=None, model=None, model_offset=0, group_len=0, data=None, data_offset=0, group_class=None,
+                 point_class=None, index=None):
 
-        data = self.model.device.read(self.model.model_addr + self.offset, self.len)
+        device.Group.__init__(self, gdef=gdef, model=model, model_offset=model_offset, group_len=group_len,
+                              data=data, data_offset=data_offset, group_class=group_class, point_class=point_class,
+                              index=index)
+
+    def read(self, len=None):
+        if len is None:
+            len = self.len
+        # check if currently connected
+        connected = self.model.device.is_connected()
+        if not connected:
+            self.model.device.connect()
+
+        if self.access_regions:
+            data = bytearray()
+            for region in self.access_regions:
+                data += self.model.device.read(self.model.model_addr + self.offset + region[0], region[1])
+            data = bytes(data)
+        else:
+            data = self.model.device.read(self.model.model_addr + self.offset, len)
         self.set_mb(data=data, dirty=False)
 
-    def write(self):
+        # disconnect if was not connected
+        if not connected:
+            self.model.device.disconnect()
 
+    def write(self):
         start_addr = next_addr = self.model.model_addr + self.offset
         data = b''
         start_addr, next_addr, data = self.write_points(start_addr, next_addr, data)
@@ -94,7 +121,10 @@ class SunSpecModbusClientGroup(device.Group):
                 data = b''
             if point.dirty:
                 point_len = point.len
-                point_data = point.info.to_data(point.value, int(point_len) * 2)
+                try:
+                    point_data = point.info.to_data(point.value, int(point_len) * 2)
+                except Exception as e:
+                    raise SunSpecModbusValueError('Point value error for %s %s: %s' % (name, point.value, str(e)))
                 if not data:
                     start_addr = point_addr
                 next_addr = point_addr + point_len
@@ -132,6 +162,15 @@ class SunSpecModbusClientModel(SunSpecModbusClientGroup):
         except Exception as e:
             self.add_error(str(e))
 
+        # determine largest point index that contains a group len
+        group_len_points_index = mdef.get_group_len_points_index(gdef)
+        # if data len < largest point index that contains a group len, read the rest of the point data
+        data_regs = len(data)/2
+        remaining = group_len_points_index - data_regs
+        if remaining > 0:
+            points_data = self.device.read(self.model_addr + data_regs, remaining)
+            data += points_data
+
         SunSpecModbusClientGroup.__init__(self, gdef=gdef, model=self.model, model_offset=0, group_len=self.model_len,
                                           data=data, data_offset=0, group_class=group_class, point_class=point_class)
 
@@ -145,6 +184,9 @@ class SunSpecModbusClientModel(SunSpecModbusClientGroup):
 
     def add_error(self, error_info):
         self.error_info = '%s%s\n' % (self.error_info, error_info)
+
+    def read(self, len=None):
+        SunSpecModbusClientGroup.read(self, len=self.len + 2)
 
 
 class SunSpecModbusClientDevice(device.Device):
@@ -161,6 +203,9 @@ class SunSpecModbusClientDevice(device.Device):
     def disconnect(self):
         pass
 
+    def is_connected(self):
+        return True
+
     def close(self):
         pass
 
@@ -172,13 +217,16 @@ class SunSpecModbusClientDevice(device.Device):
     def write(self, addr, data):
         return
 
-    def scan(self, progress=None, delay=None, connect=False):
+    def scan(self, progress=None, delay=None, connect=True, full_model_read=True):
         """Scan all the models of the physical device and create the
         corresponding model objects within the device object based on the
         SunSpec model definitions.
         """
+        self.base_addr = None
+        self.delete_models()
 
-        data = error = ''
+        data = ''
+        error = ''
         connected = False
 
         if connect:
@@ -188,50 +236,68 @@ class SunSpecModbusClientDevice(device.Device):
             if delay is not None:
                 time.sleep(delay)
 
+        error_dict = {}
         if self.base_addr is None:
             for addr in self.base_addr_list:
+                error_dict[addr] = ''
                 try:
                     data = self.read(addr, 3)
-                    if data[:4] == b'SunS':
-                        self.base_addr = addr
-                        break
+                    if data:
+                        if data[:4] == b'SunS':
+                            self.base_addr = addr
+                            break
+                        else:
+                            error_dict[addr] = 'Device responded - not SunSpec register map'
                     else:
-                        error = 'Device responded - not SunSpec register map'
+                        error_dict[addr] = 'Data time out'
                 except SunSpecModbusClientError as e:
-                    if not error:
-                        error = str(e)
+                    error_dict[addr] = str(e)
+                except modbus_client.ModbusClientTimeout as e:
+                    error_dict[addr] = str(e)
+                except modbus_client.ModbusClientException as e:
+                    error_dict[addr] = str(e)
+                except Exception as e:
+                    error_dict[addr] = str(e)
 
                 if delay is not None:
                     time.sleep(delay)
 
+        error = 'Error scanning SunSpec base addresses. \n'
+        for k, v in error_dict.items():
+            error += 'Base address %s error = %s. \n' % (k, v)
+
         if self.base_addr is not None:
-            model_id = mb.data_to_u16(data[4:6])
+            model_id_data = data[4:6]
+            model_id = mb.data_to_u16(model_id_data)
             addr = self.base_addr + 2
 
             mid = 0
             while model_id != mb.SUNS_END_MODEL_ID:
                 # read model and model len separately due to some devices not supplying
                 # count for the end model id
-                data = self.read(addr + 1, 1)
-                if data and len(data) == 2:
+                model_len_data = self.read(addr + 1, 1)
+                if model_len_data and len(model_len_data) == 2:
                     if progress is not None:
-                        cont = progress('Scanning model %s' % (model_id))
+                        cont = progress('Scanning model %s' % model_id)
                         if not cont:
                             raise SunSpecModbusClientError('Device scan terminated')
-                    model_len = mb.data_to_u16(data)
+                    model_len = mb.data_to_u16(model_len_data)
 
                     # read model data
-                    model_data = self.read(addr, model_len + 2)
+                    ### model_data = self.read(addr, model_len + 2)
+                    model_data = model_id_data + model_len_data
                     model = self.model_class(model_id=model_id, model_addr=addr, model_len=model_len, data=model_data,
                                              mb_device=self)
+                    if full_model_read and model.model_def:
+                        model.read()
                     model.mid = '%s_%s' % (self.did, mid)
                     mid += 1
                     self.add_model(model)
 
                     addr += model_len + 2
-                    data = self.read(addr, 1)
-                    if data and len(data) == 2:
-                        model_id = mb.data_to_u16(data)
+                    model_id_data = self.read(addr, 1)
+                    if model_id_data and len(model_id_data) == 2:
+                        model_id = mb.data_to_u16(model_id_data)
                     else:
                         break
                 else:
@@ -241,8 +307,6 @@ class SunSpecModbusClientDevice(device.Device):
                     time.sleep(delay)
 
         else:
-            if not error:
-                error = 'Unknown error'
             raise SunSpecModbusClientError(error)
 
         if connected:
@@ -252,7 +316,8 @@ class SunSpecModbusClientDevice(device.Device):
 class SunSpecModbusClientDeviceTCP(SunSpecModbusClientDevice):
     def __init__(self, slave_id=1, ipaddr='127.0.0.1', ipport=502, timeout=None, ctx=None, trace_func=None,
                  tls=False, cafile=None, certfile=None, keyfile=None, insecure_skip_tls_verify=False,
-                 max_count=modbus_client.REQ_COUNT_MAX, test=False, model_class=SunSpecModbusClientModel):
+                 max_count=modbus_client.REQ_COUNT_MAX, max_write_count=modbus_client.REQ_WRITE_COUNT_MAX,
+                 model_class=SunSpecModbusClientModel):
         SunSpecModbusClientDevice.__init__(self, model_class=model_class)
 
         self.slave_id = slave_id
@@ -268,20 +333,26 @@ class SunSpecModbusClientDeviceTCP(SunSpecModbusClientDevice):
         self.certfile = certfile
         self.keyfile = keyfile
         self.insecure_skip_tls_verify = insecure_skip_tls_verify
+        self.max_write_count = max_write_count
 
         self.client = modbus_client.ModbusClientTCP(slave_id=slave_id, ipaddr=ipaddr, ipport=ipport, timeout=timeout,
                                                     ctx=ctx, trace_func=trace_func,
                                                     tls=tls, cafile=cafile, certfile=certfile, keyfile=keyfile,
                                                     insecure_skip_tls_verify=insecure_skip_tls_verify,
-                                                    max_count=modbus_client.REQ_COUNT_MAX, test=test)
+                                                    max_count=modbus_client.REQ_COUNT_MAX,
+                                                    max_write_count=modbus_client.REQ_WRITE_COUNT_MAX)
+
         if self.client is None:
             raise SunSpecModbusClientError('No modbus tcp client set for device')
 
-    def connect(self):
-        self.client.connect()
+    def connect(self, timeout=None):
+        self.client.connect(timeout)
 
     def disconnect(self):
         self.client.disconnect()
+
+    def is_connected(self):
+        return self.client.is_connected()
 
     def read(self, addr, count, op=modbus_client.FUNC_READ_HOLDING):
         return self.client.read(addr, count, op)
@@ -323,7 +394,8 @@ class SunSpecModbusClientDeviceRTU(SunSpecModbusClientDevice):
     """
 
     def __init__(self, slave_id, name, baudrate=None, parity=None, timeout=None, ctx=None, trace_func=None,
-                 max_count=modbus_client.REQ_COUNT_MAX, model_class=SunSpecModbusClientModel):
+                 max_count=modbus_client.REQ_COUNT_MAX, max_write_count=modbus_client.REQ_WRITE_COUNT_MAX,
+                 model_class=SunSpecModbusClientModel):
         # test if this super class init is needed
         SunSpecModbusClientDevice.__init__(self, model_class=model_class)
         self.slave_id = slave_id
@@ -332,21 +404,18 @@ class SunSpecModbusClientDeviceRTU(SunSpecModbusClientDevice):
         self.ctx = ctx
         self.trace_func = trace_func
         self.max_count = max_count
+        self.max_write_count = max_write_count
 
-        self.client = modbus_client.modbus_rtu_client(name, baudrate, parity)
+        self.client = modbus_client.modbus_rtu_client(name, baudrate, parity, timeout)
         if self.client is None:
             raise SunSpecModbusClientError('No modbus rtu client set for device')
         self.client.add_device(self.slave_id, self)
-
-        if timeout is not None and self.client.serial is not None:
-            self.client.serial.timeout = timeout
-            self.client.serial.writeTimeout = timeout
 
     def open(self):
         self.client.open()
 
     def close(self):
-        """Close the device. Called when device is not longer in use.
+        """Close the device. Called when device is no longer in use.
         """
 
         if self.client:
@@ -365,7 +434,7 @@ class SunSpecModbusClientDeviceRTU(SunSpecModbusClientDevice):
             Byte string containing register contents.
         """
 
-        return self.client.read(self.slave_id, addr, count, op=op, trace_func=self.trace_func, max_count=self.max_count)
+        return self.client.read(self.slave_id, addr, count, op=op, max_count=self.max_count)
 
     def write(self, addr, data):
         """Write Modbus device registers.
@@ -376,4 +445,4 @@ class SunSpecModbusClientDeviceRTU(SunSpecModbusClientDevice):
                 Byte string containing register contents.
         """
 
-        return self.client.write(self.slave_id, addr, data, trace_func=self.trace_func, max_count=self.max_count)
+        return self.client.write(self.slave_id, addr, data, max_write_count=self.max_write_count)

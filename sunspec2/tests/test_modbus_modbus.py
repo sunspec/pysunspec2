@@ -204,3 +204,20 @@ class TestModbusClientTCP:
         check_req = b"\x00\x00\x00\x00\x00'\x01\x10\x9ct\x00\x10 sn-000\x00\x00\x00\x00\x00\x00\x00" \
                     b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
         assert c.socket.request[0] == check_req
+
+    def test_write_over_max_size(self, monkeypatch):
+        c = modbus_client.ModbusClientTCP()
+        monkeypatch.setattr(socket, 'socket', MockSocket.mock_socket)
+        c.connect()
+        data_to_write = bytearray((c.max_write_count+1)*2)
+        data_to_write[:6] = b'sn-000'
+
+        buffer = [b'\x00\x00\x00\x00\x00\x06\x01\x10\x9ct\x00\x7b',
+                b'\x00\x00\x00\x00\x00\x06\x01\x10\x9c\xef\x00\x01']
+        c.socket._set_buffer(buffer)
+        c.write(40052, data_to_write)
+
+        check_req0 = b"\x00\x00\x00\x00\x00\xfd\x01" + b"\x10\x9ct\x00{\xf6" + data_to_write[:(c.max_write_count*2)]
+        check_req1 = b"\x00\x00\x00\x00\x00\x09\x01" + b"\x10\x9c\xef\x00\x01\x02\x00\x00"
+        assert c.socket.request[0] == check_req0
+        assert c.socket.request[1] == check_req1

@@ -20,6 +20,9 @@ class MockSocket(object):
         self.connected = False
 
     def recv(self, size):
+        if len(self.buffer) == 0:
+            return b''
+        print(f"MockSocket.recv: size={size}. Message: {self.buffer[0]}")
         return self.buffer.pop(0)
 
     def sendall(self, data):
@@ -35,3 +38,15 @@ class MockSocket(object):
 
 def mock_socket(AF_INET, SOCK_STREAM):
     return MockSocket()
+
+
+def mock_tcp_connect(self):
+    if self.client.socket is None:
+        self.client.socket = mock_socket('foo', 'bar')
+    self.client.socket.settimeout(999)
+    self.client.socket.connect((999, 999))
+    pass
+
+
+def mock_tcp_disconnect(self):
+    pass

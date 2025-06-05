@@ -11,77 +11,44 @@ def test_to_smdx_filename():
 
 def test_model_filename_to_id():
     assert smdx.model_filename_to_id('smdx_00077.xml') == 77
-    assert smdx.model_filename_to_id('smdx_abc.xml') is None
+    with pytest.raises(Exception) as exc:
+        smdx.model_filename_to_id('smdx_abc.xml')
+    assert 'Error extracting model id from filename' in str(exc.value)
 
 
 def test_from_smdx_file():
-    smdx_304 = {
-      "id": 304,
-      "group": {
-        "name": "inclinometer",
-        "type": "group",
-        "points": [
-          {
-            "name": "ID",
-            "value": 304,
-            "desc": "Model identifier",
-            "label": "Model ID",
-            "mandatory": "M",
-            "static": "S",
-            "type": "uint16"
-          },
-          {
-            "name": "L",
-            "desc": "Model length",
-            "label": "Model Length",
-            "mandatory": "M",
-            "static": "S",
-            "type": "uint16"
-          }
-        ],
-        "groups": [
-          {
-            "name": "incl",
-            "type": "group",
-            "count": 0,
-            "points": [
-              {
-                "name": "Inclx",
-                "type": "int32",
-                "mandatory": "M",
-                "units": "Degrees",
-                "sf": -2,
-                "label": "X",
-                "desc": "X-Axis inclination"
-              },
-              {
-                "name": "Incly",
-                "type": "int32",
-                "units": "Degrees",
-                "sf": -2,
-                "label": "Y",
-                "desc": "Y-Axis inclination"
-              },
-              {
-                "name": "Inclz",
-                "type": "int32",
-                "units": "Degrees",
-                "sf": -2,
-                "label": "Z",
-                "desc": "Z-Axis inclination"
-              }
-            ]
-          }
-        ],
-        "label": "Inclinometer Model",
-        "desc": "Include to support orientation measurements"
-      }
-    }
-    assert smdx.from_smdx_file('sunspec2/models/smdx/smdx_00304.xml') == smdx_304
+    smdx_304 = {'id': 304, 'group': {'name': 'inclinometer', 'type': 'group', 'points': [
+        {'name': 'ID', 'value': 304, 'desc': 'Model identifier', 'label': 'Model ID', 'size': 1, 'mandatory': 'M',
+         'static': 'S', 'type': 'uint16'},
+        {'name': 'L', 'desc': 'Model length', 'label': 'Model Length', 'size': 1, 'mandatory': 'M', 'static': 'S',
+         'type': 'uint16'}], 'groups': [{'name': 'incl', 'type': 'group', 'count': 0, 'points': [
+        {'name': 'Inclx', 'type': 'int32', 'size': 2, 'mandatory': 'M', 'units': 'Degrees', 'sf': -2, 'label': 'X',
+         'desc': 'X-Axis inclination'},
+        {'name': 'Incly', 'type': 'int32', 'size': 2, 'units': 'Degrees', 'sf': -2, 'label': 'Y',
+         'desc': 'Y-Axis inclination'},
+        {'name': 'Inclz', 'type': 'int32', 'size': 2, 'units': 'Degrees', 'sf': -2, 'label': 'Z',
+         'desc': 'Z-Axis inclination'}]}], 'label': 'Inclinometer Model',
+                                     'desc': 'Include to support orientation measurements'}}
+    assert smdx.from_smdx_file('./sunspec2/models/smdx/smdx_00304.xml') == smdx_304
+
+
+def test_from_smdx_file_symbols():
+    mdef = smdx.from_smdx_file('sunspec2/models/smdx/smdx_00803.xml')
+    for point_def in mdef["group"]["groups"][0]["points"]:
+        if point_def["name"] != "StrSt":
+            continue
+        symbol = point_def["symbols"][1]
+        assert symbol["name"] == "CONTACTOR_STATUS"
+        assert symbol["label"] == "Contactor Status"
+        assert symbol["desc"].startswith("String")
+        assert symbol["detail"]
+        break
+    else:
+        pytest.fail("Point not found")
 
 
 def test_from_smdx():
-    tree = ET.parse('sunspec2/models/smdx/smdx_00304.xml')
+    tree = ET.parse('./sunspec2/models/smdx/smdx_00304.xml')
     root = tree.getroot()
 
     mdef_not_found = copy.deepcopy(root)

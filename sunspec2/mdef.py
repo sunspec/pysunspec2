@@ -29,7 +29,7 @@ A group dict
 A point dict
   - must contain: 'name', 'type'
   - may contain: 'count', 'size', 'sf', 'units', 'mandatory', 'access', 'symbols', 'label', 'description', 'notes',
-                 'comments'
+                 'comments', 'standards'
 
 A symbol dict
   - must contain: 'name', 'value'
@@ -45,31 +45,32 @@ Example:
   }
 '''
 
-DEVICE = 'device'            # device (device dict) ### currently not in the spec
-MODEL = 'model'              # model (model dict) ### currently not in the spec
-GROUP = 'group'              # top level model group (group dict)
-GROUPS = 'groups'            # groups in group (list of group dicts)
-POINTS = 'points'            # points in group (list of point dicts)
+DEVICE = 'device'           # device (device dict) ### currently not in the spec
+MODEL = 'model'             # model (model dict) ### currently not in the spec
+GROUP = 'group'             # top level model group (group dict)
+GROUPS = 'groups'           # groups in group (list of group dicts)
+POINTS = 'points'           # points in group (list of point dicts)
 
-ID = 'id'                    # id (int or str)
-NAME = 'name'                # name (str)
-VALUE = 'value'              # value (int, float, str)
-COUNT = 'count'              # instance count (int or str)
+ID = 'id'                   # id (int or str)
+NAME = 'name'               # name (str)
+VALUE = 'value'             # value (int, float, str)
+COUNT = 'count'             # instance count (int or str)
 
-TYPE = 'type'                # point type (str of TYPE_XXX)
-MANDATORY = 'mandatory'      # point mandatory (str of MANDATORY_XXX)
-ACCESS = 'access'            # point access (str of ACCESS_XXX)
-STATIC = 'static'            # point value is static (str of STATIC_XXX)
-SF = 'sf'                    # point scale factor (int)
-UNITS = 'units'              # point units (str)
-SIZE = 'size'                # point string length (int)
+TYPE = 'type'               # point type (str of TYPE_XXX)
+MANDATORY = 'mandatory'     # point mandatory (str of MANDATORY_XXX)
+ACCESS = 'access'           # point access (str of ACCESS_XXX)
+STATIC = 'static'           # point value is static (str of STATIC_XXX)
+SF = 'sf'                   # point scale factor (int)
+UNITS = 'units'             # point units (str)
+SIZE = 'size'               # point string length (int)
 
-LABEL = 'label'              # label (str)
-DESCRIPTION = 'desc'         # description (str)
-NOTES = 'notes'              # notes (str)
-DETAIL = 'detail'            # detailed description (str)
-SYMBOLS = 'symbols'          # symbols (list of symbol dicts)
-COMMENTS = 'comments'        # comments (list of str)
+LABEL = 'label'             # label (str)
+DESCRIPTION = 'desc'        # description (str)
+NOTES = 'notes'             # notes (str)
+DETAIL = 'detail'           # detailed description (str)
+SYMBOLS = 'symbols'         # symbols (list of symbol dicts)
+COMMENTS = 'comments'       # comments (list of str)
+STANDARDS = 'standards'     # standards (list of str)
 
 TYPE_GROUP = 'group'
 TYPE_SYNC_GROUP = 'sync'
@@ -147,7 +148,7 @@ point_attr = {NAME: {'type': str, 'mand': True}, COUNT: {'type': int}, VALUE: {}
               MANDATORY: {'type': str, 'values': ['O', 'M'], 'default': 'O'},
               STATIC: {'type': str, 'values': ['D', 'S'], 'default': 'D'},
               LABEL: {'type': str}, DESCRIPTION: {'type': str}, NOTES: {'type': str}, SYMBOLS: {}, COMMENTS: {},
-              DETAIL: {'type': str}}
+              DETAIL: {'type': str}, STANDARDS: {'type': list}}
 
 # valid symbol attributes
 symbol_attr = {NAME: {'type': str, 'mand': True}, VALUE: {'mand': True}, LABEL: {'type': str},
@@ -198,7 +199,7 @@ def to_number_type(n):
 
 
 def validate_find_point(group, pname):
-    points = group.get(POINTS, list())
+    points = group.get(POINTS, [])
     for p in points:
         pxname = p.get(NAME)
         if pxname:
@@ -221,8 +222,9 @@ def validate_attrs(element, attrs, result=''):
                     result += 'Unexpected type for model attribute %s, expected %s, found %s\n' % \
                               (k, t, type(element[k]))
             else:
-                if t and type(element[k]) != t:
-                    result += 'Unexpected type for model attribute %s, expected %s, found %s\n' % (k, t, type(element[k]))
+                if t and not isinstance(element[k], t):
+                    result += ('Unexpected type for model attribute %s, expected %s, found %s\n' %
+                               (k, t, type(element[k])))
             values = a.get('values')
             if values and element[k] not in values:
                 result += 'Unexpected value for model attribute %s: %s\n' % (k, element[k])
@@ -232,7 +234,7 @@ def validate_attrs(element, attrs, result=''):
 
 
 def validate_group_point_dup(group, result=''):
-    groups = group.get(GROUPS, list())
+    groups = group.get(GROUPS, [])
     for g in groups:
         gname = g.get(NAME)
         if gname:
@@ -248,7 +250,7 @@ def validate_group_point_dup(group, result=''):
                 result += 'Duplicate group and point id %s in group %s' % (gname, group[NAME])
         else:
             result += 'Mandatory %s attribute missing in group definition element\n' % (NAME)
-    points = group.get(POINTS, list())
+    points = group.get(POINTS, [])
     for p in points:
         pname = p.get(NAME)
         if pname:
@@ -273,7 +275,7 @@ def validate_symbols(symbols, model_group, result=''):
 
 def validate_sf(point, sf, sf_groups, result=''):
     found = False
-    if type(sf) == str:
+    if isinstance(sf, str):
         for group in sf_groups:
             p = validate_find_point(group, sf)
             if p:
@@ -283,7 +285,7 @@ def validate_sf(point, sf, sf_groups, result=''):
                 break
         if not found:
             result += 'Scale factor %s for point %s not found\n' % (sf, point[NAME])
-    elif type(sf) == int:
+    elif isinstance(sf, int):
         if sf < - 10 or sf > 10:
             result += 'Scale factor %s for point %s out of range\n' % (sf, point[NAME])
     else:
@@ -298,12 +300,12 @@ def validate_point_def(point, model_group, group, result=''):
     ptype = point.get(TYPE)
     if ptype not in point_type_info:
         result += 'Unknown point type %s for point %s\n' % (ptype, point[NAME])
-    # validate scale foctor, if present
+    # validate scale factor, if present
     sf = point.get(SF)
     if sf:
         result = validate_sf(point, sf, [model_group, group], result)
     # validate symbols
-    symbols = point.get(SYMBOLS, list())
+    symbols = point.get(SYMBOLS, [])
     result = validate_symbols(symbols, symbol_attr, result)
     # check for duplicate symbols
     for s in symbols:
@@ -324,11 +326,11 @@ def validate_group_def(group, model_group, result=''):
     # validate general group attributes
     result = validate_attrs(group, group_attr, result)
     # validate points
-    points = group.get(POINTS, list())
+    points = group.get(POINTS, [])
     for p in points:
         result = validate_point_def(p, model_group, group, result)
     # validate groups
-    groups = group.get(GROUPS, list())
+    groups = group.get(GROUPS, [])
     for g in groups:
         result = validate_group_def(g, model_group, result)
     # check for group and point duplicates
@@ -375,7 +377,7 @@ def from_json_file(filename):
     f = open(filename)
     model_def = json.load(f)
     f.close()
-    return(model_def)
+    return model_def
 
 
 def to_json_str(model_def, indent=4):
@@ -386,6 +388,18 @@ def to_json_filename(model_id):
     return 'model_%s%s' % (model_id, MODEL_DEF_EXT)
 
 
+def model_filename_to_id(filename):
+    f = filename
+    if '.' in f:
+        f = os.path.splitext(f)[0]
+    try:
+        mid = int(f.rsplit('_', 1)[1])
+    except ValueError:
+        raise ModelDefinitionError('Error extracting model id from filename')
+
+    return mid
+
+
 def to_json_file(model_def, filename=None, filedir=None, indent=4):
     if filename is None:
         filename = to_json_filename(model_def[ID])
@@ -393,6 +407,47 @@ def to_json_file(model_def, filename=None, filedir=None, indent=4):
             filename = os.path.join(filedir, filename)
     f = open(filename, 'w')
     json.dump(model_def, f, indent=indent, sort_keys=True)
+
+
+def get_group_len_points(group_def, points=None):
+    if points is None:
+        points = []
+    groups = group_def.get(GROUPS)
+    if groups:
+        for g in groups:
+            count = g.get(COUNT)
+            if count:
+                try:
+                    count = int(count)
+                except:
+                    if count not in points:
+                        points.append(count)
+            points = get_group_len_points(g, points)
+    return points
+
+
+def get_group_len_points_index(group_def):
+    index = pindex = 0
+    if group_def:
+        len_points = get_group_len_points(group_def)
+        if len_points:
+            points = group_def.get(POINTS, [])
+            for p in points:
+                name = p.get(NAME)
+                plen = point_type_info.get(p.get(TYPE)).get('len')
+                if plen is None:
+                    plen = point_type_info.get(p.get(SIZE))
+                if not plen:
+                    raise ModelDefinitionError('Unable to get size of point %s' % name)
+                pindex += plen
+                if name in len_points:
+                    index = pindex
+                    len_points.remove(name)
+                if not len_points:
+                    break
+            if len_points:
+                raise ModelDefinitionError('Expected points not found in group definition: %s' % len_points)
+    return index
 
 
 if __name__ == "__main__":
