@@ -29,6 +29,10 @@ TEST_NAME = 'test_name'
 
 modbus_rtu_clients = {}
 
+# Reference for SVP driver
+MAPPED = 'Mapped SunSpec Device'
+RTU = 'Modbus RTU'
+TCP = 'Modbus TCP'
 
 class SunSpecModbusClientError(Exception):
     pass
@@ -311,9 +315,11 @@ class SunSpecModbusClientDevice(device.Device):
 
 class SunSpecModbusClientDeviceTCP(SunSpecModbusClientDevice):
     def __init__(self, slave_id=1, ipaddr='127.0.0.1', ipport=502, timeout=None, ctx=None, trace_func=None,
+                 tls=False, cafile=None, certfile=None, keyfile=None, insecure_skip_tls_verify=False,
                  max_count=modbus_client.REQ_COUNT_MAX, max_write_count=modbus_client.REQ_WRITE_COUNT_MAX,
                  model_class=SunSpecModbusClientModel):
         SunSpecModbusClientDevice.__init__(self, model_class=model_class)
+
         self.slave_id = slave_id
         self.ipaddr = ipaddr
         self.ipport = ipport
@@ -322,10 +328,17 @@ class SunSpecModbusClientDeviceTCP(SunSpecModbusClientDevice):
         self.socket = None
         self.trace_func = trace_func
         self.max_count = max_count
+        self.tls = tls
+        self.cafile = cafile
+        self.certfile = certfile
+        self.keyfile = keyfile
+        self.insecure_skip_tls_verify = insecure_skip_tls_verify
         self.max_write_count = max_write_count
 
         self.client = modbus_client.ModbusClientTCP(slave_id=slave_id, ipaddr=ipaddr, ipport=ipport, timeout=timeout,
                                                     ctx=ctx, trace_func=trace_func,
+                                                    tls=tls, cafile=cafile, certfile=certfile, keyfile=keyfile,
+                                                    insecure_skip_tls_verify=insecure_skip_tls_verify,
                                                     max_count=modbus_client.REQ_COUNT_MAX,
                                                     max_write_count=modbus_client.REQ_WRITE_COUNT_MAX)
 
