@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-  Copyright (c) 2020, SunSpec Alliance
+  Copyright (c) 2025, SunSpec Alliance
   All Rights Reserved
 """
 
@@ -9,7 +9,7 @@ from setuptools import setup
 
 setup(
     name='pysunspec2',
-    version='1.1.9',
+    version='1.2.0',
     description='Python SunSpec Tools',
     license="Apache Software License, Version 2.0",
     author='SunSpec Alliance',
@@ -36,6 +36,6 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
 )
