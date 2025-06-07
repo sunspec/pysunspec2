@@ -18,7 +18,7 @@ from optparse import OptionParser
       -o: output mode for data (text, xml)
       -x: export model description (slang, xml)
       -t: transport type: tcp or rtu (default: tcp)
-      -a: modbus slave address (default: 1)
+      -a: modbus unit identifier (default: 1)
       -i: ip address to use for modbus tcp (default: localhost)
       -P: port number for modbus tcp (default: 502)
       -p: serial port for modbus rtu (default: /dev/ttyUSB0)
@@ -46,7 +46,7 @@ if __name__ == "__main__":
                       help='transport type: rtu, tcp, file [default: tcp]')
     parser.add_option('-a', metavar=' ', type='int',
                       default=1,
-                      help='modbus slave address [default: 1]')
+                      help='modbus unit identifier [default: 1]')
     parser.add_option('-i', metavar=' ',
                       default='localhost',
                       help='ip address to use for modbus tcp [default: localhost]')
@@ -72,10 +72,10 @@ if __name__ == "__main__":
 
     try:
         if options.t == 'tcp':
-            sd = client.SunSpecModbusClientDeviceTCP(slave_id=options.a, ipaddr=options.i, ipport=options.P,
+            sd = client.SunSpecModbusClientDeviceTCP(unit_id=options.a, ipaddr=options.i, ipport=options.P,
                                                      timeout=options.T)
         elif options.t == 'rtu':
-            sd = client.SunSpecModbusClientDeviceRTU(slave_id=options.a, name=options.p, baudrate=options.b,
+            sd = client.SunSpecModbusClientDeviceRTU(unit_id=options.a, name=options.p, baudrate=options.b,
                                                      parity=options.R, timeout=options.T)
         elif options.t == 'file':
             sd = file_client.FileClientDevice(filename=options.m)
