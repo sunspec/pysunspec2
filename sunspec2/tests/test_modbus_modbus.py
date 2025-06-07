@@ -126,7 +126,7 @@ class TestModbusClientRTU:
 class TestModbusClientTCP:
     def test___init__(self):
         c = modbus_client.ModbusClientTCP()
-        assert c.slave_id == 1
+        assert c.unit_id == 1
         assert c.ipaddr == '127.0.0.1'
         assert c.ipport == 502
         assert c.timeout == 2

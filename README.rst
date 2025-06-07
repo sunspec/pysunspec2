@@ -165,20 +165,20 @@ type.
 
 TCP
 ^^^
-The following is how to open and initialize a TCP Device, where the slave ID is set to 1, the IP address of the TCP
+The following is how to open and initialize a TCP Device, where the Unit ID is set to 1, the IP address of the TCP
 device is
 127.0.0.1, and the port is 8502::
 
     >>> import sunspec2.modbus.client as client
-    >>> d = client.SunSpecModbusClientDeviceTCP(slave_id=1, ipaddr='127.0.0.1', ipport=8502)
+    >>> d = client.SunSpecModbusClientDeviceTCP(unit_id=1, ipaddr='127.0.0.1', ipport=8502)
 
 RTU
 ^^^
-The following to open and initialize a RTU Device, where the slave ID is set to 1, and the name of the serial port is
+The following to open and initialize a RTU Device, where the Unit ID is set to 1, and the name of the serial port is
 COM2::
 
     >>> import sunspec2.modbus.client as client
-    >>> d = client.SunSpecModbusClientDeviceRTU(slave_id=1, name="COM2")
+    >>> d = client.SunSpecModbusClientDeviceRTU(unit_id=1, name="COM2")
 
 Device Image
 ^^^^^^^^^^^^
@@ -209,7 +209,7 @@ model ID. The first key is the model ID as an int, the second key is the model n
 that a device may contain more than one model with the same model ID, the dictionary keys refer to a list of model
 objects with that ID. Both keys refer to the same model list for a model ID.
 
-    >>> d = client.SunSpecModbusClientDeviceTCP(slave_id=1, ipaddr='127.0.0.1', ipport=8502)
+    >>> d = client.SunSpecModbusClientDeviceTCP(unit_id=1, ipaddr='127.0.0.1', ipport=8502)
     >>> d.scan()
 
 
@@ -296,7 +296,7 @@ This section will go over the full steps on how to set a volt-var curve.
 
 Initialize device, and run device discovery with scan(): ::
 
-    >>> d = client.SunSpecModbusClientDeviceRTU(slave_id=1, name="COM2")
+    >>> d = client.SunSpecModbusClientDeviceRTU(unit_id=1, name="COM2")
     >>> d.scan()
 
 Confirm that model 705 (DERVoltVar) is on the device: ::

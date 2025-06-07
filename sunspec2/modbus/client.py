@@ -22,6 +22,7 @@
 
 import time
 import uuid
+import warnings
 from sunspec2 import mdef, device, mb
 import sunspec2.modbus.modbus as modbus_client
 
@@ -308,13 +309,52 @@ class SunSpecModbusClientDevice(device.Device):
         if connected:
             self.disconnect()
 
-
 class SunSpecModbusClientDeviceTCP(SunSpecModbusClientDevice):
-    def __init__(self, slave_id=1, ipaddr='127.0.0.1', ipport=502, timeout=None, ctx=None, trace_func=None,
+    """Provides access to a Modbus RTU device.
+    Parameters:
+        unit_id :
+            Modbus Unit Identifier.
+        ipaddr :
+            IP address of the Modbus TCP device.
+        ipport :
+            Port number for Modbus TCP. Default is 502 if not specified.
+        timeout :
+            Modbus request timeout in seconds. Fractional seconds are permitted
+            such as .5.
+        ctx :
+            Context variable to be used by the object creator. Not used by the
+            modbus module.
+        trace_func :
+            Trace function to use for detailed logging. No detailed logging is
+            perform is a trace function is not supplied.
+        max_count :
+            Maximum register count for a single Modbus request.
+        max_write_count :
+            Maximum register count for a single Modbus write request.
+        model_class :
+            Model class to use for creating models in the device. Default is
+            :class:`sunspec2.modbus.client.SunSpecModbusClientModel`.
+        slave_id : [DEPRECATED] Use unit_id instead.
+    Raises:
+        SunSpecModbusClientError: Raised for any general modbus client error.
+        SunSpecModbusClientTimeoutError: Raised for a modbus client request timeout.
+        SunSpecModbusClientException: Raised for an exception response to a modbus
+            client request.
+    """
+
+    def __init__(self, unit_id=1, ipaddr='127.0.0.1', ipport=502, timeout=None, ctx=None, trace_func=None,
                  max_count=modbus_client.REQ_COUNT_MAX, max_write_count=modbus_client.REQ_WRITE_COUNT_MAX,
-                 model_class=SunSpecModbusClientModel):
+                 model_class=SunSpecModbusClientModel, slave_id=None):
         SunSpecModbusClientDevice.__init__(self, model_class=model_class)
-        self.slave_id = slave_id
+        if unit_id == 1 and slave_id is not None:
+            unit_id = slave_id
+        if slave_id is not None:
+            warnings.warn(
+                "The 'slave_id' parameter is deprecated and will be removed in a future version. Use 'unit_id' instead.",
+                DeprecationWarning,
+                stacklevel=2
+            )
+        self.unit_id = unit_id
         self.ipaddr = ipaddr
         self.ipport = ipport
         self.timeout = timeout
@@ -324,7 +364,7 @@ class SunSpecModbusClientDeviceTCP(SunSpecModbusClientDevice):
         self.max_count = max_count
         self.max_write_count = max_write_count
 
-        self.client = modbus_client.ModbusClientTCP(slave_id=slave_id, ipaddr=ipaddr, ipport=ipport, timeout=timeout,
+        self.client = modbus_client.ModbusClientTCP(unit_id=unit_id, ipaddr=ipaddr, ipport=ipport, timeout=timeout,
                                                     ctx=ctx, trace_func=trace_func,
                                                     max_count=modbus_client.REQ_COUNT_MAX,
                                                     max_write_count=modbus_client.REQ_WRITE_COUNT_MAX)
@@ -351,8 +391,8 @@ class SunSpecModbusClientDeviceTCP(SunSpecModbusClientDevice):
 class SunSpecModbusClientDeviceRTU(SunSpecModbusClientDevice):
     """Provides access to a Modbus RTU device.
     Parameters:
-        slave_id :
-            Modbus slave id.
+        unit_id :
+            Modbus Unit Identifier.
         name :
             Name of the serial port such as 'com4' or '/dev/ttyUSB0'.
         baudrate :
@@ -373,6 +413,7 @@ class SunSpecModbusClientDeviceRTU(SunSpecModbusClientDevice):
             perform is a trace function is not supplied.
         max_count :
             Maximum register count for a single Modbus request.
+        slave_id : [DEPRECATED] Use unit_id instead.
     Raises:
         SunSpecModbusClientError: Raised for any general modbus client error.
         SunSpecModbusClientTimeoutError: Raised for a modbus client request timeout.
@@ -380,12 +421,26 @@ class SunSpecModbusClientDeviceRTU(SunSpecModbusClientDevice):
             client request.
     """
 
-    def __init__(self, slave_id, name, baudrate=None, parity=None, timeout=None, ctx=None, trace_func=None,
+    def __init__(self, unit_id=None, name=None, baudrate=None, parity=None, timeout=None, ctx=None, trace_func=None,
                  max_count=modbus_client.REQ_COUNT_MAX, max_write_count=modbus_client.REQ_WRITE_COUNT_MAX,
-                 model_class=SunSpecModbusClientModel):
+                 model_class=SunSpecModbusClientModel, slave_id=None):
         # test if this super class init is needed
         SunSpecModbusClientDevice.__init__(self, model_class=model_class)
-        self.slave_id = slave_id
+        # Backward compatibility for slave_id
+        if unit_id is not None:
+            self.unit_id = unit_id
+        elif slave_id is not None:
+            self.unit_id = slave_id
+        else:
+            raise ValueError("unit_id must be provided")
+        if name is None:
+            raise ValueError("name must be provided")
+        if slave_id is not None:
+            warnings.warn(
+                "The 'slave_id' parameter is deprecated and will be removed in a future version. Use 'unit_id' instead.",
+                DeprecationWarning,
+                stacklevel=2
+            )
         self.name = name
         self.client = None
         self.ctx = ctx
@@ -396,7 +451,7 @@ class SunSpecModbusClientDeviceRTU(SunSpecModbusClientDevice):
         self.client = modbus_client.modbus_rtu_client(name, baudrate, parity, timeout)
         if self.client is None:
             raise SunSpecModbusClientError('No modbus rtu client set for device')
-        self.client.add_device(self.slave_id, self)
+        self.client.add_device(self.unit_id, self)
 
     def open(self):
         self.client.open()
@@ -406,7 +461,7 @@ class SunSpecModbusClientDeviceRTU(SunSpecModbusClientDevice):
         """
 
         if self.client:
-            self.client.remove_device(self.slave_id)
+            self.client.remove_device(self.unit_id)
 
     def read(self, addr, count, op=modbus_client.FUNC_READ_HOLDING):
         """Read Modbus device registers.
@@ -421,7 +476,7 @@ class SunSpecModbusClientDeviceRTU(SunSpecModbusClientDevice):
             Byte string containing register contents.
         """
 
-        return self.client.read(self.slave_id, addr, count, op=op, max_count=self.max_count)
+        return self.client.read(self.unit_id, addr, count, op=op, max_count=self.max_count)
 
     def write(self, addr, data):
         """Write Modbus device registers.
@@ -432,4 +487,4 @@ class SunSpecModbusClientDeviceRTU(SunSpecModbusClientDevice):
                 Byte string containing register contents.
         """
 
-        return self.client.write(self.slave_id, addr, data, max_write_count=self.max_write_count)
+        return self.client.write(self.unit_id, addr, data, max_write_count=self.max_write_count)
