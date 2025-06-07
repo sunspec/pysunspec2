@@ -261,6 +261,81 @@ After assigning the value on the point object, "Ena", write() must be called in 
 consider it a good Modbus practice to read after every write to check if the operation was successful, but it is not
 required. In this example, we perform a read() after a write().
 
+Accessing Multiple Unit IDs (Single Connection)
+-----------------------------------------------
+For devices that support multiple unit IDs through a single connection, you can use the
+``scan_units()`` method to discover SunSpec models on multiple units, and then access them through the ``Units`` collection.
+
+This is particularly useful for devices that only allow one TCP connection but have multiple devices connected
+via serial with different unit IDs.
+
+Scanning Multiple Unit IDs
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Use ``scan_units(unit_ids)`` to discover SunSpec models on multiple unit IDs: ::
+
+    >>> import sunspec2.modbus.client as client
+    >>> d = client.SunSpecModbusClientDeviceTCP(unit_id=1, ipaddr='192.168.1.100', ipport=502)
+    >>> d.connect()
+
+    # Scan multiple units for SunSpec models
+    >>> d.scan_units([1, 2, 3])
+
+    # Access models from the default unit (unit_id=1) directly
+    >>> manufacturer = d.common[0].Mn.value
+    >>> power = d.inverter[0].W.value
+
+    # Access models from specific units via Units collection
+    >>> unit1_common = d.Units[1].common[0]
+    >>> unit2_inverter = d.Units[2].inverter[0]
+    >>> unit3_meter = d.Units[3].meter[0]
+
+    # Both approaches work for the default unit
+    >>> assert d.common[0].Mn.value == d.Units[1].common[0].Mn.value
+
+Reading from Different Unit IDs
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+You can also read raw register data from specific unit IDs using ``read_unit(unit_id, addr, count)``: ::
+
+    # Read raw register data from different units
+    >>> data1 = d.read(40000, 10)              # Default unit (unit_id=1)
+    >>> data2 = d.read_unit(2, 40000, 10)      # Unit ID 2
+    >>> data3 = d.read_unit(3, 40000, 10)      # Unit ID 3
+
+Writing to Different Unit IDs
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Use ``write_unit(unit_id, addr, data)`` to write to a specific unit ID: ::
+
+    >>> # Write to unit_id=2
+    >>> d.write_unit(2, 40100, b'\\x00\\x01\\x00\\x02')
+
+    # Write to unit_id=3
+    >>> d.write_unit(3, 40100, b'\\x00\\x03\\x00\\x04')
+
+Example: Multi-Unit Setup
+^^^^^^^^^^^^^^^^^^^^^^^^^
+Here's a complete example for accessing multiple units through a single TCP connection: ::
+
+    >>> import sunspec2.modbus.client as client
+    >>>
+    >>> # Create a single TCP connection to the device gateway
+    >>> d = client.SunSpecModbusClientDeviceTCP(unit_id=1, ipaddr='192.168.1.100', ipport=502)
+    >>> d.connect()
+    >>>
+    >>> # Read SunSpec identifier from multiple units
+    >>> unit1_sunspec = d.read(40000, 2)  # Default unit_id=1
+    >>> unit2_sunspec = d.read_unit(2, 40000, 2)  # Unit ID 2
+    >>> unit3_sunspec = d.read_unit(3, 40000, 2)  # Unit ID 3
+    >>>
+    >>> print(f"Unit 1 SunSpec ID: {unit1_sunspec}")
+    >>> print(f"Unit 2 SunSpec ID: {unit2_sunspec}")
+    >>> print(f"Unit 3 SunSpec ID: {unit3_sunspec}")
+    >>>
+    >>> # Close the connection when done
+    >>> d.close()
+
+The ``read_unit()`` and ``write_unit()`` methods are available for both TCP and RTU device types, providing consistent
+functionality across different connection types.
+
 Additional Information
 ----------------------
 The groups and points in a group are contained in ordered groups and points dictionaries if needed. Repeating groups are
