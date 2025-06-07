@@ -23,6 +23,7 @@
 import time
 import uuid
 import warnings
+from collections import UserDict
 from sunspec2 import mdef, device, mb
 import sunspec2.modbus.modbus as modbus_client
 
@@ -186,6 +187,78 @@ class SunSpecModbusClientModel(SunSpecModbusClientGroup):
         SunSpecModbusClientGroup.read(self, len=self.len + 2)
 
 
+class SunSpecModbusClientUnit(device.Device):
+    """A device proxy that represents a specific unit ID on a parent device.
+
+    This class acts like a regular Device but delegates all Modbus communication
+    to the parent device using the specified unit ID. The parent device handles
+    all connection management.
+    """
+
+    def __init__(self, parent_device, unit_id, model_class=SunSpecModbusClientModel):
+        device.Device.__init__(self, model_class=model_class)
+        self.parent_device = parent_device
+        self.unit_id = unit_id
+        self.did = f"{parent_device.did}_unit_{unit_id}"
+
+    def is_connected(self):
+        """Check if the parent device is connected."""
+        return self.parent_device.is_connected()
+
+    def read(self, addr, count):
+        """Read from this unit using the parent device's read_unit method."""
+        return self.parent_device.read_unit(self.unit_id, addr, count)
+
+    def write(self, addr, data):
+        """Write to this unit using the parent device's write_unit method."""
+        return self.parent_device.write_unit(self.unit_id, addr, data)
+
+
+class SunSpecModbusClientUnitCollection(UserDict):
+    """A collection that provides access to different unit IDs as device-like objects.
+
+    Units are only available after being scanned with scan_units().
+
+    Usage:
+        # Scan units to discover their models
+        d.scan_units([1, 2, 3])
+
+        # Access unit models through the Units collection
+        d.Units[1].common[0].Mn.value       # Access unit 1's common model
+        d.Units[2].DERVoltVar[0].Ena.value  # Access unit 2's DERVoltVar model
+
+        # Read/write directly to a unit
+        data = d.Units[3].read(40000, 10)
+        d.Units[3].write(40100, data)
+
+        # Accessing unscanned units raises KeyError
+        d.Units[99]  # Raises: KeyError: "Unit 99 has not been scanned. Use scan_units([99]) first."
+    """
+
+    def __init__(self, parent_device):
+        super().__init__()
+        self.parent_device = parent_device
+
+    def __getitem__(self, unit_id):
+        """Get a SunSpecModbusClientUnit for the specified unit ID.
+
+        Raises KeyError if the unit has not been scanned yet.
+        """
+        if unit_id not in self.data:
+            raise KeyError(f"Unit {unit_id} has not been scanned. Use scan_units([{unit_id}]) first.")
+        return self.data[unit_id]
+
+    def _create_unit(self, unit_id):
+        """Internal method to create a unit device during scanning."""
+        if unit_id not in self.data:
+            self.data[unit_id] = SunSpecModbusClientUnit(
+                self.parent_device,
+                unit_id,
+                model_class=self.parent_device.model_class
+            )
+        return self.data[unit_id]
+
+
 class SunSpecModbusClientDevice(device.Device):
     def __init__(self, model_class=SunSpecModbusClientModel):
         device.Device.__init__(self, model_class=model_class)
@@ -193,6 +266,7 @@ class SunSpecModbusClientDevice(device.Device):
         self.retry_count = 2
         self.base_addr_list = [40000, 0, 50000]
         self.base_addr = None
+        self.Units = SunSpecModbusClientUnitCollection(self)
 
     def connect(self):
         pass
@@ -214,34 +288,122 @@ class SunSpecModbusClientDevice(device.Device):
     def write(self, addr, data):
         return
 
+    # must be overridden by Modbus protocol implementation
+    def read_unit(self, unit_id, addr, count):
+        """Read Modbus device registers using a specific unit ID.
+
+        Parameters:
+            unit_id :
+                Modbus Unit Identifier to use for this request.
+            addr :
+                Starting Modbus address.
+            count :
+                Read length in Modbus registers.
+        Returns:
+            Byte string containing register contents.
+        """
+        return ''
+
+    # must be overridden by Modbus protocol implementation
+    def write_unit(self, unit_id, addr, data):
+        """Write Modbus device registers using a specific unit ID.
+
+        Parameters:
+            unit_id :
+                Modbus Unit Identifier to use for this request.
+            addr :
+                Starting Modbus address.
+            data :
+                Byte string containing register contents.
+        """
+        return
+
     def scan(self, progress=None, delay=None, connect=True, full_model_read=True):
         """Scan all the models of the physical device and create the
         corresponding model objects within the device object based on the
         SunSpec model definitions.
+
+        This method scans the default unit ID and adds models directly to the device.
         """
         self.base_addr = None
         self.delete_models()
 
-        data = ''
-        error = ''
-        connected = False
+        # Use scan_units to scan the default unit ID
+        # This will populate both the Units collection and the main device
+        self.scan_units([self.unit_id], progress=progress, delay=delay,
+                       connect=connect, full_model_read=full_model_read)
 
+    def scan_units(self, unit_ids, progress=None, delay=None, connect=True, full_model_read=True):
+        """Scan multiple unit IDs and create corresponding unit objects with their models.
+
+        This method scans each specified unit ID for SunSpec models and creates
+        SunSpecModbusClientUnit objects that can be accessed via the Units collection.
+
+        Parameters:
+            unit_ids :
+                List of Modbus Unit Identifiers to scan.
+            progress :
+                Progress callback function.
+            delay :
+                Delay between operations in seconds.
+            connect :
+                Whether to connect/disconnect automatically.
+            full_model_read :
+                Whether to perform full model reads during scan.
+
+        Example:
+            # Scan units 1, 2, and 3
+            d.scan_units([1, 2, 3])
+
+            # Access models from different units
+            unit1_common = d.Units[1].common[0]
+            unit2_inverter = d.Units[2].inverter[0]
+        """
+        if not isinstance(unit_ids, (list, tuple)):
+            unit_ids = [unit_ids]
+
+        connected = False
         if connect:
             self.connect()
             connected = True
 
-            if delay is not None:
-                time.sleep(delay)
+        try:
+            for unit_id in unit_ids:
+                if progress is not None:
+                    cont = progress(f'Scanning unit {unit_id}')
+                    if not cont:
+                        break
+
+                self._scan_single_unit(unit_id, progress, delay, full_model_read)
+
+        finally:
+            if connected:
+                self.disconnect()
+
+    def _scan_single_unit(self, unit_id, progress=None, delay=None, full_model_read=True):
+        """Scan a single unit ID and populate its models."""
+        base_addr = None
+        data = ''
+        error = ''
+
+        # Get or create the unit device for this unit ID
+        unit_device = self.Units._create_unit(unit_id)
+
+        # Clean up any existing models in the unit device before scanning
+        unit_device.delete_models()
+
+        if delay is not None:
+            time.sleep(delay)
 
         error_dict = {}
-        if self.base_addr is None:
+        if base_addr is None:
             for addr in self.base_addr_list:
                 error_dict[addr] = ''
                 try:
-                    data = self.read(addr, 3)
+                    data = self.read_unit(unit_id, addr, 3)
                     if data:
                         if data[:4] == b'SunS':
-                            self.base_addr = addr
+                            base_addr = addr
                             break
                         else:
                             error_dict[addr] = 'Device responded - not SunSpec register map'
@@ -259,40 +421,45 @@ class SunSpecModbusClientDevice(device.Device):
                 if delay is not None:
                     time.sleep(delay)
 
-        error = 'Error scanning SunSpec base addresses. \n'
+        error = f'Error scanning SunSpec base addresses for unit {unit_id}. \n'
         for k, v in error_dict.items():
             error += 'Base address %s error = %s. \n' % (k, v)
 
-        if self.base_addr is not None:
+        if base_addr is not None:
             model_id_data = data[4:6]
             model_id = mb.data_to_u16(model_id_data)
-            addr = self.base_addr + 2
+            addr = base_addr + 2
 
             mid = 0
             while model_id != mb.SUNS_END_MODEL_ID:
                 # read model and model len separately due to some devices not supplying
                 # count for the end model id
-                model_len_data = self.read(addr + 1, 1)
+                model_len_data = self.read_unit(unit_id, addr + 1, 1)
                 if model_len_data and len(model_len_data) == 2:
                     if progress is not None:
-                        cont = progress('Scanning model %s' % model_id)
+                        cont = progress(f'Scanning unit {unit_id} model {model_id}')
                         if not cont:
                             raise SunSpecModbusClientError('Device scan terminated')
                     model_len = mb.data_to_u16(model_len_data)
 
-                    # read model data
-                    ### model_data = self.read(addr, model_len + 2)
+                    # read model data and add to the unit device
                     model_data = model_id_data + model_len_data
                     model = self.model_class(model_id=model_id, model_addr=addr, model_len=model_len, data=model_data,
-                                             mb_device=self)
+                                             mb_device=unit_device)
                     if full_model_read and model.model_def:
                         model.read()
-                    model.mid = '%s_%s' % (self.did, mid)
+                    model.mid = f'{unit_device.did}_{mid}'
                     mid += 1
-                    self.add_model(model)
+                    unit_device.add_model(model)
+
+                    # If this is the default unit, also add the same model to the main device
+                    if unit_id == self.unit_id:
+                        # Add the same model instance to the main device
+                        # This ensures both the unit and main device share the exact same data
+                        self.add_model(model)
 
                     addr += model_len + 2
-                    model_id_data = self.read(addr, 1)
+                    model_id_data = self.read_unit(unit_id, addr, 1)
                     if model_id_data and len(model_id_data) == 2:
                         model_id = mb.data_to_u16(model_id_data)
                     else:
@@ -305,9 +472,6 @@ class SunSpecModbusClientDevice(device.Device):
 
         else:
             raise SunSpecModbusClientError(error)
-
-        if connected:
-            self.disconnect()
 
 class SunSpecModbusClientDeviceTCP(SunSpecModbusClientDevice):
     """Provides access to a Modbus RTU device.
@@ -382,10 +546,42 @@ class SunSpecModbusClientDeviceTCP(SunSpecModbusClientDevice):
         return self.client.is_connected()
 
     def read(self, addr, count, op=modbus_client.FUNC_READ_HOLDING):
-        return self.client.read(addr, count, op)
+        """Read Modbus device registers using the default unit ID."""
+        return self.read_unit(self.unit_id, addr, count, op)
 
     def write(self, addr, data):
-        return self.client.write(addr, data)
+        """Write Modbus device registers using the default unit ID."""
+        return self.write_unit(self.unit_id, addr, data)
+
+    def read_unit(self, unit_id, addr, count, op=modbus_client.FUNC_READ_HOLDING):
+        """Read Modbus device registers using a specific unit ID.
+
+        Parameters:
+            unit_id :
+                Modbus Unit Identifier to use for this request.
+            addr :
+                Starting Modbus address.
+            count :
+                Read length in Modbus registers.
+            op :
+                Modbus function code for request.
+        Returns:
+            Byte string containing register contents.
+        """
+        return self.client.read(addr, count, op, unit_id=unit_id)
+
+    def write_unit(self, unit_id, addr, data):
+        """Write Modbus device registers using a specific unit ID.
+
+        Parameters:
+            unit_id :
+                Modbus Unit Identifier to use for this request.
+            addr :
+                Starting Modbus address.
+            data :
+                Byte string containing register contents.
+        """
+        return self.client.write(addr, data, unit_id=unit_id)
 
 
 class SunSpecModbusClientDeviceRTU(SunSpecModbusClientDevice):
@@ -464,8 +660,19 @@ class SunSpecModbusClientDeviceRTU(SunSpecModbusClientDevice):
             self.client.remove_device(self.unit_id)
 
     def read(self, addr, count, op=modbus_client.FUNC_READ_HOLDING):
-        """Read Modbus device registers.
+        """Read Modbus device registers using the default unit ID."""
+        return self.read_unit(self.unit_id, addr, count, op)
+
+    def write(self, addr, data):
+        """Write Modbus device registers using the default unit ID."""
+        return self.write_unit(self.unit_id, addr, data)
+
+    def read_unit(self, unit_id, addr, count, op=modbus_client.FUNC_READ_HOLDING):
+        """Read Modbus device registers using a specific unit ID.
+
         Parameters:
+            unit_id :
+                Modbus Unit Identifier to use for this request.
             addr :
                 Starting Modbus address.
             count :
@@ -475,16 +682,17 @@ class SunSpecModbusClientDeviceRTU(SunSpecModbusClientDevice):
         Returns:
             Byte string containing register contents.
         """
+        return self.client.read(unit_id, addr, count, op=op, max_count=self.max_count)
 
-        return self.client.read(self.unit_id, addr, count, op=op, max_count=self.max_count)
+    def write_unit(self, unit_id, addr, data):
+        """Write Modbus device registers using a specific unit ID.
 
-    def write(self, addr, data):
-        """Write Modbus device registers.
         Parameters:
+            unit_id :
+                Modbus Unit Identifier to use for this request.
             addr :
                 Starting Modbus address.
-            count :
+            data :
                 Byte string containing register contents.
         """
-
-        return self.client.write(self.unit_id, addr, data, max_write_count=self.max_write_count)
+        return self.client.write(unit_id, addr, data, max_write_count=self.max_write_count)

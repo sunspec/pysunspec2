@@ -557,16 +557,18 @@ class ModbusClientTCP:
     def is_connected(self):
         return self.socket
 
-    def _read(self, addr, count, op=FUNC_READ_HOLDING):
+    def _read(self, addr, count, op=FUNC_READ_HOLDING, unit_id=None):
         resp = bytearray()
         len_remaining = TCP_HDR_LEN + TCP_RESP_MIN_LEN
         len_found = False
         except_code = None
 
-        req = struct.pack('>HHHBBHH', 0, 0, TCP_READ_REQ_LEN, int(self.unit_id), op, int(addr), int(count))
+        # Use provided unit_id or fall back to instance unit_id
+        effective_unit_id = unit_id if unit_id is not None else self.unit_id
+        req = struct.pack('>HHHBBHH', 0, 0, TCP_READ_REQ_LEN, int(effective_unit_id), op, int(addr), int(count))
 
         if self.trace_func:
-            # s = '%s:%s:%s[addr=%s] ->' % (self.ipaddr, str(self.ipport), str(self.unit_id), addr)
+            # s = '%s:%s:%s[addr=%s] ->' % (self.ipaddr, str(self.ipport), str(effective_unit_id), addr)
             s = '> '
             for c in req:
                 s += '%02X' % c
@@ -604,7 +606,7 @@ class ModbusClientTCP:
 
         return resp[(TCP_HDR_LEN + 3):]
 
-    def read(self, addr, count, op=FUNC_READ_HOLDING):
+    def read(self, addr, count, op=FUNC_READ_HOLDING, unit_id=None):
         """ Read Modbus device registers. If no connection exists to the
         destination, one is created and disconnected at the end of the request.
 
@@ -618,6 +620,10 @@ class ModbusClientTCP:
 
             op :
                 Modbus function code for request.
+
+            unit_id :
+                Optional unit ID to use for this request. If not provided,
+                uses the instance's default unit_id.
 
         Returns:
 
@@ -638,7 +644,7 @@ class ModbusClientTCP:
                     read_count = self.max_count
                 else:
                     read_count = count
-                data = self._read(addr + read_offset, read_count, op=op)
+                data = self._read(addr + read_offset, read_count, op=op, unit_id=unit_id)
 
                 if data:
                     resp += data
@@ -654,7 +660,7 @@ class ModbusClientTCP:
 
         return bytes(resp)
 
-    def _write(self, addr, data):
+    def _write(self, addr, data, unit_id=None):
         resp = bytearray()
         len_remaining = TCP_HDR_LEN + TCP_RESP_MIN_LEN
         len_found = False
@@ -663,12 +669,14 @@ class ModbusClientTCP:
 
         write_len = len(data)
         write_count = int(write_len/2)
-        req = struct.pack('>HHHBBHHB', 0, 0, TCP_WRITE_MULT_REQ_LEN + write_len, int(self.unit_id),
+        # Use provided unit_id or fall back to instance unit_id
+        effective_unit_id = unit_id if unit_id is not None else self.unit_id
+        req = struct.pack('>HHHBBHHB', 0, 0, TCP_WRITE_MULT_REQ_LEN + write_len, int(effective_unit_id),
                           func, int(addr), write_count, write_len)
         req += data
 
         if self.trace_func:
-            # s = '%s:%s:%s[addr=%s] ->' % (self.ipaddr, str(self.ipport), str(self.unit_id), addr)
+            # s = '%s:%s:%s[addr=%s] ->' % (self.ipaddr, str(self.ipport), str(effective_unit_id), addr)
             s = '> '
             for c in req:
                 s += '%02X' % c
@@ -704,7 +712,7 @@ class ModbusClientTCP:
         if except_code:
             raise ModbusClientException('Modbus exception: %d' % except_code)
 
-    def _write_single(self, addr, data):
+    def _write_single(self, addr, data, unit_id=None):
         """
         Write Single Modbus device register
         """
@@ -716,12 +724,14 @@ class ModbusClientTCP:
         func = FUNC_WRITE_SINGLE
 
         write_len = len(data)
-        req = struct.pack('>HHHBBH', 0, 0, TCP_WRITE_SINGLE_REQ_LEN + write_len, int(self.unit_id),
+        # Use provided unit_id or fall back to instance unit_id
+        effective_unit_id = unit_id if unit_id is not None else self.unit_id
+        req = struct.pack('>HHHBBH', 0, 0, TCP_WRITE_SINGLE_REQ_LEN + write_len, int(effective_unit_id),
                           func, int(addr))
         req += data
 
         if self.trace_func:
-            # s = '%s:%s:%s[addr=%s] ->' % (self.ipaddr, str(self.ipport), str(self.unit_id), addr)
+            # s = '%s:%s:%s[addr=%s] ->' % (self.ipaddr, str(self.ipport), str(effective_unit_id), addr)
             s = '> '
             for c in req:
                 s += '%02X' % c
@@ -757,7 +767,7 @@ class ModbusClientTCP:
         if except_code:
             raise ModbusClientException('Modbus exception: %d' % except_code)
 
-    def write(self, addr, data):
+    def write(self, addr, data, unit_id=None):
         """ Write Modbus device registers. If no connection exists to the
         destination, one is created and disconnected at the end of the request.
 
@@ -768,6 +778,10 @@ class ModbusClientTCP:
 
             data :
                 Byte string containing register contents.
+
+            unit_id :
+                Optional unit ID to use for this request. If not provided,
+                uses the instance's default unit_id.
         """
         write_offset = 0
         local_connect = False
@@ -779,7 +793,7 @@ class ModbusClientTCP:
 
         try:
             if count == 1:
-                self._write_single(addr, data)  # If only one register, use Func Code 0x06
+                self._write_single(addr, data, unit_id=unit_id)  # If only one register, use Func Code 0x06
             else:
                 while count > 0:
                     if count > self.max_write_count:
@@ -788,7 +802,7 @@ class ModbusClientTCP:
                         write_count = count
                     start = write_offset * 2
                     end = int((write_offset + write_count) * 2)
-                    self._write(addr + write_offset, data[start:end])
+                    self._write(addr + write_offset, data[start:end], unit_id=unit_id)
                     count -= write_count
                     write_offset += write_count
         finally:
