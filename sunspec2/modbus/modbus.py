@@ -20,6 +20,7 @@
 import socket
 import struct
 import serial
+import os
 try:
     import ssl
 except Exception as e:
@@ -50,6 +51,11 @@ TCP_WRITE_SINGLE_REQ_LEN = 4
 
 TCP_DEFAULT_PORT = 502
 TCP_DEFAULT_TIMEOUT = 2
+
+TLS_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'tests', 'tls_data')
+CAFILE = os.path.join(TLS_DATA_DIR, "ca.crt")
+CLIENT_CERTFILE = os.path.join(TLS_DATA_DIR, "client.crt")
+CLIENT_KEYFILE = os.path.join(TLS_DATA_DIR, "client.key")
 
 
 class ModbusClientError(Exception):
@@ -537,7 +543,7 @@ class ModbusClientTCP(object):
     """
 
     def __init__(self, slave_id=1, ipaddr='127.0.0.1', ipport=502, timeout=None, ctx=None, trace_func=None,
-                 tls=False, cafile=None, certfile=None, keyfile=None, insecure_skip_tls_verify=False,
+                 tls=False, cafile=CAFILE, certfile=CLIENT_CERTFILE, keyfile=CLIENT_KEYFILE, insecure_skip_tls_verify=False,
                  max_count=REQ_COUNT_MAX, max_write_count=REQ_WRITE_COUNT_MAX):
 
         self.slave_id = slave_id
@@ -549,8 +555,26 @@ class ModbusClientTCP(object):
         self.trace_func = trace_func
         self.tls = tls
         self.cafile = cafile
+        if self.cafile is None or self.cafile == '':
+            log_msg = f"CA file not specified, using default for testing (server certificates located in same path): {CAFILE}"
+            print(log_msg)
+            if self.trace_func:
+                self.trace_func(log_msg)
+            self.cafile = CAFILE
         self.certfile = certfile
+        if self.certfile is None or self.certfile == '':
+            log_msg = f"Client certificate file not specified, using default for testing (server certificates located in same path): {CLIENT_CERTFILE}"
+            print(log_msg)
+            if self.trace_func:
+                self.trace_func(log_msg)
+            self.certfile = CLIENT_CERTFILE
         self.keyfile = keyfile
+        if self.keyfile is None or self.keyfile == '':
+            log_msg = f"Client key file not specified, using default for testing (server certificates located in same path): {CLIENT_KEYFILE}"
+            print(log_msg)
+            if self.trace_func:
+                self.trace_func(log_msg)
+            self.keyfile = CLIENT_KEYFILE
         self.tls_verify = not insecure_skip_tls_verify
         self.max_count = max_count
         self.max_write_count = max_write_count

@@ -24,6 +24,7 @@ import time
 import uuid
 from sunspec2 import mdef, device, mb
 import sunspec2.modbus.modbus as modbus_client
+from sunspec2.modbus.modbus import CLIENT_CERTFILE, CLIENT_KEYFILE, CAFILE
 
 TEST_NAME = 'test_name'
 
@@ -33,6 +34,7 @@ modbus_rtu_clients = {}
 MAPPED = 'Mapped SunSpec Device'
 RTU = 'Modbus RTU'
 TCP = 'Modbus TCP'
+
 
 class SunSpecModbusClientError(Exception):
     pass
