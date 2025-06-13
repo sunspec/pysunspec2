@@ -9,7 +9,7 @@ from setuptools import setup
 
 setup(
     name='pysunspec2',
-    version='1.3.1',
+    version='1.3.2',
     description='Python SunSpec Tools',
     license="Apache Software License, Version 2.0",
     author='SunSpec Alliance',
@@ -19,7 +19,7 @@ setup(
     package_data={
       'sunspec2.tests': ['test_data/*', 'tls_data/*'],
       'sunspec2': ['models/json/*'],
-    }
+    },
     scripts=['scripts/suns.py'],
     python_requires='>=3.5',
     extras_require={
