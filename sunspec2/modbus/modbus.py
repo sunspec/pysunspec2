@@ -20,6 +20,11 @@
 import socket
 import struct
 import serial
+import os
+try:
+    import ssl
+except Exception as e:
+    print('Missing ssl python package: %s' % e)
 import time
 
 PARITY_NONE = 'N'
@@ -46,6 +51,11 @@ TCP_WRITE_SINGLE_REQ_LEN = 4
 
 TCP_DEFAULT_PORT = 502
 TCP_DEFAULT_TIMEOUT = 2
+
+TLS_DATA_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'tests', 'tls_data'))
+CAFILE = os.path.join(TLS_DATA_DIR, "ca.crt")
+CLIENT_CERTFILE = os.path.join(TLS_DATA_DIR, "client.crt")
+CLIENT_KEYFILE = os.path.join(TLS_DATA_DIR, "client.key")
 
 
 class ModbusClientError(Exception):
@@ -500,9 +510,42 @@ class ModbusClientRTU:
             raise ModbusClientError('Client serial port not open: %s' % self.name)
 
 
-class ModbusClientTCP:
+class ModbusClientTCP(object):
+    """Provides access to a Modbus TCP device.
+
+    Parameters:
+        slave_id :
+            Modbus slave id.
+        ipaddr :
+            IP address string.
+        ipport :
+            IP port.
+        timeout :
+            Modbus request timeout in seconds. Fractional seconds are permitted such as .5.
+        ctx :
+            Context variable to be used by the object creator. Not used by the modbus module.
+        trace_func :
+            Trace function to use for detailed logging. No detailed logging is perform is a trace function is
+            not supplied.
+        tls :
+            Use TLS (Modbus/TCP Security). Defaults to `tls=False`.
+        cafile :
+            Path to certificate authority (CA) certificate to use for validating server certificates.
+            Only used if `tls=True`.
+        certfile :
+            Path to client TLS certificate to use for client authentication. Only used if `tls=True`.
+        keyfile :
+            Path to client TLS key to use for client authentication. Only used if `tls=True`.
+        insecure_skip_tls_verify :
+            Skip verification of server TLS certificate. Only used if `tls=True`.
+        max_count :
+            Maximum register count for a single Modbus request.
+    """
+
     def __init__(self, slave_id=1, ipaddr='127.0.0.1', ipport=502, timeout=None, ctx=None, trace_func=None,
+                 tls=False, cafile=CAFILE, certfile=CLIENT_CERTFILE, keyfile=CLIENT_KEYFILE, insecure_skip_tls_verify=False,
                  max_count=REQ_COUNT_MAX, max_write_count=REQ_WRITE_COUNT_MAX):
+
         self.slave_id = slave_id
         self.ipaddr = ipaddr
         self.ipport = ipport
@@ -510,8 +553,36 @@ class ModbusClientTCP:
         self.ctx = ctx
         self.socket = None
         self.trace_func = trace_func
+        self.tls = tls
+        self.cafile = cafile
+        self.certfile = certfile
+        self.keyfile = keyfile
+        self.tls_verify = not insecure_skip_tls_verify
         self.max_count = max_count
         self.max_write_count = max_write_count
+
+        # If using TLS, use the default CA, cert, and key files if they are not specified.
+        if self.tls:
+            if self.cafile is None or self.cafile == '':
+                log_msg = f"CA file not specified, using default for testing: {CAFILE}"
+                print(log_msg)
+                if self.trace_func:
+                    self.trace_func(log_msg)
+                self.cafile = CAFILE
+
+            if self.certfile is None or self.certfile == '':
+                log_msg = f"Client certificate file not specified, using default for testing (server certificates located in same path): {CLIENT_CERTFILE}"
+                print(log_msg)
+                if self.trace_func:
+                    self.trace_func(log_msg)
+                self.certfile = CLIENT_CERTFILE
+
+            if self.keyfile is None or self.keyfile == '':
+                log_msg = f"Client key file not specified, using default for testing (server certificates located in same path): {CLIENT_KEYFILE}"
+                print(log_msg)
+                if self.trace_func:
+                    self.trace_func(log_msg)
+                self.keyfile = CLIENT_KEYFILE
 
         if ipport is None:
             self.ipport = TCP_DEFAULT_PORT
@@ -539,6 +610,14 @@ class ModbusClientTCP:
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.settimeout(timeout)
+
+            if self.tls:
+                context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=self.cafile)
+                context.load_cert_chain(certfile=self.certfile, keyfile=self.keyfile)
+                context.check_hostname = self.tls_verify
+
+                self.socket = context.wrap_socket(self.socket, server_side=False, server_hostname=self.ipaddr)
+
             self.socket.connect((self.ipaddr, self.ipport))
         except Exception as e:
             raise ModbusClientError('Connection error: %s' % str(e))

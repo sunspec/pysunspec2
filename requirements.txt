@@ -1,3 +1,4 @@
 pytest>=8.3.3
 pyserial>=3.5
 openpyxl>=3.1.5
+pymodbus==2.5.3
