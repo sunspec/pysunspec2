@@ -9,14 +9,17 @@ from setuptools import setup
 
 setup(
     name='pysunspec2',
-    version='1.3.0',
+    version='1.3.1',
     description='Python SunSpec Tools',
     license="Apache Software License, Version 2.0",
     author='SunSpec Alliance',
     author_email='support@sunspec.org',
     url='https://sunspec.org/',
     packages=['sunspec2', 'sunspec2.modbus', 'sunspec2.file', 'sunspec2.tests'],
-    package_data={'sunspec2.tests': ['test_data/*'], 'sunspec2': ['models/json/*']},
+    package_data={
+      'sunspec2.tests': ['test_data/*', 'tls_data/*'],
+      'sunspec2': ['models/json/*'],
+    }
     scripts=['scripts/suns.py'],
     python_requires='>=3.5',
     extras_require={
