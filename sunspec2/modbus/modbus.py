@@ -52,7 +52,7 @@ TCP_WRITE_SINGLE_REQ_LEN = 4
 TCP_DEFAULT_PORT = 502
 TCP_DEFAULT_TIMEOUT = 2
 
-TLS_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'tests', 'tls_data')
+TLS_DATA_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'tests', 'tls_data'))
 CAFILE = os.path.join(TLS_DATA_DIR, "ca.crt")
 CLIENT_CERTFILE = os.path.join(TLS_DATA_DIR, "client.crt")
 CLIENT_KEYFILE = os.path.join(TLS_DATA_DIR, "client.key")
@@ -555,29 +555,34 @@ class ModbusClientTCP(object):
         self.trace_func = trace_func
         self.tls = tls
         self.cafile = cafile
-        if self.cafile is None or self.cafile == '':
-            log_msg = f"CA file not specified, using default for testing (server certificates located in same path): {CAFILE}"
-            print(log_msg)
-            if self.trace_func:
-                self.trace_func(log_msg)
-            self.cafile = CAFILE
         self.certfile = certfile
-        if self.certfile is None or self.certfile == '':
-            log_msg = f"Client certificate file not specified, using default for testing (server certificates located in same path): {CLIENT_CERTFILE}"
-            print(log_msg)
-            if self.trace_func:
-                self.trace_func(log_msg)
-            self.certfile = CLIENT_CERTFILE
         self.keyfile = keyfile
-        if self.keyfile is None or self.keyfile == '':
-            log_msg = f"Client key file not specified, using default for testing (server certificates located in same path): {CLIENT_KEYFILE}"
-            print(log_msg)
-            if self.trace_func:
-                self.trace_func(log_msg)
-            self.keyfile = CLIENT_KEYFILE
         self.tls_verify = not insecure_skip_tls_verify
         self.max_count = max_count
         self.max_write_count = max_write_count
+
+        # If using TLS, use the default CA, cert, and key files if they are not specified.
+        if self.tls:
+            if self.cafile is None or self.cafile == '':
+                log_msg = f"CA file not specified, using default for testing: {CAFILE}"
+                print(log_msg)
+                if self.trace_func:
+                    self.trace_func(log_msg)
+                self.cafile = CAFILE
+
+            if self.certfile is None or self.certfile == '':
+                log_msg = f"Client certificate file not specified, using default for testing (server certificates located in same path): {CLIENT_CERTFILE}"
+                print(log_msg)
+                if self.trace_func:
+                    self.trace_func(log_msg)
+                self.certfile = CLIENT_CERTFILE
+
+            if self.keyfile is None or self.keyfile == '':
+                log_msg = f"Client key file not specified, using default for testing (server certificates located in same path): {CLIENT_KEYFILE}"
+                print(log_msg)
+                if self.trace_func:
+                    self.trace_func(log_msg)
+                self.keyfile = CLIENT_KEYFILE
 
         if ipport is None:
             self.ipport = TCP_DEFAULT_PORT
