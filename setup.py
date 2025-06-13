@@ -19,7 +19,7 @@ setup(
     package_data={
       'sunspec2.tests': ['test_data/*', 'tls_data/*'],
       'sunspec2': ['models/json/*'],
-    }
+    },
     scripts=['scripts/suns.py'],
     python_requires='>=3.5',
     extras_require={
