@@ -5,7 +5,12 @@ x509_extensions    = v3_ca
 prompt             = no
 
 [ req_distinguished_name ]
-CN = Test CA
+C  = US
+ST = STATE
+L  = LOCAL
+O  = ORG
+OU = SUBORG
+CN = ROOT-CA
 
 [ v3_ca ]
 subjectKeyIdentifier=hash

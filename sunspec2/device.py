@@ -565,13 +565,20 @@ class Group(object):
                 g = self.group_class(gdef=gdef, model=self.model, model_offset=model_offset, data=gdata,
                                      data_offset=data_offset, index=1)
                 group_points_len = g.points_len
-                # count is model.len-model.points_len/group_points_len
+                # count is (model.len - non-repeating points) / group_points_len
                 # (ID and L points are not included in model length)
-                repeating_len = model_len - (self.model.points_len - 2)
+                # TODO: investigate if this only works when there's a single group in the model
+                # TODO: investigate the case of groups of groups
+                non_repeating_points = sum(
+                    p.len for pname, p in self.model.points.items() if pname not in ('ID', 'L')
+                )
+                repeating_len = model_len - non_repeating_points
+                if group_points_len == 0:
+                    raise ModelError('Repeating group length is zero for model %s' % self.model.model_id)
                 if repeating_len > 0:
                     remaining = repeating_len % group_points_len
                     if remaining != 0:
-                        raise ModelError('Repeating group count not consistent with model length for model %s,'
+                        raise ModelError('Repeating group count not consistent with model length for model %s, '
                                          'model repeating len = %s, model repeating group len = %s' %
                                          (self.model.model_id, repeating_len, group_points_len))
 

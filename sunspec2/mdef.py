@@ -436,7 +436,7 @@ def get_group_len_points_index(group_def):
                 name = p.get(NAME)
                 plen = point_type_info.get(p.get(TYPE)).get('len')
                 if plen is None:
-                    plen = point_type_info.get(p.get(SIZE))
+                    plen = p.get(SIZE)  # use 'size' from sunspec model for string points
                 if not plen:
                     raise ModelDefinitionError('Unable to get size of point %s' % name)
                 pindex += plen

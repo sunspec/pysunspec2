@@ -11,3 +11,5 @@ build/
 build/
 
 dist/
+
+.venv/
