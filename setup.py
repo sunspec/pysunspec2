@@ -9,7 +9,7 @@ from setuptools import setup
 
 setup(
     name='pysunspec2',
-    version='1.3.2',
+    version='1.3.4',
     description='Python SunSpec Tools',
     license="Apache Software License, Version 2.0",
     author='SunSpec Alliance',
@@ -40,5 +40,6 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
     ],
 )
