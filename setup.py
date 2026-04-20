@@ -9,7 +9,7 @@ from setuptools import setup
 
 setup(
     name='pysunspec2',
-    version='1.3.4',
+    version='1.3.5',
     description='Python SunSpec Tools',
     license="Apache Software License, Version 2.0",
     author='SunSpec Alliance',
