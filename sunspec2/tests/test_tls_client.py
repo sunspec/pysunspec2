@@ -50,19 +50,23 @@ def tls_modbus_server():
 
 
 @pytest.mark.parametrize(
-    "cafile, certfile, keyfile, ipaddr, ipport", [(CAFILE_CLIENT, CLIENT_CERTFILE, CLIENT_KEYFILE, IPADDR, IPPORT)]
+    "cafile, certfile, keyfile, ipaddr, ipport",
+    [(CAFILE_SERVER, CLIENT_CERTFILE, CLIENT_KEYFILE, IPADDR, IPPORT)],
 )
 def test_tls_connection(cafile, certfile, keyfile, ipaddr, ipport):
     """
     Test TLS connection for SunSpecModbusClientDeviceTCP.
     The TLS-enabled Modbus TCP server is started automatically.
+
+    The client validates the server against the server CA chain
+    (``cafile``) and presents its own client certificate for mutual TLS.
     """
     device = SunSpecModbusClientDeviceTCP(
         slave_id=1,
         ipaddr=ipaddr,
         ipport=ipport,
         tls=True,
-        cafile=CAFILE_SERVER,
+        cafile=cafile,
         certfile=certfile,
         keyfile=keyfile,
         insecure_skip_tls_verify=False,
