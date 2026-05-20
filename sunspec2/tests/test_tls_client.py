@@ -4,10 +4,16 @@ import time
 import threading
 from pymodbus.server import StartTlsServer
 from pymodbus.datastore import (
-    ModbusSlaveContext,
     ModbusServerContext,
     ModbusSequentialDataBlock,
 )
+
+# pymodbus renamed the per-device context (ModbusSlaveContext ->
+# ModbusDeviceContext) during the 3.x series; accept either name.
+try:
+    from pymodbus.datastore import ModbusDeviceContext
+except ImportError:  # older pymodbus 3.x
+    from pymodbus.datastore import ModbusSlaveContext as ModbusDeviceContext
 from sunspec2.modbus.client import SunSpecModbusClientDeviceTCP
 import os
 
@@ -34,9 +40,15 @@ def run_tls_modbus_server():
     sslctx.load_verify_locations(cafile=CAFILE_CLIENT)
     sslctx.verify_mode = ssl.CERT_REQUIRED
 
-    block = ModbusSequentialDataBlock(0, [0] * 100)
-    store = ModbusSlaveContext(di=block, co=block, hr=block, ir=block)
-    context = ModbusServerContext(slaves=store, single=True)
+    # Data block starts at address 1 (pymodbus 3.13 rejects a 0 start).
+    block = ModbusSequentialDataBlock(1, [0] * 100)
+    store = ModbusDeviceContext(di=block, co=block, hr=block, ir=block)
+    # ModbusServerContext gained the 'devices' keyword (replacing
+    # 'slaves') during the pymodbus 3.x series.
+    try:
+        context = ModbusServerContext(devices=store, single=True)
+    except TypeError:  # older pymodbus 3.x
+        context = ModbusServerContext(slaves=store, single=True)
 
     StartTlsServer(context, address=(IPADDR, IPPORT), sslctx=sslctx)
 
