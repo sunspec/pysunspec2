@@ -53,9 +53,12 @@ TCP_DEFAULT_PORT = 502
 TCP_DEFAULT_TIMEOUT = 2
 
 TLS_DATA_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'tests', 'tls_data'))
-CAFILE = os.path.join(TLS_DATA_DIR, "ca.crt")
-CLIENT_CERTFILE = os.path.join(TLS_DATA_DIR, "client.crt")
-CLIENT_KEYFILE = os.path.join(TLS_DATA_DIR, "client.key")
+# Secure SunSpec Modbus test PKI (ECDSA P-256). See tls_data/README.md.
+# A client validates the server against the server CA chain and presents
+# the ReadOnlySunSpec client certificate by default.
+CAFILE = os.path.join(TLS_DATA_DIR, "ca", "server_ca_chain.crt")
+CLIENT_CERTFILE = os.path.join(TLS_DATA_DIR, "client", "tls1_2", "client_readonly.crt")
+CLIENT_KEYFILE = os.path.join(TLS_DATA_DIR, "client", "tls1_2", "client_readonly.key")
 
 
 class ModbusClientError(Exception):
