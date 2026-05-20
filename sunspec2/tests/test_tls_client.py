@@ -2,8 +2,12 @@ import pytest
 import ssl
 import time
 import threading
-from pymodbus.server.sync import StartTlsServer
-from pymodbus.datastore import ModbusSlaveContext, ModbusServerContext
+from pymodbus.server import StartTlsServer
+from pymodbus.datastore import (
+    ModbusSlaveContext,
+    ModbusServerContext,
+    ModbusSequentialDataBlock,
+)
 from sunspec2.modbus.client import SunSpecModbusClientDeviceTCP
 import os
 
@@ -23,12 +27,15 @@ IPPORT = 8502
 
 
 def run_tls_modbus_server():
+    # The server presents the server certificate and verifies connecting
+    # clients against the client CA chain (mutual TLS).
     sslctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     sslctx.load_cert_chain(certfile=CERTFILE, keyfile=KEYFILE)
-    sslctx.load_verify_locations(cafile=CAFILE_SERVER)
+    sslctx.load_verify_locations(cafile=CAFILE_CLIENT)
     sslctx.verify_mode = ssl.CERT_REQUIRED
 
-    store = ModbusSlaveContext()
+    block = ModbusSequentialDataBlock(0, [0] * 100)
+    store = ModbusSlaveContext(di=block, co=block, hr=block, ir=block)
     context = ModbusServerContext(slaves=store, single=True)
 
     StartTlsServer(context, address=(IPADDR, IPPORT), sslctx=sslctx)
