@@ -8,12 +8,16 @@ from sunspec2.modbus.client import SunSpecModbusClientDeviceTCP
 import os
 
 BASE_DIR = os.path.dirname(__file__)
-CAFILE_SERVER = os.path.join(BASE_DIR, "tls_data", "server_ca_chain.crt")
-CAFILE_CLIENT = os.path.join(BASE_DIR, "tls_data", "client_ca_chain.crt")
-CERTFILE = os.path.join(BASE_DIR, "tls_data", "server.crt")
-KEYFILE = os.path.join(BASE_DIR, "tls_data", "server.key")
-CLIENT_CERTFILE = os.path.join(BASE_DIR, "tls_data", "client.crt")
-CLIENT_KEYFILE = os.path.join(BASE_DIR, "tls_data", "client.key")
+TLS_DATA = os.path.join(BASE_DIR, "tls_data")
+# Trust anchors: a server validates client certificates against the
+# client CA chain, and a client validates the server against the
+# server CA chain. See tls_data/README.md for the directory layout.
+CAFILE_SERVER = os.path.join(TLS_DATA, "ca", "server_ca_chain.crt")
+CAFILE_CLIENT = os.path.join(TLS_DATA, "ca", "client_ca_chain.crt")
+CERTFILE = os.path.join(TLS_DATA, "server", "tls1_2", "server_valid.crt")
+KEYFILE = os.path.join(TLS_DATA, "server", "tls1_2", "server_valid.key")
+CLIENT_CERTFILE = os.path.join(TLS_DATA, "client", "tls1_2", "client_readonly.crt")
+CLIENT_KEYFILE = os.path.join(TLS_DATA, "client", "tls1_2", "client_readonly.key")
 IPADDR = "localhost"
 IPPORT = 8502
 
@@ -51,7 +55,7 @@ def test_tls_connection(cafile, certfile, keyfile, ipaddr, ipport):
         ipaddr=ipaddr,
         ipport=ipport,
         tls=True,
-        cafile=os.path.join(BASE_DIR, "tls_data", "client_ca_chain.crt"),
+        cafile=CAFILE_SERVER,
         certfile=certfile,
         keyfile=keyfile,
         insecure_skip_tls_verify=False,
