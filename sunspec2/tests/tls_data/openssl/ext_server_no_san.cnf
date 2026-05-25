@@ -1,0 +1,5 @@
+basicConstraints       = critical, CA:FALSE
+keyUsage               = critical, digitalSignature, keyAgreement
+extendedKeyUsage       = serverAuth
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid,issuer

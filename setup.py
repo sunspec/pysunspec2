@@ -17,7 +17,15 @@ setup(
     url='https://sunspec.org/',
     packages=['sunspec2', 'sunspec2.modbus', 'sunspec2.file', 'sunspec2.tests'],
     package_data={
-      'sunspec2.tests': ['test_data/*', 'tls_data/*'],
+      # tls_data is a nested tree (ca/, server/<tls ver>/, client/<tls ver>/,
+      # foreign_pki/); include every level so installed distributions ship
+      # the full Secure SunSpec Modbus test PKI.
+      'sunspec2.tests': [
+          'test_data/*',
+          'tls_data/*',
+          'tls_data/*/*',
+          'tls_data/*/*/*',
+      ],
       'sunspec2': ['models/json/*'],
     },
     scripts=['scripts/suns.py'],
