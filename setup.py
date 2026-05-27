@@ -30,6 +30,11 @@ setup(
     },
     scripts=['scripts/suns.py'],
     python_requires='>=3.5',
+    # pyserial is imported unconditionally by sunspec2/modbus/modbus.py, which
+    # is imported by sunspec2/modbus/client.py -- so it is required for any use
+    # of the Modbus client (TCP or RTU), not optional. It is kept in
+    # extras_require['serial'] below too for backwards compatibility.
+    install_requires=['pyserial>=3.5'],
     extras_require={
       'serial': ['pyserial'],
       'excel': ['openpyxl'],
