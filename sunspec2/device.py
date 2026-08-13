@@ -564,7 +564,7 @@ class Group(object):
                 gdata = self._group_data(data=data, name=gdef[mdef.NAME], index=0)
                 g = self.group_class(gdef=gdef, model=self.model, model_offset=model_offset, data=gdata,
                                      data_offset=data_offset, index=1)
-                group_points_len = g.points_len
+                group_points_len = g.len
                 # count is (model.len - non-repeating points) / group_points_len
                 # (ID and L points are not included in model length)
                 # TODO: investigate if this only works when there's a single group in the model

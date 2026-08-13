@@ -1698,6 +1698,82 @@ class TestGroup:
         assert len(groups) == 3
         assert len(groups[0].groups['Pt']) == 4
 
+    def test__init_repeating_group_legacy_count_nested_group(self):
+        # regression test for a repeating group (Crv) that itself contains a nested
+        # repeating group (Pt), as in model 705, when the count must be inferred from
+        # the model length rather than read directly from the count point (count == 0).
+        # each Crv instance is 10 registers of its own points plus 2 Pt points of 2
+        # registers each = 14 registers per curve; two curves make 28 repeating registers.
+        gdef_crv = {
+            "count": "NCrv",
+            "name": "Crv",
+            "groups": [
+                {
+                    "count": "NPt",
+                    "name": "Pt",
+                    "points": [
+                        {"name": "V", "type": "uint16"},
+                        {"name": "Var", "type": "int16"},
+                    ],
+                    "type": "group",
+                }
+            ],
+            "points": [
+                {"name": "ActPt", "type": "uint16"},
+                {"name": "DeptRef", "type": "enum16"},
+                {"name": "Pri", "type": "enum16"},
+                {"name": "VRef", "type": "uint16"},
+                {"name": "VRefAuto", "type": "enum16"},
+                {"name": "VRefAutoEna", "type": "enum16"},
+                {"name": "VRefAutoTms", "type": "uint16"},
+                {"name": "RspTms", "type": "uint32"},
+                {"name": "ReadOnly", "type": "enum16"},
+            ],
+            "type": "group",
+        }
+
+        p_ncrv = device.Point({"name": "NCrv", "type": "uint16"})
+        p_ncrv.value = 0  # count not resolved directly -> falls back to legacy inference
+        p_npt = device.Point({"name": "NPt", "type": "uint16"})
+        p_npt.value = 2
+
+        class FakeModel:
+            pass
+
+        m = FakeModel()
+        m.model_id = 705
+        m.error_info = ''
+        m.add_error = lambda msg: None
+        m.NCrv = p_ncrv
+        m.NPt = p_npt
+        # 11 filler 1-register points bring the non-repeating point total to 13,
+        # matching the 13 non-repeating registers of model 705's top-level group
+        fillers = {'F%d' % i: device.Point({'name': 'F%d' % i, 'type': 'uint16'}) for i in range(11)}
+        m.points = {'NCrv': p_ncrv, 'NPt': p_npt, **fillers}
+        m.points_len = 13
+        m.groups = {}
+        m.len = 41  # 13 non-repeating + 28 repeating (2 curves x 14 registers each)
+
+        g = device.Group.__new__(device.Group)
+        g.model = m
+        g.gname = None
+        g.offset = 0
+        g.len = 0
+        g.points = {}
+        g.groups = {}
+        g.points_len = 0
+        g.group_class = device.Group
+        g.index = None
+        g.access_regions = None
+        g.gdef = None
+
+        groups = g._init_repeating_group(gdef=gdef_crv, model_offset=0, data=None, data_offset=0)
+        assert len(groups) == 2
+        for crv in groups:
+            assert crv.len == 14
+            assert crv.points_len == 10
+            assert len(crv.groups['Pt']) == 2
+
     def test_get_dict(self):
         gdata_705 = {
             "ID": 705,
