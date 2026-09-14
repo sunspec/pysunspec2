@@ -55,6 +55,36 @@ def test_unimpl_float64_round_trips_to_none():
     assert mb.data_to_f64(mb.create_unimpl_value('float64', len=8)) is None
 
 
+def test_create_unimpl_value_count():
+    # count had no entry in unimpl_value either, so an unset count point
+    # reached u16_to_data as None and raised struct.error. Models 160, 401,
+    # 402, 403, 404 and 64413 all carry one.
+    assert mb.create_unimpl_value('count', len=2) == b'\xff\xff'
+
+
+def test_every_point_type_has_an_unimpl_value():
+    # create_unimpl_value looks the type up in unimpl_value, so a type in
+    # point_type_info but not in that table fails at serialization time.
+    missing = set(mb.point_type_info) - set(mb.unimpl_value)
+    assert not missing, 'no unimpl_value entry for %s' % sorted(missing)
+
+
+def test_create_unimpl_value_unknown_type_raises_value_error():
+    # The guard tested the type rather than the looked-up value, so an
+    # unknown type raised KeyError from point_type_info instead.
+    with pytest.raises(ValueError):
+        mb.create_unimpl_value('not_a_sunspec_type')
+
+
+def test_every_point_type_round_trips_to_unimplemented():
+    # pad is always implemented by definition; every other type must read
+    # back from its unimplemented encoding as not implemented.
+    for point_type, info in mb.point_type_info.items():
+        if point_type == 'pad':
+            continue
+        data = mb.create_unimpl_value(point_type, len=(info.len or 4) * 2)
+        assert not info.is_impl(info.data_to(data)), point_type
+
 def test_data_to_s16():
     assert mb.data_to_s16(b'\x13\x88') == 5000
 
