@@ -678,6 +678,17 @@ class TestPoint:
         setattr(p_sf, "_value", 4)
         assert p4.get_mb(computed=True) == b'\x9c\x40'
 
+    def test_get_mb_eui48(self):
+        # get_mb() passes a length to to_data for every type. eui48 is the
+        # one whose to_data did not accept it, so this path raised TypeError.
+        p_def = {
+            "name": "MAC",
+            "type": "eui48"
+        }
+        p = device.Point(p_def)
+        p.value = '00:40:AD:B0:A3:60'
+        assert p.get_mb() == b'\x00\x00\x00\x40\xad\xb0\xa3\x60'
+
     def test_set_mb(self):
         p_def = {
             "name": "ESVLo",

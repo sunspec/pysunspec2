@@ -131,19 +131,23 @@ def test_eui48_to_data_accepts_length():
 
 
 def test_every_to_data_accepts_length():
-    # The uniform (value, len) signature is what Point.get_mb() relies on.
+    # The uniform (value, len) signature is what Point.get_mb() relies on. The
+    # loop is driven from point_type_info so a type added there with a to_data
+    # that does not take a length fails here rather than at serialization time.
     values = {
-        'int16': -1, 'uint16': 1, 'acc16': 1, 'enum16': 1, 'bitfield16': 1,
+        'int16': -1, 'uint16': 1, 'count': 1, 'acc16': 1, 'enum16': 1,
+        'bitfield16': 1,
         'int32': -1, 'uint32': 1, 'acc32': 1, 'enum32': 1, 'bitfield32': 1,
         'int64': -1, 'uint64': 1, 'acc64': 1,
-        'ipaddr': 1, 'eui48': '12:34:56:78:90:AB',
-        'float32': 1.0, 'string': 'a', 'sunssf': 1, 'pad': 0,
+        'ipaddr': 1, 'ipv6addr': '0' * 31 + '1', 'eui48': '12:34:56:78:90:AB',
+        'float32': 1.0, 'float64': 1.0, 'string': 'a', 'sunssf': 1, 'pad': 0,
     }
-    for point_type, value in values.items():
-        info = mb.point_type_info[point_type]
+    missing = set(mb.point_type_info) - set(values)
+    assert not missing, 'add a sample value for %s' % sorted(missing)
+    for point_type, info in mb.point_type_info.items():
         # string has no fixed length; any even byte count will do here.
         length = (info.len or 2) * 2
-        info.to_data(value, length)
+        info.to_data(values[point_type], length)
 
 
 def test_is_impl_int16():
