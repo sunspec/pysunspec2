@@ -59,6 +59,7 @@ SUNS_END_MODEL_ID = 0xffff
 unimpl_value = {
     mdef.TYPE_INT16: SUNS_UNIMPL_INT16,
     mdef.TYPE_UINT16: SUNS_UNIMPL_UINT16,
+    mdef.TYPE_COUNT: SUNS_UNIMPL_UINT16,
     mdef.TYPE_ACC16: SUNS_UNIMPL_ACC16,
     mdef.TYPE_ENUM16: SUNS_UNIMPL_ENUM16,
     mdef.TYPE_BITFIELD16: SUNS_UNIMPL_BITFIELD16,
@@ -73,6 +74,7 @@ unimpl_value = {
     mdef.TYPE_ACC64: SUNS_UNIMPL_ACC64,
     mdef.TYPE_IPV6ADDR: SUNS_UNIMPL_IPV6ADDR,
     mdef.TYPE_FLOAT32: SUNS_UNIMPL_FLOAT32,
+    mdef.TYPE_FLOAT64: SUNS_UNIMPL_FLOAT64,
     mdef.TYPE_STRING: SUNS_UNIMPL_STRING,
     mdef.TYPE_SUNSSF: SUNS_UNIMPL_SUNSSF,
     mdef.TYPE_EUI48: SUNS_UNIMPL_EUI48,
@@ -82,7 +84,7 @@ unimpl_value = {
 
 def create_unimpl_value(vtype, len=None):
     value = unimpl_value.get(vtype)
-    if vtype is None:
+    if value is None:
         raise ValueError('Unknown SunSpec value type: %s' % vtype)
     if vtype == mdef.TYPE_STRING:
         if len is not None:
@@ -96,6 +98,9 @@ def create_unimpl_value(vtype, len=None):
         # f32_to_data encodes the number 2143289344.0 instead, which reads back
         # as an ordinary value rather than as an unimplemented point.
         return struct.pack('>I', SUNS_UNIMPL_FLOAT32)
+    elif vtype == mdef.TYPE_FLOAT64:
+        # Same reasoning: f64_to_data would encode the sentinel as a quantity.
+        return struct.pack('>Q', SUNS_UNIMPL_FLOAT64)
     return point_type_info[vtype][3](value)
 
 

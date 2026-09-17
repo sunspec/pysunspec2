@@ -689,6 +689,30 @@ class TestPoint:
         p.value = '00:40:AD:B0:A3:60'
         assert p.get_mb() == b'\x00\x00\x00\x40\xad\xb0\xa3\x60'
 
+    def test_get_mb_count_unimplemented(self):
+        # An unset count point reached u16_to_data as None and raised
+        # struct.error out of get_mb, not as a ModelError.
+        p_def = {
+            "name": "N",
+            "type": "count"
+        }
+        p = device.Point(p_def)
+        p.value = None
+        assert p.get_mb() == b'\xff\xff'
+
+    def test_get_mb_unimplemented_error_is_model_error(self):
+        # create_unimpl_value was called outside the try/except that wraps
+        # the neighboring to_data calls, so its errors escaped raw.
+        p_def = {
+            "name": "Bogus",
+            "type": "uint16"
+        }
+        p = device.Point(p_def)
+        p.pdef["type"] = "not_a_sunspec_type"
+        p.value = None
+        with pytest.raises(device.ModelError):
+            p.get_mb()
+
     def test_set_mb(self):
         p_def = {
             "name": "ESVLo",

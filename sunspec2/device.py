@@ -311,7 +311,12 @@ class Point(object):
                 if err:
                     raise ModelError(err)
         elif v is None:
-            data = mb.create_unimpl_value(self.pdef[mdef.TYPE], len=(int(self.len) * 2))
+            try:
+                data = mb.create_unimpl_value(self.pdef[mdef.TYPE], len=(int(self.len) * 2))
+            except Exception as e:
+                err = 'Error getting unimplemented value for %s: %s' % (self.pdef[mdef.NAME], e)
+            if err:
+                raise ModelError(err)
 
         if data is None:
             try:
