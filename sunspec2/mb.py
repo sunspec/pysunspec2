@@ -91,6 +91,11 @@ def create_unimpl_value(vtype, len=None):
             raise ValueError('Unimplemented value creation for string requires a length')
     elif vtype == mdef.TYPE_IPV6ADDR:
         return b'\0' * 16
+    elif vtype == mdef.TYPE_FLOAT32:
+        # SUNS_UNIMPL_FLOAT32 is a bit pattern, not a quantity. Passing it to
+        # f32_to_data encodes the number 2143289344.0 instead, which reads back
+        # as an ordinary value rather than as an unimplemented point.
+        return struct.pack('>I', SUNS_UNIMPL_FLOAT32)
     return point_type_info[vtype][3](value)
 
 

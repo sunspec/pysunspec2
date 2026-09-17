@@ -1,3 +1,5 @@
+import struct
+
 import sunspec2.mb as mb
 import pytest
 
@@ -25,10 +27,23 @@ def test_create_unimpl_value():
     assert mb.create_unimpl_value('int64') == b'\x80\x00\x00\x00\x00\x00\x00\x00'
     assert mb.create_unimpl_value('uint64') == b'\xff\xff\xff\xff\xff\xff\xff\xff'
     assert mb.create_unimpl_value('acc64') == b'\x00\x00\x00\x00\x00\x00\x00\x00'
-    assert mb.create_unimpl_value('float32') == b'N\xff\x80\x00'
+    assert mb.create_unimpl_value('float32') == b'\x7f\xc0\x00\x00'
     assert mb.create_unimpl_value('sunssf') == b'\x80\x00'
     assert mb.create_unimpl_value('eui48') == b'\x00\x00\xff\xff\xff\xff\xff\xff'
     assert mb.create_unimpl_value('pad') == b'\x00\x00'
+
+def test_create_unimpl_value_float32_is_the_sentinel_bit_pattern():
+    # SUNS_UNIMPL_FLOAT32 is a bit pattern. Encoded as a quantity it becomes
+    # 2143289344.0, which reads back as an ordinary value rather than as absent.
+    data = mb.create_unimpl_value('float32', len=4)
+    assert data == struct.pack('>I', mb.SUNS_UNIMPL_FLOAT32)
+    assert data != struct.pack('>f', float(mb.SUNS_UNIMPL_FLOAT32))
+
+
+def test_unimpl_float32_round_trips_to_none():
+    # The reader already maps the NaN pattern to None; this is what lets the
+    # writer meet it.
+    assert mb.data_to_f32(mb.create_unimpl_value('float32', len=4)) is None
 
 
 def test_data_to_s16():
