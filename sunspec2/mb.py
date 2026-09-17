@@ -222,7 +222,7 @@ def str_to_data(s, slen=None):
     return struct.pack(str(slen) + 's', s)
 
 
-def eui48_to_data(eui48):
+def eui48_to_data(eui48, len=None):
     return (b'\x00\x00' + base64.b16decode(eui48.replace(':', '')))
 
 
