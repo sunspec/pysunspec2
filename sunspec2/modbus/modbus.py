@@ -729,6 +729,8 @@ class ModbusClientTCP(object):
                 else:
                     break
         except socket.timeout as e:
+            # the response can still arrive, and would be read as the response to the next request
+            self.disconnect()
             raise ModbusClientTimeout(str(e))
         finally:
             if local_connect:
@@ -873,6 +875,10 @@ class ModbusClientTCP(object):
                     self._write(addr + write_offset, data[start:end])
                     count -= write_count
                     write_offset += write_count
+        except socket.timeout as e:
+            # the response can still arrive, and would be read as the response to the next request
+            self.disconnect()
+            raise ModbusClientTimeout(str(e))
         finally:
             if local_connect:
                 self.disconnect()
