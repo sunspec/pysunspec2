@@ -187,6 +187,25 @@ class TestModbusClientTCP:
         assert c.read(40000, 70) == in_buff[1]
         assert c.socket.request[0] == check_req
 
+    @pytest.mark.parametrize('request_func', [
+        lambda c: c.read(40000, 2),
+        lambda c: c.write(40052, b'\x00\x01'),
+        lambda c: c.write(40052, b'\x00\x01\x00\x02'),
+    ])
+    def test_timeout_disconnects(self, monkeypatch, request_func):
+        c = modbus_client.ModbusClientTCP()
+        monkeypatch.setattr(socket, 'socket', MockSocket.mock_socket)
+        c.connect()
+
+        def recv_timeout(size):
+            raise socket.timeout('timed out')
+
+        monkeypatch.setattr(c.socket, 'recv', recv_timeout)
+        with pytest.raises(modbus_client.ModbusClientTimeout):
+            request_func(c)
+        # a late response cannot be read as the response to the next request
+        assert c.socket is None
+
     def test__write(self, monkeypatch):
         pass
 
