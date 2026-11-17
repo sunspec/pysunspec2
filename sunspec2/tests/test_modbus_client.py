@@ -1020,6 +1020,23 @@ class TestSunSpecModbusClientDevice:
         for req in range(len(rtu_req_check2)):
             assert rtu_req_check2[req] == c_rtu.client.serial.request[req]
 
+    def test_scan_outside_model_chain(self, monkeypatch):
+        monkeypatch.setattr(socket, 'socket', MockSocket.mock_socket)
+        monkeypatch.setattr(client.SunSpecModbusClientDeviceTCP, 'connect', MockSocket.mock_tcp_connect)
+        monkeypatch.setattr(client.SunSpecModbusClientDeviceTCP, 'disconnect', MockSocket.mock_tcp_connect)
+
+        word = b'\x00\x00\x00\x00\x00\x05\x01\x03\x02'
+        common = [b'\x00\x00\x00\x00\x00\t\x01\x03\x06', b'SunS\x00\x01', word, b'\x00B']
+        # the header after the common model: blank registers, a length that leads past the last register
+        for header, models in (([word, b'\x00\x00', word, b'\x00\x00'], [1]),
+                               ([word, b'?~', word, b'\x97\x8d'], [1, 16254])):
+            c_tcp = client.SunSpecModbusClientDeviceTCP()
+            c_tcp.client.connect()
+            c_tcp.client.socket._set_buffer(common + header)
+            c_tcp.scan(full_model_read=False)
+            assert [model_id for model_id in c_tcp.models if isinstance(model_id, int)] == models
+            assert len(c_tcp.client.socket.request) == 4
+
     def test_get_text(self, monkeypatch):
         # tcp scan
         monkeypatch.setattr(socket, 'socket', MockSocket.mock_socket)
