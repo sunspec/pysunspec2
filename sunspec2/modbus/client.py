@@ -284,6 +284,9 @@ class SunSpecModbusClientDevice(device.Device):
                         if not cont:
                             raise SunSpecModbusClientError('Device scan terminated')
                     model_len = mb.data_to_u16(model_len_data)
+                    # blank registers are not a model
+                    if model_id == 0 and model_len == 0:
+                        break
 
                     # read model data
                     ### model_data = self.read(addr, model_len + 2)
@@ -297,6 +300,9 @@ class SunSpecModbusClientDevice(device.Device):
                     self.add_model(model)
 
                     addr += model_len + 2
+                    # no model follows the last register
+                    if addr > 0xffff:
+                        break
                     model_id_data = self.read(addr, 1)
                     if model_id_data and len(model_id_data) == 2:
                         model_id = mb.data_to_u16(model_id_data)
