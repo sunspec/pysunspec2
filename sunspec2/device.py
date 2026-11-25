@@ -351,7 +351,7 @@ class Point(object):
     def get_text(self, index=None, parent_index=None):
         txt = ''
         name = self.pdef['name']
-        val = self.value
+        val = self.cvalue
         units = self.pdef.get('units')
         if index:
             if parent_index:
