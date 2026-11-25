@@ -2479,20 +2479,20 @@ class TestGroup:
         expected_output = '''      ActPt                                                 4\n''' + \
                           '''      DeptRef                                               1\n''' + \
                           '''      Pri                                                   1\n''' + \
-                          '''      VRef                                                  1 VNomPct\n''' + \
-                          '''      VRefAuto                                              0 VNomPct\n''' + \
+                          '''      VRef                                               0.01 VNomPct\n''' + \
+                          '''      VRefAuto                                            0.0 VNomPct\n''' + \
                           '''      VRefAutoEna                                        None\n''' + \
                           '''      VRefAutoTms                                        None Secs\n''' + \
                           '''      RspTms                                                6 Secs\n''' + \
                           '''      ReadOnly                                              1\n''' + \
-                          '''   01:V                                                  9200 VNomPct\n''' + \
-                          '''   01:Var                                                3000 DeptRef\n''' + \
-                          '''   02:V                                                  9670 VNomPct\n''' + \
-                          '''   02:Var                                                   0 DeptRef\n''' + \
-                          '''   03:V                                                 10300 VNomPct\n''' + \
-                          '''   03:Var                                                   0 DeptRef\n''' + \
-                          '''   04:V                                                 10700 VNomPct\n''' + \
-                          '''   04:Var                                                3000 DeptRef\n'''
+                          '''   01:V                                                  92.0 VNomPct\n''' + \
+                          '''   01:Var                                                30.0 DeptRef\n''' + \
+                          '''   02:V                                                  96.7 VNomPct\n''' + \
+                          '''   02:Var                                                 0.0 DeptRef\n''' + \
+                          '''   03:V                                                 103.0 VNomPct\n''' + \
+                          '''   03:Var                                                 0.0 DeptRef\n''' + \
+                          '''   04:V                                                 107.0 VNomPct\n''' + \
+                          '''   04:Var                                                30.0 DeptRef\n'''
         assert g.get_text() == expected_output
 
 
@@ -2664,54 +2664,54 @@ def test_get_text(model_705_data):
                                '''   01:ActPt                                                 4\n''' + \
                                '''   01:DeptRef                                               1\n''' + \
                                '''   01:Pri                                                   1\n''' + \
-                               '''   01:VRef                                                  1 VNomPct\n''' + \
-                               '''   01:VRefAuto                                              0 VNomPct\n''' + \
+                               '''   01:VRef                                               0.01 VNomPct\n''' + \
+                               '''   01:VRefAuto                                            0.0 VNomPct\n''' + \
                                '''   01:VRefAutoEna                                        None\n''' + \
                                '''   01:VRefAutoTms                                        None Secs\n''' + \
                                '''   01:RspTms                                                6 Secs\n''' + \
                                '''   01:ReadOnly                                              1\n''' + \
-                               '''01:01:V                                                  9200 VNomPct\n''' + \
-                               '''01:01:Var                                                3000 DeptRef\n''' + \
-                               '''01:02:V                                                  9670 VNomPct\n''' + \
-                               '''01:02:Var                                                   0 DeptRef\n''' + \
-                               '''01:03:V                                                 10300 VNomPct\n''' + \
-                               '''01:03:Var                                                   0 DeptRef\n''' + \
-                               '''01:04:V                                                 10700 VNomPct\n''' + \
-                               '''01:04:Var                                                3000 DeptRef\n''' + \
+                               '''01:01:V                                                  92.0 VNomPct\n''' + \
+                               '''01:01:Var                                                30.0 DeptRef\n''' + \
+                               '''01:02:V                                                  96.7 VNomPct\n''' + \
+                               '''01:02:Var                                                 0.0 DeptRef\n''' + \
+                               '''01:03:V                                                 103.0 VNomPct\n''' + \
+                               '''01:03:Var                                                 0.0 DeptRef\n''' + \
+                               '''01:04:V                                                 107.0 VNomPct\n''' + \
+                               '''01:04:Var                                                30.0 DeptRef\n''' + \
                                '''   02:ActPt                                                 4\n''' + \
                                '''   02:DeptRef                                               1\n''' + \
                                '''   02:Pri                                                   1\n''' + \
-                               '''   02:VRef                                                  1 VNomPct\n''' + \
-                               '''   02:VRefAuto                                              0 VNomPct\n''' + \
+                               '''   02:VRef                                               0.01 VNomPct\n''' + \
+                               '''   02:VRefAuto                                            0.0 VNomPct\n''' + \
                                '''   02:VRefAutoEna                                        None\n''' + \
                                '''   02:VRefAutoTms                                        None Secs\n''' + \
                                '''   02:RspTms                                                6 Secs\n''' + \
                                '''   02:ReadOnly                                              0\n''' + \
-                               '''02:01:V                                                  9300 VNomPct\n''' + \
-                               '''02:01:Var                                                3000 DeptRef\n''' + \
-                               '''02:02:V                                                  9570 VNomPct\n''' + \
-                               '''02:02:Var                                                   0 DeptRef\n''' + \
-                               '''02:03:V                                                 10200 VNomPct\n''' + \
-                               '''02:03:Var                                                   0 DeptRef\n''' + \
-                               '''02:04:V                                                 10600 VNomPct\n''' + \
-                               '''02:04:Var                                                4000 DeptRef\n''' + \
+                               '''02:01:V                                                  93.0 VNomPct\n''' + \
+                               '''02:01:Var                                                30.0 DeptRef\n''' + \
+                               '''02:02:V                                                  95.7 VNomPct\n''' + \
+                               '''02:02:Var                                                 0.0 DeptRef\n''' + \
+                               '''02:03:V                                                 102.0 VNomPct\n''' + \
+                               '''02:03:Var                                                 0.0 DeptRef\n''' + \
+                               '''02:04:V                                                 106.0 VNomPct\n''' + \
+                               '''02:04:Var                                                40.0 DeptRef\n''' + \
                                '''   03:ActPt                                                 4\n''' + \
                                '''   03:DeptRef                                               1\n''' + \
                                '''   03:Pri                                                   1\n''' + \
-                               '''   03:VRef                                                  1 VNomPct\n''' + \
-                               '''   03:VRefAuto                                              0 VNomPct\n''' + \
+                               '''   03:VRef                                               0.01 VNomPct\n''' + \
+                               '''   03:VRefAuto                                            0.0 VNomPct\n''' + \
                                '''   03:VRefAutoEna                                        None\n''' + \
                                '''   03:VRefAutoTms                                        None Secs\n''' + \
                                '''   03:RspTms                                                6 Secs\n''' + \
                                '''   03:ReadOnly                                              0\n''' + \
-                               '''03:01:V                                                  9400 VNomPct\n''' + \
-                               '''03:01:Var                                                2000 DeptRef\n''' + \
-                               '''03:02:V                                                  9570 VNomPct\n''' + \
-                               '''03:02:Var                                                   0 DeptRef\n''' + \
-                               '''03:03:V                                                 10500 VNomPct\n''' + \
-                               '''03:03:Var                                                   0 DeptRef\n''' + \
-                               '''03:04:V                                                 10800 VNomPct\n''' + \
-                               '''03:04:Var                                                2000 DeptRef\n'''
+                               '''03:01:V                                                  94.0 VNomPct\n''' + \
+                               '''03:01:Var                                                20.0 DeptRef\n''' + \
+                               '''03:02:V                                                  95.7 VNomPct\n''' + \
+                               '''03:02:Var                                                 0.0 DeptRef\n''' + \
+                               '''03:03:V                                                 105.0 VNomPct\n''' + \
+                               '''03:03:Var                                                 0.0 DeptRef\n''' + \
+                               '''03:04:V                                                 108.0 VNomPct\n''' + \
+                               '''03:04:Var                                                20.0 DeptRef\n'''
     assert expected_output == m.get_text()
 
 
@@ -3318,54 +3318,54 @@ class TestDevice:
                                    '''   01:ActPt                                                 4\n''' + \
                                    '''   01:DeptRef                                               1\n''' + \
                                    '''   01:Pri                                                   1\n''' + \
-                                   '''   01:VRef                                                  1 VNomPct\n''' + \
-                                   '''   01:VRefAuto                                              0 VNomPct\n''' + \
+                                   '''   01:VRef                                               0.01 VNomPct\n''' + \
+                                   '''   01:VRefAuto                                            0.0 VNomPct\n''' + \
                                    '''   01:VRefAutoEna                                        None\n''' + \
                                    '''   01:VRefAutoTms                                        None Secs\n''' + \
                                    '''   01:RspTms                                                6 Secs\n''' + \
                                    '''   01:ReadOnly                                              1\n''' + \
-                                   '''01:01:V                                                  9200 VNomPct\n''' + \
-                                   '''01:01:Var                                                3000 DeptRef\n''' + \
-                                   '''01:02:V                                                  9670 VNomPct\n''' + \
-                                   '''01:02:Var                                                   0 DeptRef\n''' + \
-                                   '''01:03:V                                                 10300 VNomPct\n''' + \
-                                   '''01:03:Var                                                   0 DeptRef\n''' + \
-                                   '''01:04:V                                                 10700 VNomPct\n''' + \
-                                   '''01:04:Var                                                3000 DeptRef\n''' + \
+                                   '''01:01:V                                                  92.0 VNomPct\n''' + \
+                                   '''01:01:Var                                                30.0 DeptRef\n''' + \
+                                   '''01:02:V                                                  96.7 VNomPct\n''' + \
+                                   '''01:02:Var                                                 0.0 DeptRef\n''' + \
+                                   '''01:03:V                                                 103.0 VNomPct\n''' + \
+                                   '''01:03:Var                                                 0.0 DeptRef\n''' + \
+                                   '''01:04:V                                                 107.0 VNomPct\n''' + \
+                                   '''01:04:Var                                                30.0 DeptRef\n''' + \
                                    '''   02:ActPt                                                 4\n''' + \
                                    '''   02:DeptRef                                               1\n''' + \
                                    '''   02:Pri                                                   1\n''' + \
-                                   '''   02:VRef                                                  1 VNomPct\n''' + \
-                                   '''   02:VRefAuto                                              0 VNomPct\n''' + \
+                                   '''   02:VRef                                               0.01 VNomPct\n''' + \
+                                   '''   02:VRefAuto                                            0.0 VNomPct\n''' + \
                                    '''   02:VRefAutoEna                                        None\n''' + \
                                    '''   02:VRefAutoTms                                        None Secs\n''' + \
                                    '''   02:RspTms                                                6 Secs\n''' + \
                                    '''   02:ReadOnly                                              0\n''' + \
-                                   '''02:01:V                                                  9300 VNomPct\n''' + \
-                                   '''02:01:Var                                                3000 DeptRef\n''' + \
-                                   '''02:02:V                                                  9570 VNomPct\n''' + \
-                                   '''02:02:Var                                                   0 DeptRef\n''' + \
-                                   '''02:03:V                                                 10200 VNomPct\n''' + \
-                                   '''02:03:Var                                                   0 DeptRef\n''' + \
-                                   '''02:04:V                                                 10600 VNomPct\n''' + \
-                                   '''02:04:Var                                                4000 DeptRef\n''' + \
+                                   '''02:01:V                                                  93.0 VNomPct\n''' + \
+                                   '''02:01:Var                                                30.0 DeptRef\n''' + \
+                                   '''02:02:V                                                  95.7 VNomPct\n''' + \
+                                   '''02:02:Var                                                 0.0 DeptRef\n''' + \
+                                   '''02:03:V                                                 102.0 VNomPct\n''' + \
+                                   '''02:03:Var                                                 0.0 DeptRef\n''' + \
+                                   '''02:04:V                                                 106.0 VNomPct\n''' + \
+                                   '''02:04:Var                                                40.0 DeptRef\n''' + \
                                    '''   03:ActPt                                                 4\n''' + \
                                    '''   03:DeptRef                                               1\n''' + \
                                    '''   03:Pri                                                   1\n''' + \
-                                   '''   03:VRef                                                  1 VNomPct\n''' + \
-                                   '''   03:VRefAuto                                              0 VNomPct\n''' + \
+                                   '''   03:VRef                                               0.01 VNomPct\n''' + \
+                                   '''   03:VRefAuto                                            0.0 VNomPct\n''' + \
                                    '''   03:VRefAutoEna                                        None\n''' + \
                                    '''   03:VRefAutoTms                                        None Secs\n''' + \
                                    '''   03:RspTms                                                6 Secs\n''' + \
                                    '''   03:ReadOnly                                              0\n''' + \
-                                   '''03:01:V                                                  9400 VNomPct\n''' + \
-                                   '''03:01:Var                                                2000 DeptRef\n''' + \
-                                   '''03:02:V                                                  9570 VNomPct\n''' + \
-                                   '''03:02:Var                                                   0 DeptRef\n''' + \
-                                   '''03:03:V                                                 10500 VNomPct\n''' + \
-                                   '''03:03:Var                                                   0 DeptRef\n''' + \
-                                   '''03:04:V                                                 10800 VNomPct\n''' + \
-                                   '''03:04:Var                                                2000 DeptRef\n'''
+                                   '''03:01:V                                                  94.0 VNomPct\n''' + \
+                                   '''03:01:Var                                                20.0 DeptRef\n''' + \
+                                   '''03:02:V                                                  95.7 VNomPct\n''' + \
+                                   '''03:02:Var                                                 0.0 DeptRef\n''' + \
+                                   '''03:03:V                                                 105.0 VNomPct\n''' + \
+                                   '''03:03:Var                                                 0.0 DeptRef\n''' + \
+                                   '''03:04:V                                                 108.0 VNomPct\n''' + \
+                                   '''03:04:Var                                                20.0 DeptRef\n'''
         get_text_output = d.get_text()
         # dont compare timestamps
         assert get_text_output[get_text_output.index('Model'):] == get_text_expected_output
