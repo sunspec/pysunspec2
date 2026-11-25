@@ -112,7 +112,7 @@ def test_data_to_u64():
 
 
 def test_data_to_ipv6addr():
-    assert mb.data_to_ipv6addr(b'\x20\x01\x0d\xb8\x85\xa3\x00\x00\x00\x00\x8a\x2e\x03\x70\x73\x34') == '20010DB8:85A30000:00008A2E:03707334'
+    assert mb.data_to_ipv6addr(b'\x20\x01\x0d\xb8\x85\xa3\x00\x00\x00\x00\x8a\x2e\x03\x70\x73\x34') == '2001:db8:85a3::8a2e:370:7334'
 
 
 def test_data_to_eui48():

@@ -435,3 +435,12 @@ tox -e py39
 Contribution
 ============
 If you wish to contribute to the project, please contact support@sunspec.org to sign a CLA.
+
+Address point values
+--------------------
+
+``ipv6addr`` values are displayed in standard compressed IPv6 notation (for
+example ``2001:db8::1``). Standard IPv6 input and the older four-32-bit-group
+or unseparated hexadecimal forms are accepted. Applications comparing the
+previous nonstandard text representation should account for the new display
+format. An all-zero IPv6 value remains unimplemented.
