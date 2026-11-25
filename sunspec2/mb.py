@@ -23,6 +23,8 @@
 import struct
 import base64
 import collections
+import ipaddress
+import re
 
 import sunspec2.mdef as mdef
 
@@ -144,26 +146,13 @@ def data_to_u64(data):
 
 
 def data_to_ipv6addr(data):
-    value = False
-    for i in data:
-        if i != 0:
-            value = True
-            break
-    if value and len(data) == 16:
-        return '%02X%02X%02X%02X:%02X%02X%02X%02X:%02X%02X%02X%02X:%02X%02X%02X%02X' % (
-            data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7],
-            data[8], data[9], data[10], data[11], data[12], data[13], data[14], data[15])
+    if len(data) == 16 and any(data):
+        return str(ipaddress.IPv6Address(bytes(data)))
 
 
 def data_to_eui48(data):
-    value = False
-    for i in data:
-        if i != 0:
-            value = True
-            break
-    if value and len(data) == 8:
-        return '%02X:%02X:%02X:%02X:%02X:%02X' % (
-            data[2], data[3], data[4], data[5], data[6], data[7])
+    if len(data) == 8:
+        return ':'.join('%02X' % byte for byte in data[2:8])
 
 
 def data_to_f32(data):
@@ -211,7 +200,13 @@ def u64_to_data(u64, len=None):
 
 
 def ipv6addr_to_data(addr, slen=None):
-    s = base64.b16decode(addr.replace(':', ''))
+    try:
+        s = ipaddress.IPv6Address(addr).packed
+    except ValueError:
+        # Retain the earlier four-32-bit-group and unseparated hex formats.
+        if not re.fullmatch(r'(?:[0-9a-fA-F]{8}:){3}[0-9a-fA-F]{8}|[0-9a-fA-F]{32}', addr):
+            raise
+        s = bytes.fromhex(addr.replace(':', ''))
     if slen is None:
         slen = len(s)
     return struct.pack(str(slen) + 's', s)
@@ -233,7 +228,7 @@ def str_to_data(s, slen=None):
 
 
 def eui48_to_data(eui48, len=None):
-    return (b'\x00\x00' + base64.b16decode(eui48.replace(':', '')))
+    return (b'\x00\x00' + base64.b16decode(eui48.replace(':', ''), casefold=True))
 
 
 def is_impl_int16(value):
