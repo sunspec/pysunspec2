@@ -231,7 +231,7 @@ class SunSpecModbusClientDevice(device.Device):
         error = ''
         connected = False
 
-        if connect:
+        if connect and not self.is_connected():
             self.connect()
             connected = True
 
